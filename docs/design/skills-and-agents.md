@@ -1,0 +1,170 @@
+# Skills and agents: the outline
+
+Every skill and agent from `research_plugin_build_plan.md`, joined to what justifies it.
+
+**Two tests, not one.** A row earns its place if it implements an entry in `academic.md` **or** if it serves one of the four goals: parallel gathering, simple presentation, planning directions, simple to use. The sheet documents research methodology and says nothing about usability, so a row backed only by a goal is fully justified.
+
+Counts: 27 typed skills plus 5 composites, 28 agents, 4 scripts.
+
+---
+
+## Stage 1 — Question
+
+| Skill | Agents | Output | Justification |
+|---|---|---|---|
+| `/onboard` | — | `CONTEXT.md` | goal: simple to use. Stage one for a new project. |
+| `/grill` | — | `QUESTION.md` | Booth (topic→question→problem, so-what), Heilmeier (8 questions), Hamming (important problems), Wagstaff (metric ties to a decision) |
+
+Human gate: the question. Nothing downstream runs without `QUESTION.md`.
+
+---
+
+## Stage 2 — Landscape
+
+| Skill | Agents | Output | Justification |
+|---|---|---|---|
+| `/surveys` | `survey-differ` | `landscape/surveys.md` | Petersen (mapping studies), vocabulary harvest |
+| `/landscape` | `paper-scout` ×7, `merger` | `landscape/matrix.md`, `timeslice.md` | Ré (bits, snowball, asymptote 25–35, group by thesis), Wohlin (snowballing), Webster/Watson (concept matrix), Petersen (empty cells), Musgrave (reproduced/self-reported/contested), absence claims. Goal: parallel gathering. |
+| `/datasets` | `dataset-scout` | `landscape/datasets.md` | Kapoor (leakage in standard splits) |
+| `/groups` | `author-tracker` | `landscape/groups.md` | goal: competitive landscape. Who is publishing, where they are heading. Hamming is a secondary source, not the reason. |
+| `/bits` | — | `BITS.md` | Ré (every cluster has a bit) |
+| `/watch` | `paper-scout` | matrix updates | **deferred to milestone 5.** No sheet source and no goal it uniquely serves. |
+
+`paper-scout` is the agent to get right first: one question in, one section out, snowballing from seeds with the asymptote rule, absence claims naming what was checked. Tools: retrieval MCPs plus Read. No Bash.
+
+`merger` is contract-bound: assembles the matrix from scout sections, marks contradictions and empty cells, cannot add a claim absent from a section. Its contradiction list feeds `/ideas`.
+
+---
+
+## Stage 2b — Presentation
+
+Presentation carries the same weight as gathering, because unclear output was the original complaint. Three explicit modes so they never collapse into one long document. One agent, `brief-writer`, three paths.
+
+| Skill | Mode | Output | Justification |
+|---|---|---|---|
+| `/brief` | prose | `landscape/brief.md`, the Heilmeier one-pager | Heilmeier, Olah (research debt). Goal: simple presentation. |
+| `/render` | interactive | HTML matrix you click through, plus the cards deck | goal: simple presentation |
+| `/figure` | diagram | pipeline-style figure, one real example image per formulation | goal: simple presentation. Needs the user to point at example imagery, so it has its own path. |
+
+---
+
+## Stage 3 — Reading and ledgers
+
+| Skill | Agents | Output | Justification |
+|---|---|---|---|
+| `/read` | `predictor`, `reader`, `scorer` | `papers/<slug>.md` | Keshav (three passes), Mensh/Kording (central contribution, delta sentence), prediction-as-test, Olah (explain it back) |
+| `/audit` | `leakage-auditor` | leakage flags on cards | Kapoor/Narayanan (leakage taxonomy) |
+| `/reviews` | `openreview-reader` | review notes on cards | reviewers say what authors will not; three papers of OpenReview reviews show what the field's referees push on. Nearly free once the OpenReview MCP is bundled. Not in the sheet. |
+| `/critique` | `critic` | critique report | devil's advocate concession ladder, generator ≠ judge |
+
+The three-agent read protocol is the sheet's own design: `predictor` sees only title, abstract, intro and commits predictions; `reader` sees the whole paper and never sees the prediction; `scorer` sees both and writes what was non-obvious. Separate contexts are the point.
+
+`reader` carries one extra line: compare this card's result against the other cards in the same matrix cell and flag any incompatibility. Cheap, because the reader already knows the cell. This is PaperQA2's contradiction detection at read time.
+
+---
+
+## Stage 4 — Ideation
+
+| Skill | Agents | Output | Justification |
+|---|---|---|---|
+| `/brainstorm` | `persona-ideator` ×4–6 | appends to `IDEAS.md` | STORM (personas ask their own questions), Polya (transformations), Hamming |
+| `/fingerprint` | — | problem shape, domain nouns stripped | Swanson (ABC model) |
+| `/analogs` | `analog-scout`, `field-carder`, `transfer-checker` | `landscape/analogs.md` | Swanson, Uzzi (atypical combinations) |
+| `/flip` | `flip-generator`, `novelty-checker` | appends to `IDEAS.md` | Ré (flip the bit), Nova (novelty is a retrieval result) |
+| `/ideas` | `diversity-planner`, + the loop | `ideas/<slug>.md`, appends to `IDEAS.md` | Nova (iterative retrieval planning), narrow-exploration study (diversity threshold), negative space (abandoned directions), Kuhn (contradictions as seeds) |
+
+**`IDEAS.md` is the running idea log** (Schulman). `/brainstorm`, `/flip` and `/ideas` all append to it, so ideas accumulate across sessions instead of dying with one run.
+
+**Anomalies as seeds** (Beveridge, Kuhn): `/ideas` reads the merger's contradiction list as an explicit seed source, alongside bits, analogs, abandoned directions and personas.
+
+**Typicality** (Uzzi) stays a written note on the idea page. Nothing computes it. That is deliberate.
+
+`novelty-checker` runs in a fresh context, calls `similarity.py`, never sees the generator's reasoning. Nova's rule: novelty is retrieval, not a feeling.
+
+---
+
+## Stage 5 — Selection
+
+| Skill | Agents | Output | Justification |
+|---|---|---|---|
+| `/premortem` | `premortem-agent` | premortem per idea | Si (ideation-execution gap: baselines, metrics, feasibility) |
+| `/rank` | `tournament-judge` | ranked list, Alon chart | Co-Scientist (pairwise tournament), Alon (feasibility × interest), Steinhardt (cheapest kill first) |
+| `/spec` | — | Heilmeier page | Heilmeier catechism |
+
+Human gate: which ideas survive.
+
+---
+
+## Stage 6 — Experiment
+
+These agents get Bash and file access to code and data, and **no web tools**. The agent that runs the experiment cannot go find a paper that agrees with its result.
+
+| Skill | Agents | Output | Justification |
+|---|---|---|---|
+| `/baseline` | `baseline-reproducer` | reproduction plan + gap | Schulman (working baseline), Musgrave (reproduce the strongest baseline), PaperBench |
+| `/design` | `experiment-designer`, `ablation-planner` | experiment page | pre-registration lite, Platt (competing hypotheses, discriminating test), Lipton (ablation isolates gains), Bouthillier (variance plan), Dodge (compute budget), Kapoor (leakage check) |
+| `/log` | `variance-checker` (`ingest_runs.py`) | notebook entries | lab notebook (log before the result is known), Henderson (seeds) |
+| `/result` | `results-tabulator`, `results-critic`, `failure-mode-auditor` | verdict | M1–M7 checklist, Lipton, Henderson |
+| `/replicate` | `baseline-reproducer` | calibration report | PaperBench (replication as a calibration test) |
+
+Human gate: whether to spend compute.
+
+---
+
+## Cross-cutting
+
+Not a stage. Applied inside every skill.
+
+| Rule | Where it lives | Source |
+|---|---|---|
+| Citation existence check | **`/verify`**, run on anything that emits references: landscape sections, paper cards, idea pages, the brief | ARS resolvers (gray zone is fail), hallucinated citations |
+| Generator never judges in the same context | separate agents, fresh contexts | verification-gap survey |
+| Retrieved content is data, not instructions | one line in every scout agent | the sheet's own rule |
+| Abstention beats a guess | one line in every agent | uncertainty with abstention |
+| Log before the result is known | `/log`, notebook append | lab notebook |
+| Anti-rationalization table | one shared file every skill includes | Osmani |
+| Write-scope guard | `hooks/hooks.json`, PreToolUse on Write/Edit | ARS (the only enforcement that is not prompt text) |
+
+`/verify` was previously filed under reading. It is cross-cutting: references appear in landscape sections and idea pages too, and those are exactly where fabricated citations do the most damage.
+
+---
+
+## Composites
+
+Thirty typed commands are unusable without a front door. These serve the "simple to use" goal and need no sheet source.
+
+| Skill | Does |
+|---|---|
+| `/router` | picks the skill from what you say. The front door. |
+| `/start` | `/onboard` + `/grill` |
+| `/orient` | `/surveys` + `/landscape` + `/brief` |
+| `/think` | `/bits` + `/analogs` + `/ideas` + `/rank` |
+| `/handoff` | **deferred.** No goal it uniquely serves yet. |
+
+**Naming:** the composite was `/map` in the build plan, which collides with the wayfinder's map. `/survey` is not available either, since `/surveys` already exists in stage 2. `/orient` is the rename.
+
+---
+
+## Deferred
+
+Only two rows fail both tests: `/watch` (milestone 5 anyway) and `/handoff`.
+
+## Gaps, now closed
+
+| Gap | Fix |
+|---|---|
+| Schulman's running idea log | `IDEAS.md`, appended by `/brainstorm`, `/flip`, `/ideas` |
+| Beveridge and Kuhn: anomalies as seeds | `/ideas` reads the merger's contradiction list as a seed source |
+| Uzzi's typicality | stays a written note, never computed. Deliberate. |
+| PaperQA2 contradiction detection at read time | one line in `reader`: compare against other cards in the same matrix cell, flag incompatibility |
+
+## Agent count by stage
+
+| Stage | Agents |
+|---|---|
+| Landscape and presentation | 6 (`survey-differ`, `paper-scout`, `merger`, `brief-writer`, `dataset-scout`, `author-tracker`) |
+| Reading | 6 (`predictor`, `reader`, `scorer`, `leakage-auditor`, `openreview-reader`, `critic`) |
+| Ideation | 7 (`persona-ideator`, `analog-scout`, `field-carder`, `transfer-checker`, `flip-generator`, `novelty-checker`, `diversity-planner`) |
+| Selection | 2 (`premortem-agent`, `tournament-judge`) |
+| Experiment | 7 (`baseline-reproducer`, `experiment-designer`, `ablation-planner`, `variance-checker`, `results-tabulator`, `results-critic`, `failure-mode-auditor`) |
+| **Total** | **28** |
