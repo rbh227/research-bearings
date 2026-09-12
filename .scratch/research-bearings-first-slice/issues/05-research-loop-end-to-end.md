@@ -1,7 +1,7 @@
 # The research loop end to end
 
 Type: grilling
-Status: open
+Status: claimed
 Blocked by: 
 
 ## Question
