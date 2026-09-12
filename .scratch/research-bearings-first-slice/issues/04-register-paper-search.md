@@ -21,4 +21,6 @@ Endpoints declared on the Semantic Scholar API key request:
 /graph/v1/author/{author_id}/papers
 ```
 
-Status note: key requested 2026-09-12, awaiting approval. Anticipated volume: 2,000 requests per day. One landscape run is roughly 200 calls (seed searches, detail lookups, one backward and one forward hop over ~30 papers, a few batch calls); development means several partial runs a day. The binding constraint is the 1 request/second rate, not the daily total, so the scout must serialise calls and cache aggressively.
+Key requested 2026-09-12, awaiting approval.
+
+Anticipated volume: 2,000 requests per day. One landscape run is roughly 200 calls (seed searches, detail lookups, one backward and one forward hop over ~30 papers, a few batch calls); development means several partial runs a day. The binding constraint is the 1 request/second rate, not the daily total, so the scout must serialise calls and cache aggressively.
