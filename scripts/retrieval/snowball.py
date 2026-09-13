@@ -1069,11 +1069,23 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
             f"file={from_file!r} env={from_env!r} none={nothing!r}",
         )
 
+    # 17. Rows with no edge fields at all still parse; the card simply has no
+    #     sentence to quote. This is the pre-edge-field capture from ticket 09.
+    bare = split_rows(_fixture("refs_dmg.json"), "references", "ARXIV:2405.04800")
+    check(
+        "17 rows without citation contexts parse, with empty edges",
+        bare["resolved_count"] == 22
+        and bare["unresolvable_count"] == 3
+        and all(p["edges"] and p["edges"][0]["contexts"] == [] for p in bare["papers"])
+        and all(p["edges"][0]["describes"] == "this_paper" for p in bare["papers"]),
+        f"resolved={bare['resolved_count']} unresolvable={bare['unresolvable_count']}",
+    )
+
     print()
     if failures:
-        print(f"{len(failures)} of 16 cases failed: {', '.join(failures)}")
+        print(f"{len(failures)} of 17 cases failed: {', '.join(failures)}")
         return 1
-    print("16 of 16 cases passed")
+    print("17 of 17 cases passed")
     return 0
 
 

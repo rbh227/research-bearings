@@ -88,6 +88,28 @@ handed out, refuses a hop once the ceiling is reached — before spending the
 request — and sizes each hop to what remains. The ceiling used to be a sentence in
 the agent's prompt; told 40, it touched 114–160.
 
+**Other free sources, for the record.** From their public documentation as of
+September 2026; only the first is used and measured by this plugin. The column
+that decided it is *contexts*: the sentence a citing paper writes about the cited
+one, which is the `Cited as` line on every card and the only tool-sourced prose a
+scout gets. Only Semantic Scholar carries it.
+
+| API | Search | Citation graph | Contexts | Credential |
+|---|---|---|---|---|
+| **Semantic Scholar Graph** — used here | yes | references and citations | **yes** | key optional, effectively required (429s unkeyed) |
+| OpenAlex | yes | `referenced_works`, `cites:` filter | no | none; `mailto=` for the polite pool |
+| Crossref | metadata | references where publishers deposit them | no | none; `mailto=` for the polite pool |
+| OpenCitations | no | DOI-to-DOI citations | no | none |
+| arXiv | yes | no | no | none |
+| Europe PMC | yes, biomedical | references and citations | no | none |
+| DBLP | yes, computer science | no | no | none |
+| CORE | yes, full text | no | no | key required |
+| Unpaywall | by DOI, open-access links | no | no | email required |
+| OpenReview | venues, submissions, reviews | no | no | none for public data |
+
+Whether a keyless walker on OpenAlex is worth losing the `Cited as` line is an
+open chunk 3 question (chunk 2 spec §11.6).
+
 Two on-disk artifacts:
 
 - **`~/.cache/research-bearings/s2/`** — raw API responses, shared across
@@ -141,7 +163,7 @@ exists and shows you what the field actually asks, run `frame` again.
 The `static checks` and `one test file` verbs in
 [`docs/agents/toolchain.md`](docs/agents/toolchain.md) are free and fast — run
 them freely. Between them they cover the write-scope guard (13 cases), the
-retrieval script offline against real captured API responses (16 cases),
+retrieval script offline against real captured API responses (17 cases),
 template/contract heading parity, and the plugin, skill and agent manifests.
 
 The behavioural suite is the `full suite` verb in

@@ -1,5 +1,9 @@
 # Chunk 2 — retrieval and the scout
 
+> **Amended 2026-09-13.** §1–§5 describe the MCP-server design as specified and
+> built. It was replaced the day the suite first ran; **§11 is what ships**. The
+> scout's contract (§4.6–§4.12) and the done-check's intent (§6) still hold.
+
 Spec for the second buildable chunk of `research-bearings`. Ready for `/to-spec`.
 
 Resolves the retrieval half of the map's "not yet specified" list, and the first
@@ -1082,7 +1086,7 @@ The script refuses once the ledger reaches the ceiling — before spending the
 request — and clamps each hop's `limit` to what remains, so an overshoot is
 impossible rather than unlikely. Search rows are seeds and do not charge it.
 `/scout` reads the ledger back after the run and reports the ledger's number
-over the section's if they differ. Sixteen offline selftest cases; 13 and 14
+over the section's if they differ. Seventeen offline selftest cases; 13 and 14
 are the ones that would have caught the overrun.
 
 Measured live on the ported script: search 3 seeds (touched 0); references 6

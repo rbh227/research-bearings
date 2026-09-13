@@ -57,7 +57,7 @@ Presentation carries the same weight as gathering, because unclear output was th
 |---|---|---|---|
 | `/read` | `predictor`, `reader`, `scorer` | `papers/<slug>.md` | Keshav (three passes), Mensh/Kording (central contribution, delta sentence), prediction-as-test, Olah (explain it back) |
 | `/audit` | `leakage-auditor` | leakage flags on cards | Kapoor/Narayanan (leakage taxonomy) |
-| `/reviews` | `openreview-reader` | review notes on cards | reviewers say what authors will not; three papers of OpenReview reviews show what the field's referees push on. Nearly free once the OpenReview MCP is bundled. Not in the sheet. |
+| `/reviews` | `openreview-reader` | review notes on cards | reviewers say what authors will not; three papers of OpenReview reviews show what the field's referees push on. Nearly free: OpenReview has a public API, so this is a second small script beside the walker, not a server. Not in the sheet. |
 | `/critique` | `critic` | critique report | devil's advocate concession ladder, generator ≠ judge |
 
 The three-agent read protocol is the sheet's own design: `predictor` sees only title, abstract, intro and commits predictions; `reader` sees the whole paper and never sees the prediction; `scorer` sees both and writes what was non-obvious. Separate contexts are the point.
