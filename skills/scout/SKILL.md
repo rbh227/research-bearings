@@ -111,7 +111,13 @@ of API time. The ten minutes a user will wait is model triage time.
 
 250 is a starting value and a guess. Raise it when a run stops on `budget` and
 the user wants more. Lower it when you are being run inside an eval harness,
-which times out at 600 s.
+which caps each case's wall clock.
+
+**The crawl is not the slow part; writing the section is.** Measured 2026-09-13:
+with the budget enforced, 40 papers touched took six tool calls and well under a
+minute of API time, and the run still exceeded 600 s without producing a file,
+because triaging those papers and writing 25-35 cards is where the time goes.
+Budget bounds the crawl. It does not bound the write.
 
 **The ceiling is enforced by `s2-snowball`, not by the agent.** It counts the
 distinct resolved papers it has handed out and refuses a hop once the number is

@@ -25,6 +25,14 @@ RUNS="${RUNS:-3}"
 JUDGE="${JUDGE:-sonnet}"
 TAG="${TAG:-ci}"
 JOBS="${JOBS:-3}"
+
+# The harness gives each run a CLEAN HOME, so ~/.cache/uv is not there and every
+# `uvx` server start re-resolves its whole dependency tree from the network.
+# Cold start measured >30 s, which is the MCP connect ceiling: paper-search then
+# never comes up and the scout correctly refuses to run, so the case fails for a
+# reason that has nothing to do with the behaviour it tests. Handing the child a
+# warm cache takes that start to ~1.5 s. Measured 2026-09-13.
+export UV_CACHE_DIR="${UV_CACHE_DIR:-$(uv cache dir 2>/dev/null)}"
 COMMON=(--trust-plugin --judge-model "$JUDGE" --mocks off --runs "$RUNS" --ablation none --threshold 0.8 -j "$JOBS")
 BASE_TOOLS=(Write Edit Agent WebSearch 'mcp__plugin_research-bearings_paper-search__*')
 
