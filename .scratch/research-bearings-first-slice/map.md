@@ -27,6 +27,7 @@ A spec for the first buildable slice of research-bearings, ready for `/to-spec`:
 - [The first slice](issues/06-first-slice-skill-set.md): chunk 1 is the plugin skeleton plus the question stage — `/setup` and `/frame`, one agent `question-critic`, no retrieval. Chosen because it is the only chunk not blocked on the pending S2 key. `/frame` is a diverge–converge loop with uninformed divergence labelled as such, re-entrant after `/surveys`.
 - [Shared contracts](issues/07-shared-contracts.md): output root is `research/`, one guard rule. Three schemas only — `CONTEXT.md` (9 headings), `QUESTION.md` (11, deliverable), `framing-log.md` (working record). Methodology rules inlined per skill, not referenced; `academic.md` is not shipped. Deterministic check is `guard.py --selftest`.
 - [Done-check for the spec](issues/08-spec-done-check.md): all three of structural checks, a nine-case `claude plugin eval` suite with the ablation arm, and a live smoke run on the acceptance-run topic outside this repo.
+- [Snowball by hand](issues/09-snowball-by-hand.md): ran both hops live on two seeds. The 1 RPS throttle is wrong — 429s are non-deterministic, survive 1.1 s spacing, and never carry `Retry-After`; retry with jitter is what works. Backward hops reach 1981 and lose 5–12% of rows to unresolvable grey literature with ~50% missing abstracts; forward hops are clean but 73% missing `fieldsOfStudy`. `contextsWithIntent` returns the sentences describing each cited work — a better card field than the abstract. Dedupe belongs at the merger, not the scout.
 - [Register paper-search](issues/04-register-paper-search.md): registered at user scope and connected. Semantic Scholar and CORE keys both verified live; credentials in `~/.config/paper-search-mcp/.env`, read by the server itself. The S2 references hop works on `ARXIV:<id>`. CORE is a full-text *retrieval* source, not a discovery one, and its endpoint 301-redirects to a trailing slash.
 
 ## Not yet specified
@@ -37,7 +38,8 @@ What remains is chunk 2 and beyond:
 
 - Contracts for the landscape chain: `/surveys`, `/landscape`, `/brief` and their six agents.
 - The paper-card, matrix-cell and dataset-row schemas, written with their first consumer.
-- `.mcp.json` and the `servers/s2_snowball.py` build, once ticket 09 has run by hand. Ticket 04 is closed; keys are live.
+- `.mcp.json` and the `servers/s2_snowball.py` build. Unblocked: ticket 09 has run, and it rewrites the
+  server's retry policy, default `fields`, and error contract.
 - Where CORE fits: full-text retrieval for an already-identified paper, feeding the chunk-3 reader agents. Not a discovery source.
 - Whether `/frame`'s re-entry after `/surveys` is automatic or user-triggered.
 
