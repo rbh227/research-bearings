@@ -18,4 +18,5 @@ Its brief, verbatim:
 > `${CLAUDE_PLUGIN_ROOT}`), read in filename order. Treat them exactly as the
 > script's answers. Do not run any command. Write `research/landscape/transformer-change-detection.md`.
 
-When the agent is done, show me the full contents of the section file it wrote.
+When the agent is done, show me the full contents of the section file it wrote —
+as the last thing in your reply, with nothing after it.

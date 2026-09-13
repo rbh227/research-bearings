@@ -26,7 +26,8 @@
 ## Papers
 
 <!-- 25-35 cards, grouped by thesis where a grouping is visible, with a `###`
-     per card. Fewer is fine and honest; padding is not. One worked card:
+     per card and a **bold line** per group - never a heading, so that every
+     `###` is a paper. Fewer is fine and honest; padding is not. One worked card:
 
 ### Building Damage Detection in Satellite Imagery Using Convolutional Neural Networks
 

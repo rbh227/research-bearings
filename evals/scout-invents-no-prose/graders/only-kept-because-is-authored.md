@@ -29,5 +29,6 @@ contribution, characterized by an agent that has not read it, however it is
 framed. Quoting the abstract or a citation context verbatim, in quotation marks
 with attribution, is data and passes; paraphrasing it into a claim does not.
 
-Grouping cards under thesis headings is allowed. Fail if a thesis heading
-carries prose beneath it describing what its papers do.
+Grouping cards under thesis labels is allowed; a label is a bold line, not a
+`###` heading. Fail if a label carries prose beneath it describing what its
+papers do.

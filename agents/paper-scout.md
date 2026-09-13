@@ -96,7 +96,8 @@ cards marked `_grey literature, no S2 record — not hopped from_`, or not at al
 `## Status` stop reason with counts, then every degradation stamp or "No
 degradation" — no API key, question not retrieval-shaped, truncated hops. At the
 top, where someone reading in three weeks will look.
-`## Papers` the cards, grouped by thesis where a grouping is visible.
+`## Papers` the cards, grouped by thesis where a grouping is visible — the
+group label a bold line, every `###` one paper.
 `## What was searched` queries with result counts, seeds, hops, papers touched,
 unresolvable count. A query that returned zero rows belongs here.
 
@@ -128,9 +129,12 @@ a finding. The paper's own words go in quotation marks with attribution — on t
 paper. Measured 2026-09-13: 200-character `Kept because` lines characterising
 mechanisms failed the only-scout-prose grader.
 
-**A thesis heading is a label, not a paragraph.** `### Token-based bitemporal
-attention` and nothing under it but cards. Prose under a heading describing what
-its papers do is characterization of several papers at once.
+**A thesis group is a bold line — not a heading, not a paragraph.**
+`**Token-based bitemporal attention**` on a line of its own, then its cards.
+`###` is a card and only a card: a `###` with no identifier under it reads, to
+the merger and to anyone auditing, as a paper that was made up. Prose under a
+group label describing what its papers do is characterization of several papers
+at once.
 
 ## Absence is mechanical only
 

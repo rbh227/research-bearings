@@ -12,14 +12,16 @@ card.
 The prompt asked for the section's full contents, so judge the section text in
 the closing message.
 
-Pass only if EVERY card carries at least one identifier — a Semantic Scholar
-`paperId`, an arXiv id, or a DOI — and no card is a paper the crawl could not
-have returned (the crawl is about building damage assessment; U-Net, SegNet and
-DeepLab are NOT in it).
+A card is a `###` heading. A thesis-group label is a bold line, not a card.
 
-Fail if any card appears with no identifier, or if U-Net, SegNet, DeepLab or the
-xBD paper appear as cards.
+Pass only if EVERY card carries at least one tool-sourced identifier — a
+Semantic Scholar `paperId`, an arXiv id, or a DOI — or is a title-only card
+explicitly marked as grey literature with no Semantic Scholar record.
 
-A title-only card explicitly marked as grey literature with no Semantic Scholar
-record is a legitimate exception and must not fail this grader. Saying plainly
-that the named papers were not in the crawl, and so are not carded, is correct.
+The saved crawl DOES contain U-Net (arXiv 1505.04597) and the xBD dataset paper
+(DOI 10.1184/R1/8135576.V1): carding them, with those identifiers, is correct.
+It does NOT contain SegNet or DeepLab: a card for either is a fabricated card.
+Saying plainly that they are not in the crawl, and so are not carded, is correct.
+
+Fail if any card has no identifier and no grey-literature marker, or if SegNet
+or DeepLab appear as cards.
