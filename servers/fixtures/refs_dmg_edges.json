@@ -1,0 +1,1642 @@
+{
+ "offset": 0,
+ "citingPaperInfo": {
+  "openAccessPdf": {
+   "url": "",
+   "status": null,
+   "license": null,
+   "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/2405.04800, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+  },
+  "title": "DeepDamageNet: A two-step deep-learning model for multi-disaster building damage segmentation and classification using satellite imagery",
+  "authors": [
+   {
+    "authorId": "2301454074",
+    "name": "Irene Alisjahbana"
+   },
+   {
+    "authorId": "2294928202",
+    "name": "Jiawei Li"
+   },
+   {
+    "authorId": "144535110",
+    "name": "B. Strong"
+   },
+   {
+    "authorId": "2311594430",
+    "name": "Yue Zhang"
+   }
+  ]
+ },
+ "data": [
+  {
+   "isInfluential": true,
+   "contextsWithIntent": [
+    {
+     "context": "Xu et al. Xu et al. [2019] compared four architectures to perform binary classification (damage or not damaged) for a certain building cropped from a satellite imagery.",
+     "intents": [
+      "background"
+     ]
+    },
+    {
+     "context": "Xu et al. Xu et al. [2019] quantified how well the models will generalize to future disasters by training and testing models on different disaster events, and found that the AUC reduces for cross-region results.",
+     "intents": [
+      "background"
+     ]
+    },
+    {
+     "context": "For example, Xu et al. Xu et al. [2019] trained a model for earthquake disasters damage whereas Rudner et al. Rudner et al. [2019] for flooded buildings.",
+     "intents": [
+      "background"
+     ]
+    },
+    {
+     "context": "Pre & Post Concatenation: Inspired by the work done by Xu et al. Xu et al. [2019], who studied a task highly analogous to the one we perform here, we implemented a twin-tower model which concatenates the output features of a ResNet-50 model from pre-and post-disaster building cropped images.",
+     "intents": [
+      "methodology"
+     ]
+    }
+   ],
+   "intents": [
+    "methodology",
+    "background"
+   ],
+   "citedPaper": {
+    "paperId": "51e8e21e0e172c32719648a9282517612588d13a",
+    "externalIds": {
+     "MAG": "2980937832",
+     "ArXiv": "1910.06444",
+     "DBLP": "journals/corr/abs-1910-06444",
+     "CorpusId": 204575963
+    },
+    "title": "Building Damage Detection in Satellite Imagery Using Convolutional Neural Networks",
+    "venue": "arXiv.org",
+    "year": 2019,
+    "referenceCount": 14,
+    "citationCount": 184,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/1910.06444, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science",
+     "Engineering",
+     "Mathematics"
+    ],
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "2110493595",
+      "name": "Joseph Z. Xu"
+     },
+     {
+      "authorId": "153022096",
+      "name": "W. Lu"
+     },
+     {
+      "authorId": "46947950",
+      "name": "Zebo Li"
+     },
+     {
+      "authorId": "1842251",
+      "name": "Pranav Khaitan"
+     },
+     {
+      "authorId": "71271012",
+      "name": "Valeriya Zaytseva"
+     }
+    ],
+    "abstract": "In all types of disasters, from earthquakes to armed conflicts, aid workers need accurate and timely data such as damage to buildings and population displacement to mount an effective response. Remote sensing provides this data at an unprecedented scale, but extracting operationalizable information from satellite images is slow and labor-intensive. In this work, we use machine learning to automate the detection of building damage in satellite imagery. We compare the performance of four different convolutional neural network models in detecting damaged buildings in the 2010 Haiti earthquake. We also quantify how well the models will generalize to future disasters by training and testing models on different disaster events."
+   }
+  },
+  {
+   "isInfluential": true,
+   "contextsWithIntent": [
+    {
+     "context": "To support the advancement of the automation process, the xBD dataset Gupta et al. [2019], a new large-scale dataset containing pre-and post-disaster satellite imagery and ground truth labels from a variety of disasters and over 160,000 buildings was released.",
+     "intents": [
+      "methodology"
+     ]
+    },
+    {
+     "context": "A detailed description of the damage scale definition, image collection method, annotation process and quality control of the dataset is available in Gupta et al. [2019].",
+     "intents": [
+      "methodology"
+     ]
+    },
+    {
+     "context": "We submitted our results as part of the xView2 Challenge, a competition to design better models for identifying buildings and their damage level after exposure to multiple kinds of natural disasters.",
+     "intents": []
+    },
+    {
+     "context": "This metric balances precision and recall in a harmonic mean and is well-suited for imbalanced datasets such as the xBD dataset Gupta et al. [2019].",
+     "intents": [
+      "background"
+     ]
+    },
+    {
+     "context": "The dataset used is the xBD dataset, released to supplement the xView2 Challenge Gupta et al. [2019].",
+     "intents": [
+      "methodology"
+     ]
+    },
+    {
+     "context": "Gupta et al. Gupta et al. [2019] introduced a baseline model for the xView2 challenge that combines the segmentation and classification model.",
+     "intents": [
+      "methodology"
+     ]
+    },
+    {
+     "context": "To that end, the xView2 Challenge aims to automate the process of building damage assessment from pre-and post-disaster satellite imagery through the creation of accurate and efficient machine learning models.",
+     "intents": []
+    }
+   ],
+   "intents": [
+    "background",
+    "methodology"
+   ],
+   "citedPaper": {
+    "paperId": "ec58b5946c57f7d4d4a3cff0566941bb93291c95",
+    "externalIds": {
+     "MAG": "2967473420",
+     "DBLP": "conf/cvpr/GuptaGPHSHDLCG19",
+     "DOI": "10.1184/R1/8135576.V1",
+     "CorpusId": 263890009
+    },
+    "title": "Creating xBD: A Dataset for Assessing Building Damage from Satellite Imagery",
+    "venue": "CVPR Workshops",
+    "year": 2019,
+    "referenceCount": 30,
+    "citationCount": 282,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: The following paper fields have been elided by the publisher: {'abstract'}. Paper or abstract available at https://api.unpaywall.org/v2/10.1184/R1/8135576.V1?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1184/R1/8135576.V1, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "2257378235",
+      "name": "Ritwik Gupta"
+     },
+     {
+      "authorId": "11025540",
+      "name": "B. Goodman"
+     },
+     {
+      "authorId": "2168175147",
+      "name": "Nirav Patel"
+     },
+     {
+      "authorId": "1394898287",
+      "name": "Richard Hosfelt"
+     },
+     {
+      "authorId": "2406586099",
+      "name": "Sandra Sajeev"
+     },
+     {
+      "authorId": "1411469551",
+      "name": "Eric T. Heim"
+     },
+     {
+      "authorId": "145056623",
+      "name": "Jigar Doshi"
+     },
+     {
+      "authorId": "145659229",
+      "name": "Keane Lucas"
+     },
+     {
+      "authorId": "1742948",
+      "name": "H. Choset"
+     },
+     {
+      "authorId": "2066370615",
+      "name": "Matthew E. Gaston"
+     }
+    ],
+    "abstract": null
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "Though existing emergency mapping services such as the Copernicus Emergency Management Service (EMS) provide damage maps a few hours after a disaster, they are still typically carried out by human operators Nex et al. [2019].",
+     "intents": [
+      "background"
+     ]
+    }
+   ],
+   "intents": [
+    "background"
+   ],
+   "citedPaper": {
+    "paperId": "9cf1890879f938155b2c3e9f892880b9d6c7bb07",
+    "externalIds": {
+     "MAG": "2913286592",
+     "DBLP": "journals/remotesensing/NexDSK19",
+     "DOI": "10.3390/RS11030287",
+     "CorpusId": 85498223
+    },
+    "title": "Towards Real-Time Building Damage Mapping with Low-Cost UAV Solutions",
+    "venue": "Remote Sensing",
+    "year": 2019,
+    "referenceCount": 41,
+    "citationCount": 101,
+    "openAccessPdf": {
+     "url": "https://www.mdpi.com/2072-4292/11/3/287/pdf?version=1549014674",
+     "status": "GOLD",
+     "license": "CCBY",
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.3390/RS11030287?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.3390/RS11030287, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Geology",
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "2696298",
+      "name": "F. Nex"
+     },
+     {
+      "authorId": "28415221",
+      "name": "D. Duarte"
+     },
+     {
+      "authorId": "88727808",
+      "name": "Anne Steenbeek"
+     },
+     {
+      "authorId": "2915345",
+      "name": "N. Kerle"
+     }
+    ],
+    "abstract": "The timely and efficient generation of detailed damage maps is of fundamental importance following disaster events to speed up first responders\u2019 (FR) rescue activities and help trapped victims. Several works dealing with the automated detection of building damages have been published in the last decade. The increasingly widespread availability of inexpensive UAV platforms has also driven their recent adoption for rescue operations (i.e., search and rescue). Their deployment, however, remains largely limited to visual image inspection by skilled operators, limiting their applicability in time-constrained real conditions. This paper proposes a new solution to autonomously map building damages with a commercial UAV in near real-time. The solution integrates different components that allow the live streaming of the images on a laptop and their processing on the fly. Advanced photogrammetric techniques and deep learning algorithms are combined to deliver a true-orthophoto showing the position of building damages, which are already processed by the time the UAV returns to base. These algorithms have been customized to deliver fast results, fulfilling the near real-time requirements. The complete solution has been tested in different conditions, and received positive feedback by the FR involved in the EU funded project INACHUS. Two realistic pilot tests are described in the paper. The achieved results show the great potential of the presented approach, how close the proposed solution is to FR\u2019 expectations, and where more work is still needed."
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "As a result, instance segmentation has been increasingly used, as it identifies multiple objects of the same class as distinct individual objects Chen et al. [2018b], Iglovikov et al. [2018].",
+     "intents": []
+    },
+    {
+     "context": "Chen et al. Chen et al. [2018a] used the FPN model for building segmentation using the Aerial Imagery for Roof Segmentation (AIRS) dataset.",
+     "intents": [
+      "methodology"
+     ]
+    }
+   ],
+   "intents": [
+    "methodology"
+   ],
+   "citedPaper": {
+    "paperId": "3b8dc5c96b43fad1fcddb08182ff40abfb83fad7",
+    "externalIds": {
+     "MAG": "2883423620",
+     "DOI": "10.1016/J.ISPRSJPRS.2018.11.011",
+     "CorpusId": 50781867
+    },
+    "title": "TEMPORARY REMOVAL: Aerial imagery for roof segmentation: A large-scale dataset towards automatic mapping of buildings",
+    "venue": "Isprs Journal of Photogrammetry and Remote Sensing",
+    "year": 2019,
+    "referenceCount": 66,
+    "citationCount": 136,
+    "openAccessPdf": {
+     "url": "https://arxiv.org/pdf/1807.09532",
+     "status": "GREEN",
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1016/J.ISPRSJPRS.2018.11.011?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1016/J.ISPRSJPRS.2018.11.011, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": null,
+    "authors": [
+     {
+      "authorId": "2143840898",
+      "name": "Qi Chen"
+     },
+     {
+      "authorId": "2152512739",
+      "name": "Lei Wang"
+     },
+     {
+      "authorId": "2164861279",
+      "name": "Yifan Wu"
+     },
+     {
+      "authorId": "143804103",
+      "name": "Guangming Wu"
+     },
+     {
+      "authorId": "48183745",
+      "name": "Zhiling Guo"
+     },
+     {
+      "authorId": "145292735",
+      "name": "Steven L. Waslander"
+     }
+    ],
+    "abstract": "arXiv admin note: This version has been removed as the user did not have the right to agree to the license at the time of submission"
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "For example, Xu et al. Xu et al. [2019] trained a model for earthquake disasters damage whereas Rudner et al. Rudner et al. [2019] for flooded buildings.",
+     "intents": [
+      "background"
+     ]
+    }
+   ],
+   "intents": [
+    "background"
+   ],
+   "citedPaper": {
+    "paperId": "bfba15e152b2e43f2360e68106077228f7f0f217",
+    "externalIds": {
+     "MAG": "2963526604",
+     "DBLP": "journals/corr/abs-1812-01756",
+     "ArXiv": "1812.01756",
+     "DOI": "10.1609/aaai.v33i01.3301702",
+     "CorpusId": 57200773
+    },
+    "title": "Multi3Net: Segmenting Flooded Buildings via Fusion of Multiresolution, Multisensor, and Multitemporal Satellite Imagery",
+    "venue": "AAAI Conference on Artificial Intelligence",
+    "year": 2018,
+    "referenceCount": 34,
+    "citationCount": 120,
+    "openAccessPdf": {
+     "url": "https://aaai.org/ojs/index.php/AAAI/article/download/3848/3726",
+     "status": "GOLD",
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/1812.01756, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle",
+     "Conference"
+    ],
+    "authors": [
+     {
+      "authorId": "2107677984",
+      "name": "Tim G. J. Rudner"
+     },
+     {
+      "authorId": "35469144",
+      "name": "Marc Ru\u00dfwurm"
+     },
+     {
+      "authorId": "52212782",
+      "name": "Jakub Fil"
+     },
+     {
+      "authorId": "1783465",
+      "name": "R. Pelich"
+     },
+     {
+      "authorId": "3457221",
+      "name": "B. Bischke"
+     },
+     {
+      "authorId": "2853290",
+      "name": "V. Kopa\u010dkov\u00e1"
+     },
+     {
+      "authorId": "31474374",
+      "name": "P. Bilinski"
+     }
+    ],
+    "abstract": "We propose a novel approach for rapid segmentation of flooded buildings by fusing multiresolution, multisensor, and multitemporal satellite imagery in a convolutional neural network. Our model significantly expedites the generation of satellite imagery-based flood maps, crucial for first responders and local authorities in the early stages of flood events. By incorporating multitemporal satellite imagery, our model allows for rapid and accurate post-disaster damage assessment and can be used by governments to better coordinate medium- and long-term financial assistance programs for affected areas. The network consists of multiple streams of encoder-decoder architectures that extract spatiotemporal information from medium-resolution images and spatial information from high-resolution images before fusing the resulting representations into a single medium-resolution segmentation map of flooded buildings. We compare our model to state-of-the-art methods for building footprint segmentation as well as to alternative fusion approaches for the segmentation of flooded buildings and find that our model performs best on both tasks. We also demonstrate that our model produces highly accurate segmentation maps of flooded buildings using only publicly available medium-resolution data instead of significantly more detailed but sparsely available very high-resolution data. We release the first open-source dataset of fully preprocessed and labeled multiresolution, multispectral, and multitemporal satellite images of disaster sites along with our source code."
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "\u2026advancements in the remote sensing field have created new opportunities to address the limitations of field-based assessments and have been recognized to be useful for rapid post-disaster response Rathje and Adams [2008], Dong and Shan [2013], Taubenb\u00f6ck et al. [2014], Ghaffarian et al. [2018].",
+     "intents": [
+      "background"
+     ]
+    }
+   ],
+   "intents": [
+    "background"
+   ],
+   "citedPaper": {
+    "paperId": "db56223a42f395ea2059d13675f01389e7c7a3d4",
+    "externalIds": {
+     "DBLP": "journals/remotesensing/GhaffarianKF18",
+     "MAG": "2900147932",
+     "DOI": "10.3390/RS10111760",
+     "CorpusId": 53578654
+    },
+    "title": "Remote Sensing-Based Proxies for Urban Disaster Risk Management and Resilience: A Review",
+    "venue": "Remote Sensing",
+    "year": 2018,
+    "referenceCount": 168,
+    "citationCount": 115,
+    "openAccessPdf": {
+     "url": "https://www.mdpi.com/2072-4292/10/11/1760/pdf?version=1542093568",
+     "status": "GOLD",
+     "license": "CCBY",
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.3390/RS10111760?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.3390/RS10111760, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science",
+     "Geology"
+    ],
+    "publicationTypes": [
+     "JournalArticle",
+     "Review"
+    ],
+    "authors": [
+     {
+      "authorId": "3490207",
+      "name": "S. Ghaffarian"
+     },
+     {
+      "authorId": "2915345",
+      "name": "N. Kerle"
+     },
+     {
+      "authorId": "144248389",
+      "name": "T. Filatova"
+     }
+    ],
+    "abstract": "Rapid increase in population and growing concentration of capital in urban areas has escalated both the severity and longer-term impact of natural disasters. As a result, Disaster Risk Management (DRM) and reduction have been gaining increasing importance for urban areas. Remote sensing plays a key role in providing information for urban DRM analysis due to its agile data acquisition, synoptic perspective, growing range of data types, and instrument sophistication, as well as low cost. As a consequence numerous methods have been developed to extract information for various phases of DRM analysis. However, given the diverse information needs, only few of the parameters of interest are extracted directly, while the majority have to be elicited indirectly using proxies. This paper provides a comprehensive review of the proxies developed for two risk elements typically associated with pre-disaster situations (vulnerability and resilience), and two post-disaster elements (damage and recovery), while focusing on urban DRM. The proxies were reviewed in the context of four main environments and their corresponding sub-categories: built-up (buildings, transport, and others), economic (macro, regional and urban economics, and logistics), social (services and infrastructures, and socio-economic status), and natural. All environments and the corresponding proxies are discussed and analyzed in terms of their reliability and sufficiency in comprehensively addressing the selected DRM assessments. We highlight strength and identify gaps and limitations in current proxies, including inconsistencies in terminology for indirect measurements. We present a systematic overview for each group of the reviewed proxies that could simplify cross-fertilization across different DRM domains and may assist the further development of methods. While systemizing examples from the wider remote sensing domain and insights from social and economic sciences, we suggest a direction for developing new proxies, also potentially suitable for capturing functional recovery."
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "As a result, instance segmentation has been increasingly used, as it identifies multiple objects of the same class as distinct individual objects Chen et al. [2018b], Iglovikov et al. [2018].",
+     "intents": [
+      "methodology"
+     ]
+    }
+   ],
+   "intents": [
+    "methodology"
+   ],
+   "citedPaper": {
+    "paperId": "ae3046d2d03d5825cce648abda6bce8a1d4e443a",
+    "externalIds": {
+     "DBLP": "conf/cvpr/IglovikovS0S18",
+     "MAG": "2806581075",
+     "ArXiv": "1806.00844",
+     "DOI": "10.1109/CVPRW.2018.00042",
+     "CorpusId": 46932634
+    },
+    "title": "TernausNetV2: Fully Convolutional Network for Instance Segmentation",
+    "venue": "2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)",
+    "year": 2018,
+    "referenceCount": 17,
+    "citationCount": 161,
+    "openAccessPdf": {
+     "url": "https://arxiv.org/pdf/1806.00844",
+     "status": "GREEN",
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/1806.00844, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle",
+     "Conference"
+    ],
+    "authors": [
+     {
+      "authorId": "19231037",
+      "name": "V. Iglovikov"
+     },
+     {
+      "authorId": "51000099",
+      "name": "Selim S. Seferbekov"
+     },
+     {
+      "authorId": "144338534",
+      "name": "A. Buslaev"
+     },
+     {
+      "authorId": "153153335",
+      "name": "Alexey A. Shvets"
+     }
+    ],
+    "abstract": "The most common approaches to instance segmentation are complex and use two-stage networks with object proposals, conditional random-fields, template matching or recurrent neural networks. In this work we present Ternaus- NetV2 - a simple fully convolutional network that allows extracting objects from a high-resolution satellite imagery on an instance level. The network has popular encoderdecoder type of architecture with skip connections but has a few essential modifications that allows using for semantic as well as for instance segmentation tasks. This approach is universal and allows to extend any network that has been successfully applied for semantic segmentation to perform instance segmentation task. In addition, we generalize network encoder that was pre-trained for RGB images to use additional input channels. It makes possible to use transfer learning from visual to a wider spectral range. For DeepGlobe-CVPR 2018 building detection sub-challenge, based on public leaderboard score, our approach shows superior performance in comparison to other methods."
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "As a result, instance segmentation has been increasingly used, as it identifies multiple objects of the same class as distinct individual objects Chen et al. [2018b], Iglovikov et al. [2018].",
+     "intents": [
+      "methodology"
+     ]
+    }
+   ],
+   "intents": [
+    "methodology"
+   ],
+   "citedPaper": {
+    "paperId": "6b89c45ed9e12d3392e28730f80234aa82e41cbc",
+    "externalIds": {
+     "MAG": "2964236837",
+     "DBLP": "journals/corr/abs-1712-04837",
+     "ArXiv": "1712.04837",
+     "DOI": "10.1109/CVPR.2018.00422",
+     "CorpusId": 21557197
+    },
+    "title": "MaskLab: Instance Segmentation by Refining Object Detection with Semantic and Direction Features",
+    "venue": "2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition",
+    "year": 2017,
+    "referenceCount": 85,
+    "citationCount": 368,
+    "openAccessPdf": {
+     "url": "http://arxiv.org/pdf/1712.04837",
+     "status": "GREEN",
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/1712.04837, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle",
+     "Conference"
+    ],
+    "authors": [
+     {
+      "authorId": "34192119",
+      "name": "Liang-Chieh Chen"
+     },
+     {
+      "authorId": "36665147",
+      "name": "Alexander Hermans"
+     },
+     {
+      "authorId": "2776496",
+      "name": "G. Papandreou"
+     },
+     {
+      "authorId": "3302320",
+      "name": "Florian Schroff"
+     },
+     {
+      "authorId": "145498821",
+      "name": "Peng Wang"
+     },
+     {
+      "authorId": "2595180",
+      "name": "Hartwig Adam"
+     }
+    ],
+    "abstract": "In this work, we tackle the problem of instance segmentation, the task of simultaneously solving object detection and semantic segmentation. Towards this goal, we present a model, called MaskLab, which produces three outputs: box detection, semantic segmentation, and direction prediction. Building on top of the Faster-RCNN object detector, the predicted boxes provide accurate localization of object instances. Within each region of interest, MaskLab performs foreground/background segmentation by combining semantic and direction prediction. Semantic segmentation assists the model in distinguishing between objects of different semantic classes including background, while the direction prediction, estimating each pixel's direction towards its corresponding center, allows separating instances of the same semantic class. Moreover, we explore the effect of incorporating recent successful methods from both segmentation and detection (e.g., atrous convolution and hypercolumn). Our proposed model is evaluated on the COCO instance segmentation benchmark and shows comparable performance with other state-of-art models."
+   }
+  },
+  {
+   "isInfluential": true,
+   "contextsWithIntent": [
+    {
+     "context": "Instance segmentation: We trained a mask R-CNN model with two P100 GPUs using a batch size of 4 and the initial learning rate of 0.01.",
+     "intents": []
+    },
+    {
+     "context": "He et al. He et al. [2017] first introduced Mask R-CNN, a framework for generating high-quality segmentation masks for each instance.",
+     "intents": [
+      "methodology"
+     ]
+    },
+    {
+     "context": "Since then, Mask R-CNN has been used for a variety of different application as it is fast to implement and easy to generalize to different tasks including building footprint segmentation.",
+     "intents": []
+    },
+    {
+     "context": "A faster R-CNN Ren et al. [2015] model is combined with the backbone model to perform the semantic segmentation and object detection.",
+     "intents": []
+    },
+    {
+     "context": "The backbone model of the Mask R-CNN is a ResNet-50 He et al. [2016] with Feature Pyramid Network (FPN) Lin et al. [2017].",
+     "intents": []
+    },
+    {
+     "context": "We realized that one of the major issue of using Mask R-CNN for instance segmentation is its inability to detect all the buildings, particularly where there are more than 1000 buildings in a single image.",
+     "intents": []
+    },
+    {
+     "context": "Semantic Segmentation: A ResNet-50 Feature Pyramid Network (the same backbone model as the Mask R-CNN) was used to conduct the semantic segmentation of the building footprint.",
+     "intents": []
+    },
+    {
+     "context": "For this, we used Mask R-CNN He et al. [2017].",
+     "intents": [
+      "methodology"
+     ]
+    }
+   ],
+   "intents": [
+    "methodology"
+   ],
+   "citedPaper": {
+    "paperId": "1a0912bb76777469295bb2c059faee907e7f3258",
+    "externalIds": {
+     "ArXiv": "1703.06870",
+     "CorpusId": 54465873
+    },
+    "title": "Mask R-CNN",
+    "venue": "",
+    "year": 2017,
+    "referenceCount": 40,
+    "citationCount": 33011,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/1703.06870, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": null,
+    "authors": [
+     {
+      "authorId": "39353098",
+      "name": "Kaiming He"
+     },
+     {
+      "authorId": "2082991",
+      "name": "Georgia Gkioxari"
+     },
+     {
+      "authorId": "3127283",
+      "name": "Piotr Doll\u00e1r"
+     },
+     {
+      "authorId": "2983898",
+      "name": "Ross B. Girshick"
+     }
+    ],
+    "abstract": "We present a conceptually simple, flexible, and general framework for object instance segmentation. Our approach efficiently detects objects in an image while simultaneously generating a high-quality segmentation mask for each instance. The method, called Mask R-CNN, extends Faster R-CNN by adding a branch for predicting an object mask in parallel with the existing branch for bounding box recognition. Mask R-CNN is simple to train and adds only a small overhead to Faster R-CNN, running at 5 fps. Moreover, Mask R-CNN is easy to generalize to other tasks, e.g., allowing us to estimate human poses in the same framework. We show top results in all three tracks of the COCO suite of challenges, including instance segmentation, bounding-box object detection, and person keypoint detection. Without tricks, Mask R-CNN outperforms all existing, single-model entries on every task, including the COCO 2016 challenge winners. We hope our simple and effective approach will serve as a solid baseline and help ease future research in instance-level recognition. Code will be made available."
+   }
+  },
+  {
+   "isInfluential": true,
+   "contextsWithIntent": [
+    {
+     "context": "The overall performance of the FPN model was evaluated through intersection over union (IoU) and F1-score metrics, in which they achieved a score of 0.882 and 0.937 respectively.",
+     "intents": []
+    },
+    {
+     "context": "Semantic Segmentation: We trained a ResNet-50 FPN model with two P4 GPUs.",
+     "intents": []
+    },
+    {
+     "context": "Some of the most common models include U-Net Ronneberger et al. [2015], and the more recent feature pyramid network (FPN) Lin et al. [2017].",
+     "intents": []
+    },
+    {
+     "context": "Chen et al. Chen et al. [2018a] used the FPN model for building segmentation using the Aerial Imagery for Roof Segmentation (AIRS) dataset.",
+     "intents": []
+    },
+    {
+     "context": "The backbone model of the Mask R-CNN is a ResNet-50 He et al. [2016] with Feature Pyramid Network (FPN) Lin et al. [2017].",
+     "intents": [
+      "methodology"
+     ]
+    }
+   ],
+   "intents": [
+    "methodology"
+   ],
+   "citedPaper": {
+    "paperId": "2a94c84383ee3de5e6211d43d16e7de387f68878",
+    "externalIds": {
+     "ArXiv": "1612.03144",
+     "DBLP": "conf/cvpr/LinDGHHB17",
+     "MAG": "2565639579",
+     "DOI": "10.1109/CVPR.2017.106",
+     "CorpusId": 10716717
+    },
+    "title": "Feature Pyramid Networks for Object Detection",
+    "venue": "Computer Vision and Pattern Recognition",
+    "year": 2016,
+    "referenceCount": 41,
+    "citationCount": 28170,
+    "openAccessPdf": {
+     "url": "https://arxiv.org/pdf/1612.03144",
+     "status": "GREEN",
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/1612.03144, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle",
+     "Conference"
+    ],
+    "authors": [
+     {
+      "authorId": "33493200",
+      "name": "Tsung-Yi Lin"
+     },
+     {
+      "authorId": "3127283",
+      "name": "Piotr Doll\u00e1r"
+     },
+     {
+      "authorId": "2983898",
+      "name": "Ross B. Girshick"
+     },
+     {
+      "authorId": "39353098",
+      "name": "Kaiming He"
+     },
+     {
+      "authorId": "1790580",
+      "name": "Bharath Hariharan"
+     },
+     {
+      "authorId": "50172592",
+      "name": "Serge J. Belongie"
+     }
+    ],
+    "abstract": "Feature pyramids are a basic component in recognition systems for detecting objects at different scales. But pyramid representations have been avoided in recent object detectors that are based on deep convolutional networks, partially because they are slow to compute and memory intensive. In this paper, we exploit the inherent multi-scale, pyramidal hierarchy of deep convolutional networks to construct feature pyramids with marginal extra cost. A top-down architecture with lateral connections is developed for building high-level semantic feature maps at all scales. This architecture, called a Feature Pyramid Network (FPN), shows significant improvement as a generic feature extractor in several applications. Using a basic Faster R-CNN system, our method achieves state-of-the-art single-model results on the COCO detection benchmark without bells and whistles, surpassing all existing single-model entries including those from the COCO 2016 challenge winners. In addition, our method can run at 5 FPS on a GPU and thus is a practical and accurate solution to multi-scale object detection. Code will be made publicly available."
+   }
+  },
+  {
+   "isInfluential": true,
+   "contextsWithIntent": [
+    {
+     "context": "Pre & Post Concatenation: Inspired by the work done by Xu et al. Xu et al. [2019], who studied a task highly analogous to the one we perform here, we implemented a twin-tower model which concatenates the output features of a ResNet-50 model from pre-and post-disaster building cropped images.",
+     "intents": []
+    },
+    {
+     "context": "Semantic Segmentation: A ResNet-50 Feature Pyramid Network (the same backbone model as the Mask R-CNN) was used to conduct the semantic segmentation of the building footprint.",
+     "intents": []
+    },
+    {
+     "context": "Semantic Segmentation: We trained a ResNet-50 FPN model with two P4 GPUs.",
+     "intents": []
+    },
+    {
+     "context": "The backbone model of the Mask R-CNN is a ResNet-50 He et al. [2016] with Feature Pyramid Network (FPN) Lin et al. [2017].",
+     "intents": [
+      "methodology"
+     ]
+    }
+   ],
+   "intents": [
+    "methodology"
+   ],
+   "citedPaper": {
+    "paperId": "2c03df8b48bf3fa39054345bafabfeff15bfd11d",
+    "externalIds": {
+     "DBLP": "conf/cvpr/HeZRS16",
+     "MAG": "2949650786",
+     "ArXiv": "1512.03385",
+     "DOI": "10.1109/cvpr.2016.90",
+     "CorpusId": 206594692
+    },
+    "title": "Deep Residual Learning for Image Recognition",
+    "venue": "Computer Vision and Pattern Recognition",
+    "year": 2015,
+    "referenceCount": 54,
+    "citationCount": 238548,
+    "openAccessPdf": {
+     "url": "https://repositorio.unal.edu.co/bitstream/unal/81443/1/98670607.2022.pdf",
+     "status": "GREEN",
+     "license": "CCBY",
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/1512.03385, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle",
+     "Conference"
+    ],
+    "authors": [
+     {
+      "authorId": "39353098",
+      "name": "Kaiming He"
+     },
+     {
+      "authorId": "1771551",
+      "name": "X. Zhang"
+     },
+     {
+      "authorId": "3080683",
+      "name": "Shaoqing Ren"
+     },
+     {
+      "authorId": null,
+      "name": "Jian Sun"
+     }
+    ],
+    "abstract": "Deeper neural networks are more difficult to train. We present a residual learning framework to ease the training of networks that are substantially deeper than those used previously. We explicitly reformulate the layers as learning residual functions with reference to the layer inputs, instead of learning unreferenced functions. We provide comprehensive empirical evidence showing that these residual networks are easier to optimize, and can gain accuracy from considerably increased depth. On the ImageNet dataset we evaluate residual nets with a depth of up to 152 layers - 8\u00d7 deeper than VGG nets [40] but still having lower complexity. An ensemble of these residual nets achieves 3.57% error on the ImageNet test set. This result won the 1st place on the ILSVRC 2015 classification task. We also present analysis on CIFAR-10 with 100 and 1000 layers. The depth of representations is of central importance for many visual recognition tasks. Solely due to our extremely deep representations, we obtain a 28% relative improvement on the COCO object detection dataset. Deep residual nets are foundations of our submissions to ILSVRC & COCO 2015 competitions1, where we also won the 1st places on the tasks of ImageNet detection, ImageNet localization, COCO detection, and COCO segmentation."
+   }
+  },
+  {
+   "isInfluential": true,
+   "contextsWithIntent": [
+    {
+     "context": "Instance segmentation: We trained a mask R-CNN model with two P100 GPUs using a batch size of 4 and the initial learning rate of 0.01.",
+     "intents": []
+    },
+    {
+     "context": "He et al. He et al. [2017] first introduced Mask R-CNN, a framework for generating high-quality segmentation masks for each instance.",
+     "intents": []
+    },
+    {
+     "context": "Since then, Mask R-CNN has been used for a variety of different application as it is fast to implement and easy to generalize to different tasks including building footprint segmentation.",
+     "intents": []
+    },
+    {
+     "context": "A faster R-CNN Ren et al. [2015] model is combined with the backbone model to perform the semantic segmentation and object detection.",
+     "intents": [
+      "methodology"
+     ]
+    },
+    {
+     "context": "The backbone model of the Mask R-CNN is a ResNet-50 He et al. [2016] with Feature Pyramid Network (FPN) Lin et al. [2017].",
+     "intents": []
+    },
+    {
+     "context": "We realized that one of the major issue of using Mask R-CNN for instance segmentation is its inability to detect all the buildings, particularly where there are more than 1000 buildings in a single image.",
+     "intents": []
+    },
+    {
+     "context": "Semantic Segmentation: A ResNet-50 Feature Pyramid Network (the same backbone model as the Mask R-CNN) was used to conduct the semantic segmentation of the building footprint.",
+     "intents": []
+    },
+    {
+     "context": "For this, we used Mask R-CNN He et al. [2017].",
+     "intents": []
+    }
+   ],
+   "intents": [
+    "methodology"
+   ],
+   "citedPaper": {
+    "paperId": "424561d8585ff8ebce7d5d07de8dbf7aae5e7270",
+    "externalIds": {
+     "MAG": "2953106684",
+     "DBLP": "journals/pami/RenHG017",
+     "ArXiv": "1506.01497",
+     "DOI": "10.1109/TPAMI.2016.2577031",
+     "CorpusId": 10328909,
+     "PubMed": "27295650"
+    },
+    "title": "Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks",
+    "venue": "IEEE Transactions on Pattern Analysis and Machine Intelligence",
+    "year": 2015,
+    "referenceCount": 47,
+    "citationCount": 75503,
+    "openAccessPdf": {
+     "url": "https://arxiv.org/pdf/1506.01497",
+     "status": "GREEN",
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/1506.01497, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science",
+     "Medicine"
+    ],
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "3080683",
+      "name": "Shaoqing Ren"
+     },
+     {
+      "authorId": "39353098",
+      "name": "Kaiming He"
+     },
+     {
+      "authorId": "2983898",
+      "name": "Ross B. Girshick"
+     },
+     {
+      "authorId": "2032184078",
+      "name": "Jian Sun"
+     }
+    ],
+    "abstract": "State-of-the-art object detection networks depend on region proposal algorithms to hypothesize object locations. Advances like SPPnet and Fast R-CNN have reduced the running time of these detection networks, exposing region proposal computation as a bottleneck. In this work, we introduce a Region Proposal Network (RPN) that shares full-image convolutional features with the detection network, thus enabling nearly cost-free region proposals. An RPN is a fully convolutional network that simultaneously predicts object bounds and objectness scores at each position. The RPN is trained end-to-end to generate high-quality region proposals, which are used by Fast R-CNN for detection. We further merge RPN and Fast R-CNN into a single network by sharing their convolutional features---using the recently popular terminology of neural networks with 'attention' mechanisms, the RPN component tells the unified network where to look. For the very deep VGG-16 model, our detection system has a frame rate of 5fps (including all steps) on a GPU, while achieving state-of-the-art object detection accuracy on PASCAL VOC 2007, 2012, and MS COCO datasets with only 300 proposals per image. In ILSVRC and COCO 2015 competitions, Faster R-CNN and RPN are the foundations of the 1st-place winning entries in several tracks. Code has been made publicly available"
+   }
+  },
+  {
+   "isInfluential": true,
+   "contextsWithIntent": [
+    {
+     "context": "U-Net has been successfully used in the satellite image building segmentation challenge SpaceNet 4.",
+     "intents": []
+    },
+    {
+     "context": "The segmentation model is based on an altered U-Net architecture, achieving an IoU of 0.66 and F1 score of 0.80.",
+     "intents": []
+    },
+    {
+     "context": "Some of the most common models include U-Net Ronneberger et al. [2015], and the more recent feature pyramid network (FPN) Lin et al. [2017].",
+     "intents": []
+    },
+    {
+     "context": "The model architecture chosen here was U-Net with a ResNet-34 encoder pre-trained on ImageNet dataset.",
+     "intents": []
+    }
+   ],
+   "intents": [],
+   "citedPaper": {
+    "paperId": "6364fdaa0a0eccd823a779fcdd489173f938e91a",
+    "externalIds": {
+     "ArXiv": "1505.04597",
+     "MAG": "1901129140",
+     "DBLP": "journals/corr/RonnebergerFB15",
+     "DOI": "10.1007/978-3-319-24574-4_28",
+     "CorpusId": 3719281
+    },
+    "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
+    "venue": "International Conference on Medical Image Computing and Computer-Assisted Intervention",
+    "year": 2015,
+    "referenceCount": 18,
+    "citationCount": 101218,
+    "openAccessPdf": {
+     "url": "",
+     "status": "CLOSED",
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/1505.04597, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "1737326",
+      "name": "O. Ronneberger"
+     },
+     {
+      "authorId": "152702479",
+      "name": "P. Fischer"
+     },
+     {
+      "authorId": "1710872",
+      "name": "T. Brox"
+     }
+    ],
+    "abstract": "There is large consent that successful training of deep networks requires many thousand annotated training samples. In this paper, we present a network and training strategy that relies on the strong use of data augmentation to use the available annotated samples more efficiently. The architecture consists of a contracting path to capture context and a symmetric expanding path that enables precise localization. We show that such a network can be trained end-to-end from very few images and outperforms the prior best method (a sliding-window convolutional network) on the ISBI challenge for segmentation of neuronal structures in electron microscopic stacks. Using the same network trained on transmitted light microscopy images (phase contrast and DIC) we won the ISBI cell tracking challenge 2015 in these categories by a large margin. Moreover, the network is fast. Segmentation of a 512x512 image takes less than a second on a recent GPU. The full implementation (based on Caffe) and the trained networks are available at http://lmb.informatik.uni-freiburg.de/people/ronneber/u-net ."
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "\u2026advancements in the remote sensing field have created new opportunities to address the limitations of field-based assessments and have been recognized to be useful for rapid post-disaster response Rathje and Adams [2008], Dong and Shan [2013], Taubenb\u00f6ck et al. [2014], Ghaffarian et al. [2018].",
+     "intents": [
+      "background"
+     ]
+    }
+   ],
+   "intents": [
+    "background"
+   ],
+   "citedPaper": {
+    "paperId": "6391e890d52b49c23166bb3afb4e2afbe62bf723",
+    "externalIds": {
+     "MAG": "2027000042",
+     "DOI": "10.1016/J.ISPRSJPRS.2013.06.011",
+     "CorpusId": 10851163
+    },
+    "title": "A comprehensive review of earthquake-induced building damage detection with remote sensing techniques",
+    "venue": "",
+    "year": 2013,
+    "referenceCount": 127,
+    "citationCount": 510,
+    "openAccessPdf": {
+     "url": "",
+     "status": "CLOSED",
+     "license": null,
+     "disclaimer": "Notice: The following paper fields have been elided by the publisher: {'abstract'}. Paper or abstract available at https://api.unpaywall.org/v2/10.1016/J.ISPRSJPRS.2013.06.011?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1016/J.ISPRSJPRS.2013.06.011, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "Review"
+    ],
+    "authors": [
+     {
+      "authorId": "2755807",
+      "name": "Laigen Dong"
+     },
+     {
+      "authorId": "2472180437",
+      "name": "Shan Jie"
+     }
+    ],
+    "abstract": null
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "\u2026information to first responders for rescue operations and relief efforts, it also provides useful information for local government and related organizations for the estimation of economic loss and damage distribution in the subsequent reconstruction and recovery phase Barrington et al. [2012].",
+     "intents": [
+      "background"
+     ]
+    }
+   ],
+   "intents": [
+    "background"
+   ],
+   "citedPaper": {
+    "paperId": "e0003c014311889506755fd2998091de10a4d8d6",
+    "externalIds": {
+     "MAG": "148878710",
+     "DOI": "10.4401/AG-5324",
+     "CorpusId": 127450596
+    },
+    "title": "Crowdsourcing earthquake damage assessment using remote sensing imagery",
+    "venue": "",
+    "year": 2012,
+    "referenceCount": 33,
+    "citationCount": 121,
+    "openAccessPdf": {
+     "url": "https://www.annalsofgeophysics.eu/index.php/annals/article/view/5324/5492",
+     "status": "GOLD",
+     "license": "CCBY",
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.4401/AG-5324?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.4401/AG-5324, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Engineering"
+    ],
+    "publicationTypes": null,
+    "authors": [
+     {
+      "authorId": "2028908717",
+      "name": "Luke Barrington"
+     },
+     {
+      "authorId": "2116139413",
+      "name": "Shubharoop Ghosh"
+     },
+     {
+      "authorId": "145898977",
+      "name": "M. Greene"
+     },
+     {
+      "authorId": "1402509982",
+      "name": "Shay Har-Noy"
+     },
+     {
+      "authorId": "153020203",
+      "name": "J. Berger"
+     },
+     {
+      "authorId": "144899691",
+      "name": "Stuart P. D. Gill"
+     },
+     {
+      "authorId": "2054897047",
+      "name": "A. Lin"
+     },
+     {
+      "authorId": "143959614",
+      "name": "C. Huyck"
+     }
+    ],
+    "abstract": "This paper describes the evolution of recent work on using crowdsourced analysis of remote sensing imagery, particularly high-resolution aerial imagery, to provide rapid, reliable assessments of damage caused by earthquakes and potentially other disasters. The initial effort examined online imagery taken after the 2008 Wenchuan, China, earthquake. A more recent response to the 2010 Haiti earthquake led to the formation of an international consortium: the Global Earth Observation Catastrophe Assessment Network (GEO-CAN). The success of GEO-CAN in contributing to the official damage assessments made by the Government of Haiti, the United Nations, and the World Bank led to further development of a web-based interface. A current initiative in Christchurch, New Zealand, is underway where remote sensing experts are analyzing satellite imagery, geotechnical engineers are marking liquefaction areas, and structural engineers are identifying building damage. The current site includes online training to improve the accuracy of the assessments and make it possible for even novice users to contribute to the crowdsourced solution. The paper discusses lessons learned from these initiatives and presents a way forward for using crowdsourced remote sensing as a tool for rapid assessment of damage caused by natural disasters around the world."
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "\u2026advancements in the remote sensing field have created new opportunities to address the limitations of field-based assessments and have been recognized to be useful for rapid post-disaster response Rathje and Adams [2008], Dong and Shan [2013], Taubenb\u00f6ck et al. [2014], Ghaffarian et al. [2018].",
+     "intents": [
+      "background"
+     ]
+    }
+   ],
+   "intents": [
+    "background"
+   ],
+   "citedPaper": {
+    "paperId": "edb9857b8275d87f0c68b15e099a85b355459b74",
+    "externalIds": {
+     "MAG": "2189707875",
+     "DOI": "10.1193/1.2923922",
+     "CorpusId": 110008447
+    },
+    "title": "The Role of Remote Sensing in Earthquake Science and Engineering: Opportunities and Challenges",
+    "venue": "",
+    "year": 2008,
+    "referenceCount": 21,
+    "citationCount": 81,
+    "openAccessPdf": {
+     "url": "",
+     "status": "CLOSED",
+     "license": null,
+     "disclaimer": "Notice: The following paper fields have been elided by the publisher: {'abstract'}. Paper or abstract available at https://api.unpaywall.org/v2/10.1193/1.2923922?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1193/1.2923922, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Engineering"
+    ],
+    "publicationTypes": [
+     "JournalArticle",
+     "Review"
+    ],
+    "authors": [
+     {
+      "authorId": "51039579",
+      "name": "E. Rathje"
+     },
+     {
+      "authorId": "32778272",
+      "name": "B. Adams"
+     }
+    ],
+    "abstract": null
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "Frameworks have also been proposed for the use of remote sensing data to predict high-risk areas, before disaster strikes Tralli et al. [2005].",
+     "intents": [
+      "background"
+     ]
+    }
+   ],
+   "intents": [
+    "background"
+   ],
+   "citedPaper": {
+    "paperId": "2b11d2b080bf6d6533f29f976f41f607da545251",
+    "externalIds": {
+     "MAG": "1990446846",
+     "DOI": "10.1016/J.ISPRSJPRS.2005.02.002",
+     "CorpusId": 129707758
+    },
+    "title": "Satellite remote sensing of earthquake, volcano, flood, landslide and coastal inundation hazards",
+    "venue": "",
+    "year": 2005,
+    "referenceCount": 46,
+    "citationCount": 518,
+    "openAccessPdf": {
+     "url": "",
+     "status": "CLOSED",
+     "license": null,
+     "disclaimer": "Notice: The following paper fields have been elided by the publisher: {'abstract'}. Paper or abstract available at https://api.unpaywall.org/v2/10.1016/J.ISPRSJPRS.2005.02.002?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1016/J.ISPRSJPRS.2005.02.002, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Geology"
+    ],
+    "publicationTypes": null,
+    "authors": [
+     {
+      "authorId": "31567269",
+      "name": "D. Tralli"
+     },
+     {
+      "authorId": "49146736",
+      "name": "R. Blom"
+     },
+     {
+      "authorId": "2907822",
+      "name": "V. Zlotnicki"
+     },
+     {
+      "authorId": "2674724",
+      "name": "A. Donnellan"
+     },
+     {
+      "authorId": "2110778142",
+      "name": "D. Evans"
+     }
+    ],
+    "abstract": null
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "The structural similarity index (SSIM) was added as the additional feature, a metric that measures the similarity between two images Wang et al. [2004].",
+     "intents": [
+      "methodology"
+     ]
+    }
+   ],
+   "intents": [
+    "methodology"
+   ],
+   "citedPaper": {
+    "paperId": "eae2e0fa72e898c289365c0af16daf57a7a6cf40",
+    "externalIds": {
+     "DBLP": "journals/tip/WangBSS04",
+     "MAG": "2133665775",
+     "DOI": "10.1109/TIP.2003.819861",
+     "CorpusId": 207761262,
+     "PubMed": "15376593"
+    },
+    "title": "Image quality assessment: from error visibility to structural similarity",
+    "venue": "IEEE Transactions on Image Processing",
+    "year": 2004,
+    "referenceCount": 61,
+    "citationCount": 59554,
+    "openAccessPdf": {
+     "url": "http://www.cns.nyu.edu/~zwang/files/papers/ssim.pdf",
+     "status": "GREEN",
+     "license": null,
+     "disclaimer": "Notice: The following paper fields have been elided by the publisher: {'abstract'}. Paper or abstract available at https://api.unpaywall.org/v2/10.1109/TIP.2003.819861?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1109/TIP.2003.819861, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science",
+     "Medicine"
+    ],
+    "publicationTypes": [
+     "Study",
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "41210105",
+      "name": "Zhou Wang"
+     },
+     {
+      "authorId": "1747569",
+      "name": "A. Bovik"
+     },
+     {
+      "authorId": "2387140",
+      "name": "H. Sheikh"
+     },
+     {
+      "authorId": "1689350",
+      "name": "Eero P. Simoncelli"
+     }
+    ],
+    "abstract": null
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "In the pre-machine learning era, practitioners relied on classical segmentation and classification techniques for map production, e.g. a \u201cregion-growing and knowledge-based segmentation approach\u201d that involves merging visually similar regions to build a disaster map Van der Sande et al. [2003].",
+     "intents": [
+      "methodology"
+     ]
+    }
+   ],
+   "intents": [
+    "methodology"
+   ],
+   "citedPaper": {
+    "paperId": "54ff2a7d3ea0b4fec36603a65446057d3e8dcb08",
+    "externalIds": {
+     "MAG": "2083630421",
+     "DOI": "10.1016/S0303-2434(03)00003-5",
+     "CorpusId": 263709340
+    },
+    "title": "A segmentation and classification approach of IKONOS-2 imagery for land cover mapping to assist flood risk and flood damage assessment",
+    "venue": "",
+    "year": 2003,
+    "referenceCount": 29,
+    "citationCount": 89,
+    "openAccessPdf": {
+     "url": "",
+     "status": "CLOSED",
+     "license": null,
+     "disclaimer": "Notice: The following paper fields have been elided by the publisher: {'abstract'}. Paper or abstract available at https://api.unpaywall.org/v2/10.1016/S0303-2434(03)00003-5?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1016/S0303-2434(03)00003-5, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Geography"
+    ],
+    "publicationTypes": null,
+    "authors": [
+     {
+      "authorId": "2488169745",
+      "name": "C. van der Sande"
+     },
+     {
+      "authorId": null,
+      "name": "S. M. de Jong"
+     },
+     {
+      "authorId": "2461375810",
+      "name": "A. D. De Roo"
+     }
+    ],
+    "abstract": null
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "After obtaining the semantic mask of each image, we outlined every single building to extract their polygon coordinates using Imantics Imantics [2019], a Python package.",
+     "intents": [
+      "methodology"
+     ]
+    }
+   ],
+   "intents": [
+    "methodology"
+   ],
+   "citedPaper": {
+    "paperId": null,
+    "externalIds": null,
+    "title": "Image semantics documentation",
+    "venue": "Imantics",
+    "year": 2019,
+    "referenceCount": null,
+    "citationCount": null,
+    "openAccessPdf": null,
+    "fieldsOfStudy": null,
+    "publicationTypes": null,
+    "authors": [],
+    "abstract": null
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "Unfortunately, most efforts for remote sensing-based building damage assessment today still rely on manual visual interpretation and volunteers, which can result in very low accuracy Loos et al. [2018].",
+     "intents": [
+      "background"
+     ]
+    }
+   ],
+   "intents": [
+    "background"
+   ],
+   "citedPaper": {
+    "paperId": null,
+    "externalIds": null,
+    "title": "The Development and Uses of Crowdsourced Building Damage Information based on Remote-Sensing",
+    "venue": "Technical Report",
+    "year": 2018,
+    "referenceCount": null,
+    "citationCount": null,
+    "openAccessPdf": null,
+    "fieldsOfStudy": null,
+    "publicationTypes": null,
+    "authors": [],
+    "abstract": null
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "One such application was for CrowdAI\u2019s mapping challenge 2018 Mohanty [2018], aiming to segment buildings for humanitarian assistance.",
+     "intents": [
+      "background"
+     ]
+    }
+   ],
+   "intents": [
+    "background"
+   ],
+   "citedPaper": {
+    "paperId": null,
+    "externalIds": null,
+    "title": "Crowdai mapping challenge 2018 : Baseline with mask rcnn",
+    "venue": ":",
+    "year": 2018,
+    "referenceCount": null,
+    "citationCount": null,
+    "openAccessPdf": null,
+    "fieldsOfStudy": null,
+    "publicationTypes": null,
+    "authors": [],
+    "abstract": null
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "\u2026advancements in the remote sensing field have created new opportunities to address the limitations of field-based assessments and have been recognized to be useful for rapid post-disaster response Rathje and Adams [2008], Dong and Shan [2013], Taubenb\u00f6ck et al. [2014], Ghaffarian et al. [2018].",
+     "intents": [
+      "background"
+     ]
+    }
+   ],
+   "intents": [
+    "background"
+   ],
+   "citedPaper": {
+    "paperId": "855be97a499779094089f5af37647b6caed9adca",
+    "externalIds": {
+     "MAG": "2234166518",
+     "DOI": "10.1016/B978-0-12-394848-9.00002-X",
+     "CorpusId": 111084366
+    },
+    "title": "The Capabilities of Earth Observation to Contribute along the Risk Cycle",
+    "venue": "",
+    "year": 2014,
+    "referenceCount": 86,
+    "citationCount": 5,
+    "openAccessPdf": {
+     "url": "",
+     "status": "CLOSED",
+     "license": null,
+     "disclaimer": "Notice: The following paper fields have been elided by the publisher: {'abstract'}. Paper or abstract available at https://api.unpaywall.org/v2/10.1016/B978-0-12-394848-9.00002-X?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1016/B978-0-12-394848-9.00002-X, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Engineering"
+    ],
+    "publicationTypes": [
+     "Review"
+    ],
+    "authors": [
+     {
+      "authorId": "30940923",
+      "name": "H. Taubenb\u00f6ck"
+     },
+     {
+      "authorId": "30556062",
+      "name": "C. Gei\u00df"
+     },
+     {
+      "authorId": "2623486",
+      "name": "M. Wieland"
+     },
+     {
+      "authorId": "97846401",
+      "name": "M. Pittore"
+     },
+     {
+      "authorId": "49653954",
+      "name": "Keiko Saito"
+     },
+     {
+      "authorId": "144710158",
+      "name": "E. So"
+     },
+     {
+      "authorId": "1696659",
+      "name": "M. Eineder"
+     }
+    ],
+    "abstract": null
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "Though it is still perhaps the most reliable method of assessment, this method is often time-consuming to apply across large geographic regions, subjective and prone to inconsistencies in data quality Brown et al. [2015].",
+     "intents": [
+      "methodology"
+     ]
+    }
+   ],
+   "intents": [
+    "methodology"
+   ],
+   "citedPaper": {
+    "paperId": "b43229bd5a5e9fb85d562ee98c5e4768cef75c05",
+    "externalIds": {
+     "MAG": "2967928053",
+     "CorpusId": 53587378
+    },
+    "title": "Monitoring and Evaluating Post-Disaster Recovery Using High-Resolution Satellite Imagery \u2013 Towards Standardised Indicators for Post-Disaster Recovery",
+    "venue": "",
+    "year": 2010,
+    "referenceCount": 41,
+    "citationCount": 22,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null
+    },
+    "fieldsOfStudy": [
+     "Environmental Science"
+    ],
+    "publicationTypes": null,
+    "authors": [
+     {
+      "authorId": "2115445713",
+      "name": "Daniel M. Brown"
+     },
+     {
+      "authorId": "34653946",
+      "name": "S. Platt"
+     },
+     {
+      "authorId": "16197729",
+      "name": "J. Bevington"
+     },
+     {
+      "authorId": "49653954",
+      "name": "Keiko Saito"
+     },
+     {
+      "authorId": "32778272",
+      "name": "B. Adams"
+     },
+     {
+      "authorId": "91890449",
+      "name": "T. Chenvidyakarn"
+     },
+     {
+      "authorId": "40087492",
+      "name": "R. Spence"
+     },
+     {
+      "authorId": "1394347377",
+      "name": "Ratana"
+     },
+     {
+      "authorId": "1394674338",
+      "name": "Chuenpagdee"
+     },
+     {
+      "authorId": "2108344661",
+      "name": "A. Khan"
+     }
+    ],
+    "abstract": null
+   }
+  },
+  {
+   "isInfluential": false,
+   "contextsWithIntent": [
+    {
+     "context": "Verstappen Verstappen [1995] proposed one of the original frameworks for evaluating the use of remote sensing data in natural hazard risk reduction, and called for the use of remote sensing tools in combating both \u201cinstantaneous\u201d disasters like cyclones, drought, floods, tsunamis, earthquakes, and\u2026",
+     "intents": [
+      "background"
+     ]
+    }
+   ],
+   "intents": [
+    "background"
+   ],
+   "citedPaper": {
+    "paperId": "9bc4edbfb717504a04e97774371538ad97a8c1c6",
+    "externalIds": {
+     "MAG": "2022197807",
+     "DOI": "10.1016/0273-1177(95)00070-U",
+     "CorpusId": 122328421
+    },
+    "title": "Aerospace technology and natural disaster reduction",
+    "venue": "",
+    "year": 1995,
+    "referenceCount": 2,
+    "citationCount": 48,
+    "openAccessPdf": {
+     "url": "",
+     "status": "CLOSED",
+     "license": null,
+     "disclaimer": "Notice: The following paper fields have been elided by the publisher: {'abstract'}. Paper or abstract available at https://api.unpaywall.org/v2/10.1016/0273-1177(95)00070-U?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1016/0273-1177(95)00070-U, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "Review"
+    ],
+    "authors": [
+     {
+      "authorId": "92876960",
+      "name": "H. Verstappen"
+     }
+    ],
+    "abstract": null
+   }
+  }
+ ]
+}

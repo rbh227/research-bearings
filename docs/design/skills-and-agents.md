@@ -23,6 +23,7 @@ Human gate: the question. Nothing downstream runs without `QUESTION.md`.
 
 | Skill | Agents | Output | Justification |
 |---|---|---|---|
+| `/scout` | `paper-scout` ×1 | `landscape/<slug>.md` | Ré (snowball, asymptote 25–35, group by thesis), Wohlin (snowballing as sampling). **Shipped in chunk 2.** The unit of work `/landscape` fans out seven times, promoted to a user-facing skill so it could be judged before anything depended on it. |
 | `/surveys` | `survey-differ` | `landscape/surveys.md` | Petersen (mapping studies), vocabulary harvest |
 | `/landscape` | `paper-scout` ×7, `merger` | `landscape/matrix.md`, `timeslice.md` | Ré (bits, snowball, asymptote 25–35, group by thesis), Wohlin (snowballing), Webster/Watson (concept matrix), Petersen (empty cells), Musgrave (reproduced/self-reported/contested), absence claims. Goal: parallel gathering. |
 | `/datasets` | `dataset-scout` | `landscape/datasets.md` | Kapoor (leakage in standard splits) |
@@ -31,6 +32,8 @@ Human gate: the question. Nothing downstream runs without `QUESTION.md`.
 | `/watch` | `paper-scout` | matrix updates | **deferred to milestone 5.** No sheet source and no goal it uniquely serves. |
 
 `paper-scout` is the agent to get right first: one question in, one section out, snowballing from seeds with the asymptote rule, absence claims naming what was checked. Tools: retrieval MCPs plus Read. No Bash.
+
+Built in chunk 2 (`docs/design/chunk-02-scout.md`), with two narrowings the spec argued for: cards carry no scout-written characterization of a paper, only metadata plus a citation-context sentence and one `Kept because` line; and absence is **mechanical only** — a scout states facts about its own search and never about the field. Interpreted absence becomes legitimate at the `merger`, which can see seven scouts' coverage at once.
 
 `merger` is contract-bound: assembles the matrix from scout sections, marks contradictions and empty cells, cannot add a claim absent from a section. Its contradiction list feeds `/ideas`.
 

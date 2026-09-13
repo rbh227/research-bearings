@@ -1,7 +1,7 @@
 {
   "name": "research-bearings",
   "displayName": "Research Bearings",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Typed skills and contract-bound agents that run the research loop, from framing a question worth answering to a landscape you can read in ten minutes.",
   "author": {
     "name": "rbh227",
@@ -16,5 +16,13 @@
     "academic",
     "science",
     "ideation"
-  ]
+  ],
+  "userConfig": {
+    "semantic_scholar_api_key": {
+      "type": "string",
+      "title": "Semantic Scholar API key",
+      "description": "From semanticscholar.org/product/api. Without it, snowball hops rate-limit heavily and the scout will say so in its output.",
+      "sensitive": true
+    }
+  }
 }

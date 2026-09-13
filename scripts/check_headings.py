@@ -19,11 +19,13 @@ CONTRACTS = {
     "templates/research/CONTEXT.md": ["skills/setup/SKILL.md"],
     "templates/research/QUESTION.md": ["skills/frame/SKILL.md"],
     "templates/research/framing-log.md": ["skills/frame/SKILL.md"],
+    "templates/research/section.md": ["agents/paper-scout.md"],
 }
 
 # agent -> the output headings its contract must define
 AGENT_OUTPUTS = {
     "agents/question-critic.md": ["Findings", "Concessions", "Could not determine"],
+    "agents/paper-scout.md": ["Question", "Status", "Papers", "What was searched"],
 }
 
 

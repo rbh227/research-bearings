@@ -10,3 +10,19 @@ Glossary for the research plugin effort. One meaning per word.
 - **destination**: What a map is finding its way to. For this effort: Milestones 0 and 1 specified sharply enough to hand to `/to-spec`.
 - **research-bearings**: The plugin this effort is building. A Claude Code plugin whose typed skills and contract-bound agents run the research loop; Milestone 1 produces a landscape.
 - **acceptance run**: A trial of the built plugin on a real research question, performed by the user after handoff. Not part of any map; it produces the next map's loose idea.
+
+## Retrieval terms
+
+Added with chunk 2. All of these describe one `/research-bearings:scout` run.
+
+- **section**: One markdown file under `research/landscape/`, answering one question, written by one `paper-scout`. A landscape is assembled from sections; a section is never a landscape.
+- **card**: One paper's entry inside a section's `## Papers`. Metadata plus one quoted citation sentence plus one `Kept because` line. Never a summary.
+- **seed**: A paper found by search, from which hops start. Seeds are found, not hopped to.
+- **hop**: One `get_references` (backward) or `get_citations` (forward) call from one seed. A **round** is a hop in both directions across the current seed set.
+- **touched** / **kept**: Touched is every paper a hop returned and counts against the budget. Kept is the 25–35 that reach `## Papers`. The design once conflated them.
+- **saturation**: A stop reason: a completed round added fewer than three keepers. Not claimable if any hop in that round was truncated.
+- **budget**: A stop reason, and the ceiling that causes it, denominated in papers touched. `budget` always means the section is incomplete.
+- **truncated**: A hop whose result carried a non-null `next` — the API held rows back, so the hop sampled the edge list rather than reading it. Paging is not built.
+- **unresolvable**: A cited work with no Semantic Scholar record, carrying only title, venue and year. Never hopped from, never counted. Mostly grey literature.
+- **anchored** / **unanchored**: Whether the run took scope and vocabulary from `research/QUESTION.md`. Unanchored runs are stamped as such in the section.
+- **degradation stamp**: A line at the top of a section recording that the run was reduced — no API key, truncated hops, a question search cannot answer.

@@ -469,6 +469,10 @@ model: inherit
 
 No `Bash` (ticket 03), no web tools, no `Edit`. Under 80 lines.
 
+> **Amended at build time (§9.9): under 135 lines, and shorter than
+> `agents/question-critic.md`.** 80 was written without measuring against the
+> agent already in the repo. See §9.9.
+
 **Input.** One question. A budget. Anchor material, or a note that there is none. A
 key-presence flag.
 
@@ -503,7 +507,7 @@ key-presence flag.
 - S2 `<paperId>` · arXiv `<id>` · DOI `<doi>`   (omit what is absent)
 - Cited as: "<sentence from a citing paper>" — <citing paper, short> [<intent>]
 - Kept because: <one line>
-- Missing: abstract, venue, DOI   (only when something is)
+- Missing: abstract, venue, doi   (only when something is)
 ```
 
 `Kept because` is the **only** scout-authored prose on a card.
@@ -663,3 +667,343 @@ only way to learn that a later prompt change made the scout worse.
   times. It may read better as a building block than as a front-door verb.
 - **The 250-paper default.** A guess calibrated against a 0.38 s API call and a
   ten-minute tolerance. The first real run replaces it with a measurement.
+
+---
+
+## 9. What the build changed about this spec
+
+Recorded as the chunk was built, 2026-09-13. Each of these was a spec claim that
+did not survive contact.
+
+### 9.1 The fixtures did not carry the edge fields
+
+§5.3 said the three captured responses on `prototype/snowball-by-hand` included
+`contextsWithIntent`, so selftest case 4 could run over them. They do not.
+Ticket 09 §4 found the edge fields in an exploratory call it never saved, and the
+prototype CLI's own `FIELDS` constant never asked for them.
+
+So the build made the live call §5.3 already required — "the exact `fields=`
+spelling for prefixed sub-fields is confirmed against the live API at build time,
+not assumed from this document" — and captured two more fixtures with the edge
+fields present. Five fixtures ship, not three:
+
+| Fixture | What it is | What it covers |
+|---|---|---|
+| `refs_dmg.json` | ticket 09's backward hop, no edge fields | the no-edge-field parse path |
+| `refs_fire.json` | ticket 09's second backward hop | 2 more unresolvable rows |
+| `cites_fire.json` | ticket 09's forward hop, 82 rows | forward envelope, no `citedPaperInfo` |
+| `refs_dmg_edges.json` | same call as `refs_dmg`, edge fields requested | cases 1, 3, 4, 5 |
+| `cites_dmg_edges.json` | forward hop with edge fields | forward edge parse |
+
+**Confirmed spelling:** the edge fields go in the same flat `fields=` list as the
+paper fields, with no prefix, and land at **row level** alongside `citedPaper` /
+`citingPaper` — not nested inside it. `contextsWithIntent` is a list of
+`{context, intents[]}` objects; the row also carries a flat `intents` union and
+`isInfluential`.
+
+### 9.2 The SDK class is `MCPServer`, not `FastMCP`
+
+`mcp` 2.x renamed it. `from mcp.server.fastmcp import FastMCP` raises a
+`ModuleNotFoundError` whose message names the replacement:
+`from mcp.server.mcpserver import MCPServer`. The pin `mcp>=2,<3` resolves to
+2.2.0 today.
+
+The SDK import is **lazy**, inside `serve()`. `docs/agents/toolchain.md` runs the
+selftest as `python3 servers/s2_snowball.py --selftest`, on the system
+interpreter, which has no `mcp` installed. A module-level import would make the
+one-test-file verb depend on `uv`.
+
+### 9.3 A plugin that is its own marketplace registers its servers twice
+
+§4.2 warned that leaving the user-scope entries in place creates two live copies
+under two tool-name spellings. It does — that half was right, and removing them
+fixed it. What it did not foresee is that the plugin's own `.mcp.json`, sitting at
+the repo root, is **also read as a project-scope `.mcp.json`** whenever someone
+works inside this repo, because this repo is both the plugin and the project.
+
+Observed after the change:
+
+```
+plugin:research-bearings:paper-search   ✔ Connected
+plugin:research-bearings:openreview     ✔ Connected
+plugin:research-bearings:s2-snowball    ✔ Connected
+paper-search    ⏸ Pending approval    ← project-scope reading of ./.mcp.json
+openreview      ⏸ Pending approval
+s2-snowball     ⏸ Pending approval    ← and its ${CLAUDE_PLUGIN_ROOT} is undefined here
+```
+
+The three pending entries are harmless as long as nobody approves them: project
+scope does not expand `${CLAUDE_PLUGIN_ROOT}`, `${CLAUDE_PLUGIN_DATA}` or
+`${user_config.*}`, so an approved `s2-snowball` there would fail to start and a
+duplicate `paper-search` would reintroduce exactly the trap §4.2 closed.
+
+**Do not approve them.** They appear only when working inside this repo, and only
+because `source: "./"` makes the plugin root and the project root the same
+directory. Nothing to fix in the manifest; it is a property of developing a
+plugin in the directory it ships from.
+
+### 9.4 `userConfig` does reach the server from a local marketplace
+
+§4.4's unverified item, and the first entry in the build order. Verified:
+
+- `claude plugin validate` accepts the block, `required` absent.
+- `claude plugin install research-bearings@rbh227 --config semantic_scholar_api_key=…`
+  stores the value and the server receives it. `health` reports
+  `key_present: true`, called through
+  `mcp__plugin_research-bearings_s2-snowball__health` in a project outside this repo.
+- `${CLAUDE_PLUGIN_DATA}` expands to
+  `~/.claude/plugins/data/research-bearings-rbh227/`, and `${CLAUDE_PROJECT_DIR}`
+  to the project the session is in — so the two caches land where §4.5 said.
+
+Two operational facts the docs do not state:
+
+- **`--config` is ignored on an already-installed plugin.** `claude plugin install`
+  exits successfully saying "already installed" and changes nothing. Setting the
+  value non-interactively means `uninstall` then `install --config`.
+- **`claude plugin update` is version-gated.** Updating from a local directory
+  marketplace is a no-op while `plugin.json`'s `version` is unchanged, even though
+  the source files differ. Chunk 2 bumps the plugin to **0.2.0**, which is right
+  on its own terms — this is the plugin's first network access — and is also what
+  makes the local install refresh.
+
+And one that validates §4.5's split by accident: **`claude plugin uninstall`
+deletes `${CLAUDE_PLUGIN_DATA}`**, taking the whole HTTP cache with it. That is
+correct — the cache is disposable and a wipe costs time only — and it is exactly
+why the paper records live in `${CLAUDE_PROJECT_DIR}/research/.papers/` instead.
+Reinstalling to pick up an edit would otherwise destroy research data.
+
+The one half still unverified is whether the interactive **prompt** appears at
+enable time for a local-marketplace plugin. The storage and expansion path is
+proven; only the prompt is not, and it needs a human in a terminal.
+
+### 9.5 The eval harness can grant MCP tools
+
+§6.3's unknown, resolved from `claude plugin eval --help` before anything was
+built. `--allow-tools` takes `mcp__*` patterns, and `--mocks` decides whether real
+servers start at all:
+
+- `--mocks record` (the default) **does not start** a plugin server that has no
+  mock. Every scout case would fail its precondition under it.
+- `--mocks off` starts every real server, as you, outside the OS sandbox, with its
+  tools gated by `--allow-tools`.
+
+So the suite has automated cover, and `docs/agents/toolchain.md`'s full-suite verb
+gains `--mocks off` and the two `mcp__plugin_research-bearings_*__*` grants.
+
+### 9.6 One case still cannot be automated here
+
+`scout-stamps-no-key` needs `health` to report `key_present: false`. It cannot be
+forced on this machine: `.mcp.json`'s `env` block sets
+`SEMANTIC_SCHOLAR_API_KEY` from `${user_config.semantic_scholar_api_key}`, and
+that **overrides anything inherited from the parent process** — measured, a
+session run with `SEMANTIC_SCHOLAR_API_KEY=""` still reports `key_present: true`.
+A case-level `env:` override cannot reach past it.
+
+It ships without the `ci` tag, with the reason in its own prompt, and runs by hand
+on an unkeyed machine. This is the same shape as chunk 1's
+`setup-checks-before-asking`: 8 of 9 cases automated, the ninth blocked by a
+machine constraint rather than by the contract.
+
+### 9.7 The two hops point their citation sentences in opposite directions
+
+Not in the spec, found while implementing §5.5's card format. §4.8 describes
+`contextsWithIntent` as "the sentences in which a citing paper describes the
+cited work" — true, but that framing hides an asymmetry that puts the wrong
+sentence on a card.
+
+| Hop | Rows are | The sentences are |
+|---|---|---|
+| `get_references` on seed S | papers S cites | **S's prose about the row's paper** |
+| `get_citations` on seed S | papers citing S | **the row's paper's prose about S** |
+
+So on a backward hop the context describes the card's own paper, and
+`Cited as: "…" — <seed>` is right. On a forward hop the context describes the
+**seed**, and writing it on the same line attributes a description of the seed to
+a different paper entirely — a fabricated characterization produced by correct
+tool use and a careless read.
+
+Fixed structurally rather than by instruction, the same way unresolvable rows
+are: each edge carries `describes` (`this_paper` | `origin_paper`) and
+`writtenBy`, so the agent reads a field instead of inferring from the tool name.
+`agents/paper-scout.md` gives both card lines and a refusal row; selftest case 4
+asserts the labelling in both directions across both edge fixtures.
+
+### 9.8 A local-directory install copies gitignored files
+
+Ticket 07 decided `academic.md` is not shipped, and `.gitignore` excludes it
+along with `research_plugin_build_plan.md`. That holds for a git-based install.
+
+It does **not** hold for this repo's local marketplace: `claude plugin install`
+from a `Directory` source snapshot-copies the working tree, `.gitignore` and all,
+so both files sit in
+`~/.claude/plugins/cache/rbh227/research-bearings/<version>/`.
+
+Harmless on this machine — they are the user's own files — and it disappears the
+moment the marketplace points at the GitHub remote instead of the directory. Left
+alone rather than worked around, and recorded so the next reader does not assume
+the cache copy is what a real install contains. The README no longer links
+`academic.md` as though it ships.
+
+### 9.9 Deviations from §1–§8, disclosed
+
+Three reviews ran against the build: an adversarial Codex pass and a two-axis
+Standards/Spec pass. Everything below is a place the build does not match the
+spec as written, with the reason. Anything the reviews found that was simply
+wrong was fixed rather than disclosed; those are §9.10.
+
+| Deviation | Spec said | Why |
+|---|---|---|
+| `agents/paper-scout.md` is 115 lines | §5.5 "Under 80 lines" | 80 was written without measuring. `agents/question-critic.md`, the only agent in the repo, is 132. Getting under 80 means dropping one of the three structural defences — the `describes` direction rule, the truncation override, or the unresolvable-row rule. §5.5 is amended to "under 135, and shorter than `question-critic.md`". |
+| Five fixtures, not three | §5.3 | §9.1. The three captured ones carry no edge fields. |
+| Twelve selftest cases, not nine | §5.3 | Cases 10–12 cover the three defects the adversarial review found (§9.10). Each was checked against the pre-fix code and fails there. |
+| `get_papers_batch` collapses aliases within one call | §2 defers "cross-scout dedupe" to chunk 3 | Different seam. Ticket 09 §5 measured that `POST /paper/batch` returns an arXiv id and its own S2 id as two rows; not collapsing them makes one call report one paper twice and charge the budget twice. Cross-scout dedupe is still chunk 3's. |
+| `health` returns `records_dir` and `records_enabled` beyond §5.3's four fields | §5.3 "key presence, cache dir, project dir, version" | They are the project dir resolved to the path actually written to. The other extras the first draft had — `cache_writable`, `paper_fields`, `edge_fields`, `network_checked` — were cut as unasked-for, and `cache_writable` was misleading besides: it reported *configured*, not writable. |
+| `/setup` also adds `research/.papers/` to a project `.gitignore` | §5.7 asked for a probe and a heading | Implements §4.5's "`research/.papers/` is gitignored by default", which otherwise names no owner. `/setup` is the only skill that creates `research/`. |
+| `docs/agents/toolchain.md` static-checks verb grew to three `validate` calls | not in §1's file list | Found while building: `claude plugin validate ./ --strict` in this repo validates the *marketplace* manifest and stops, so skill and agent frontmatter was never being checked. The verb was claiming cover it did not have. |
+| Plugin version 0.2.0 | not specified | Required for a local-marketplace install to refresh at all (§9.4), and right on its own terms. |
+
+Not done, and not deviations — outstanding work, tracked in §10: the §6.3 eval
+suite has not been run, and §6.4's gold set needs the user.
+
+One review finding is declined. §5.3 notes that the backward envelope carries a
+top-level `citingPaperInfo`; `split_rows` reads only `data` and drops it. That
+sentence is describing *why the two hops parse differently*, not requesting a
+field. Measured, `citingPaperInfo` comes back almost entirely null — on
+`refs_fire.json` every field but `title` is `None` — and the caller already holds
+the seed it asked about. Returning it would add a field nothing can use.
+
+### 9.10 Defects the reviews found, and what changed
+
+All three were real. Each fix has a selftest case that fails against the
+pre-fix code — verified by mutating the fixed code back and watching the case go
+red, not by assertion.
+
+**Body-read failures escaped the retry loop.** `http_fetch` wrapped `urlopen` but
+`resp.read()` sat inside the `with`, so a read timeout, a connection reset or a
+truncated body raised straight past `request()`, past all five attempts, and out
+of the tool — breaking the "errors never raise into the agent" contract in §5.3.
+Case 9 only ever covered malformed *bytes*, never a raising read. Now every read
+is inside the guard, including the error-body read, and transport failures come
+back as `status: 0`, which is retryable. Case 10 injects `TimeoutError` and
+`ConnectionResetError` into the body read; against the old code it does not fail,
+it escapes the test harness entirely.
+
+**Concurrent saves discarded citation provenance.** `save_record` was an
+unlocked read-merge-write sharing one `<path>.tmp` filename. Two hops reaching
+the same paper from different seeds both read the same record, each merged only
+its own edge, and the second write erased the first seed's provenance — silently,
+with both calls returning `True`. Harmless for one scout; chunk 3 fans out seven
+over an overlapping citation graph, which is exactly the collision. Now the whole
+read-merge-write runs under an `flock` on a per-paper lock file, and every atomic
+write uses `tempfile.mkstemp`. Case 12 races six writers at one paper; with the
+lock removed it keeps 1 of 6 edges.
+
+**Truncated hops could be reported as saturation.** The server capped hops at 100
+rows and returned the API's `next` cursor, but nothing read it, and the scout's
+stop rule treats a round adding fewer than three keepers as "probably complete".
+A truncated hop therefore looked identical to an exhausted one.
+
+This was not hypothetical. §2 parked paging as "untested and will not bite until
+a seed with 100+ references" — wrong, and the first live end-to-end run proved it
+within ten minutes: the scout set `limit: 10` to stay inside its own budget, and
+**all five hop responses came back with a non-null `next`**. Every hop in that run
+was truncated. The truncation came from the scout's own budget management, not
+from a rare oversized reference list, so it will happen on most runs.
+
+Now `split_rows` returns `truncated` and `next`, and `agents/paper-scout.md`
+forbids `saturation` for any round containing a truncated hop and requires the
+truncated seeds be named in `## Status`. `skills/scout/SKILL.md` surfaces it to
+the user and reports the contradiction if a section claims both.
+
+Two smaller correctness fixes came with them: `request()` slept its full backoff
+*after* the final attempt, adding up to 8 s to every exhausted retry; and
+`split_rows` silently dropped any row it did not recognize, so
+`resolved + unresolvable` understated rows touched — the number the budget is
+spent against. Odd rows are now counted in `malformed_count` and
+`rows_returned` reconciles.
+
+---
+
+## 10. Chunk 2 results, 2026-09-13
+
+Two of the four done-check tiers pass. One has not been run. One needs the user.
+The map pointed at this section before it existed; that was wrong and is fixed.
+
+### 10.1 Structural — pass
+
+| Check | Result |
+| --- | --- |
+| `claude plugin validate ./ --strict` | pass |
+| `claude plugin validate skills/ --strict`, `agents/ --strict` | pass — added to the verb after finding `validate ./` checks only the marketplace manifest |
+| `python3 scripts/check_headings.py` | pass — 10 + 11 + 3 + 4 template headings named by their consumer; 3 + 4 agent output headings defined |
+| `python3 hooks/guard.py --selftest` | pass — 13/13, unchanged. `research-bearings:paper-scout` is covered by the existing prefix rule (§5.6) |
+| `python3 servers/s2_snowball.py --selftest` | pass — **12/12**, offline, 5 s |
+| `userConfig` reaches the server | pass — `key_present: true` via `mcp__plugin_research-bearings_s2-snowball__health`, from a project outside this repo |
+| Three servers connect | pass — all as `plugin:research-bearings:*` |
+| Tool name matches the agent allowlist | pass — `mcp__plugin_research-bearings_s2-snowball__health` exactly |
+| No `paper-search` / `openreview` in `~/.claude.json` | pass — removed |
+
+Caveat on the last two: three `Pending approval` entries appear when working
+*inside this repo*, because the plugin's `.mcp.json` is also read as a project
+config here. Not a defect, not approvable — §9.3.
+
+### 10.2 Live plumbing — pass
+
+Verified against the live Graph API rather than fixtures, on
+`ARXIV:2405.04800`:
+
+- Backward hop: 22 resolved, 3 unresolvable, 22 records written to
+  `research/.papers/`.
+- Edge-field spelling confirmed and captured as two new fixtures (§9.1).
+- `${CLAUDE_PLUGIN_DATA}` and `${CLAUDE_PROJECT_DIR}` both expand as designed;
+  the two caches land where §4.5 said.
+
+The gold-set half of §6.2 — resolving the user's papers through
+`get_papers_batch` — has not run, because the gold set does not exist yet (§10.4).
+
+### 10.3 Eval suite — written, **not run**
+
+Nine cases exist under `evals/scout-*/`. **None has ever been graded.** The
+suite's result is unknown, and no claim about the scout's behaviour rests on it.
+
+What was resolved before writing them: `claude plugin eval` *can* grant MCP tools
+(§9.5), which was §6.3's blocking unknown. `scout-stamps-no-key` ships outside the
+`ci` tag because the no-key path cannot be forced on a keyed machine (§9.6), so
+the automatable set is eight.
+
+The two-axis review also caught four graders that could not see what they claimed
+to judge — the `focus: last_message` trap from chunk 1 §9, re-made. A grader
+asking "was a file written" or "does the transcript show this tool call" reads
+only the closing message and fails a correct agent. Fixed by making the evidence
+land in the closing message (prompts now ask for the section's full contents), by
+pinning a slug so `file_exists` can do the job deterministically, and by dropping
+the one sub-check that was structurally unjudgeable. Every `llm` grader now
+states `focus` explicitly rather than relying on the default.
+
+**Running the suite is the next action on this chunk.**
+
+### 10.4 Gold set and blind read — needs the user
+
+`evals/gold/damage-assessment.md` does not exist. §6.4 requires the user to write
+it from memory, before the first judged run, and it cannot be generated — a list
+produced by searching is not a test of whether search finds things.
+
+### 10.5 One live end-to-end run
+
+Not a done-check tier, but the strongest single piece of evidence so far.
+`/scout` → `paper-scout` → three MCP servers, in a scratch project, on the
+acceptance-run topic. It produced
+`research/landscape/building-damage-assessment-satellite-imagery.md`: four fixed
+headings, 21 cards in 8 thesis groups, 35 paper records written by the server.
+
+Held: every card carried a tool-sourced identifier; `Cited as` lines quoted
+`contextsWithIntent` with attribution and intent tag; one card read
+`Missing: cited-as context` rather than inventing one; both zero-result
+`search_arxiv` queries appeared in `## What was searched`; and the `budget` stop
+was reported as **INCOMPLETE** in the file and in the session, naming the 6 of 9
+seeds never hopped.
+
+Did not hold: every hop in the run was truncated and nothing said so. That is
+§9.10's third defect, found here rather than in review, and now fixed in both the
+server and the agent contract. **The run predates that fix and has not been
+repeated.**

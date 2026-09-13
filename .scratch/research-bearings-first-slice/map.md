@@ -11,7 +11,7 @@ A spec for the first buildable slice of research-bearings, ready for `/to-spec`:
 - **Domain**: a Claude Code plugin that runs the research loop with typed skills and contract-bound agents. Glossary in `CONTEXT.md`: **map** is this artifact only; **landscape** is the plugin's literature deliverable; an **acceptance run** is the user's post-handoff trial.
 - **Inputs**: `academic.md` is "the big sheet", the source rules every skill derives from. `research_plugin_build_plan.md` is one candidate proposal for the loop and its milestones, not the plan.
 - **Standing decisions** (from the build plan, reaffirmed 2026-09-12): Claude Code plugin; this repo is its own marketplace (`marketplace.json` with `source: "./"`, like the Matt-Raphs-Skills fork), retiring `raph-cc`; v1 is eventually the full loop including experiment agents; Claude-only with the judge's `model:` field left open for a second provider; Python for the few scripts; local paper cache is the reference manager; one spec covers schemas and their first consumers together.
-- **Retrieval plumbing**: two MCP servers, `paper-search-mcp` (arXiv, Semantic Scholar, OpenAlex, Crossref, and more) and `openreview-mcp`. Both are 1.x-SDK servers and need `uvx --with 'mcp<2'`. A third server, `s2-snowball`, is the plugin's own single-file server for the references/citations/batch hop (ticket 10). Both are registered at user scope on this machine (ticket 04). Neither server exposes references or citations (ticket 02), so the snowball hop needs its own mechanism (ticket 10). A Semantic Scholar API key is effectively required; it and a CORE key are in `~/.config/paper-search-mcp/.env`.
+- **Retrieval plumbing**: three MCP servers, all **bundled by the plugin** as of chunk 2 and registered as `plugin:research-bearings:*`. `paper-search-mcp` (arXiv, Semantic Scholar, OpenAlex, Crossref, and more) and `openreview-mcp` are 1.x-SDK servers run as `uvx --with 'mcp<2'`; they read their own credentials from `~/.config/paper-search-mcp/.env`. `s2-snowball` is the plugin's own single-file server for the references/citations/batch hop, `mcp>=2,<3` under `uv run --script`, because neither of the others exposes references or citations (ticket 02). The user-scope entries for the first two were **removed** in chunk 2 — two live copies under two tool-name spellings is a trap that surfaces months later. The S2 key now arrives through the plugin's `userConfig`, stored in the Keychain, not from the `.env`.
 - **Acceptance-run topic** (the user's real question, used for smoke runs, never a deliverable): post-disaster building damage assessment from aerial and satellite imagery, plus computer vision and AI in wildfires generally, including fire-spread prediction.
 - **Skills to consult per session**: `grilling` and `domain-modeling` for every grilling ticket; `research` for research tickets; `prototype` for ticket 09. Plugin authoring follows `writing-for-agents`.
 - **Repo**: https://github.com/rbh227/research-bearings. Tracker is local markdown under `.scratch/`.
@@ -37,16 +37,30 @@ results). The plugin installs as `research-bearings@rbh227`; `/setup` and `/fram
 work; 8 of 9 eval cases score 1.00; the ninth needs a `Bash` grant this machine cannot
 give. The live smoke run is the one outstanding item and needs the user.
 
-Chunk 2 is **specified, not built** (`docs/design/chunk-02-scout.md`). It was re-cut
-during specification: the map previously called chunk 2 "the landscape chain", but
-introducing bundled MCP servers, a server we wrote, seven-way fan-out, a merger and a
-presentation layer at once means a mediocre result diagnoses nothing. So chunk 2 is
-now **retrieval plumbing plus one skill, `/scout`** — the unit of work `/landscape`
-will fan out seven times, promoted to user-facing so it can be judged before anything
-depends on it. `/scout` is new; it is not in `docs/design/skills-and-agents.md` and
-gets added there when the chunk lands. Two unknowns are probed first: whether
-`userConfig` prompts from a local marketplace, and whether `claude plugin eval` can
-grant MCP tools.
+Chunk 2 is **built, not yet verified** (`docs/design/chunk-02-scout.md`: §9 for
+what the build changed and what three reviews found, §10 for results). The plugin
+is 0.2.0 and bundles all three MCP servers; the user-scope `paper-search` and
+`openreview` entries are gone. `servers/s2_snowball.py` is the citation walker,
+12/12 on its offline selftest and verified live. `/scout` and `paper-scout` ship.
+
+Two of four done-check tiers pass: structural, and the live plumbing check.
+**The nine-case eval suite is written but has never been run**, so nothing about
+the scout's behaviour rests on it yet. The §6.4 gold set needs the user, and
+cannot be generated — a list produced by searching is not a test of whether
+search finds things. One live end-to-end run went well but predates the
+truncation fix and has not been repeated.
+
+Chunk 2 was re-cut during specification: the map previously called it "the
+landscape chain", but introducing bundled MCP servers, a server we wrote,
+seven-way fan-out, a merger and a presentation layer at once means a mediocre
+result diagnoses nothing. So chunk 2 became **retrieval plumbing plus one skill,
+`/scout`** — the unit of work `/landscape` will fan out seven times, promoted to
+user-facing so it can be judged before anything depends on it. It is now in
+`docs/design/skills-and-agents.md` under Stage 2.
+
+Both unknowns the spec flagged are resolved: `userConfig` does reach the server
+from a local marketplace (spec §9.4), and `claude plugin eval` can grant MCP
+tools with `--allow-tools mcp__*` plus `--mocks off` (§9.5).
 
 What remains is chunk 3 and beyond:
 

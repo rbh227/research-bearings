@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "paper-search": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--with", "mcp<2", "paper-search-mcp"]
+    },
+    "openreview": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--with", "mcp<2", "openreview-mcp"]
+    },
+    "s2-snowball": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "--script", "${CLAUDE_PLUGIN_ROOT}/servers/s2_snowball.py"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": "${user_config.semantic_scholar_api_key}",
+        "S2_CACHE_DIR": "${CLAUDE_PLUGIN_DATA}/s2-cache",
+        "RESEARCH_PROJECT_DIR": "${CLAUDE_PROJECT_DIR}"
+      }
+    }
+  }
+}
