@@ -32,18 +32,34 @@ A spec for the first buildable slice of research-bearings, ready for `/to-spec`:
 
 ## Not yet specified
 
-Chunk 1 is **specified and built** (`docs/design/chunk-01-question-stage.md`, §10 for results). The plugin installs as `research-bearings@rbh227`; `/setup` and `/frame` work; 8 of 9 eval cases score 1.00; the ninth needs a `Bash` grant this machine cannot give. The live smoke run is the one outstanding item and needs the user.
+Chunk 1 is **specified and built** (`docs/design/chunk-01-question-stage.md`, §10 for
+results). The plugin installs as `research-bearings@rbh227`; `/setup` and `/frame`
+work; 8 of 9 eval cases score 1.00; the ninth needs a `Bash` grant this machine cannot
+give. The live smoke run is the one outstanding item and needs the user.
 
-What remains is chunk 2 and beyond:
+Chunk 2 is **specified, not built** (`docs/design/chunk-02-scout.md`). It was re-cut
+during specification: the map previously called chunk 2 "the landscape chain", but
+introducing bundled MCP servers, a server we wrote, seven-way fan-out, a merger and a
+presentation layer at once means a mediocre result diagnoses nothing. So chunk 2 is
+now **retrieval plumbing plus one skill, `/scout`** — the unit of work `/landscape`
+will fan out seven times, promoted to user-facing so it can be judged before anything
+depends on it. `/scout` is new; it is not in `docs/design/skills-and-agents.md` and
+gets added there when the chunk lands. Two unknowns are probed first: whether
+`userConfig` prompts from a local marketplace, and whether `claude plugin eval` can
+grant MCP tools.
 
-- Contracts for the landscape chain: `/surveys`, `/landscape`, `/brief` and their six agents.
-- The paper-card, matrix-cell and dataset-row schemas, written with their first consumer.
-- `.mcp.json` and the `servers/s2_snowball.py` build. Unblocked: ticket 09 has run, and it rewrites the
-  server's retry policy, default `fields`, and error contract.
-- Where CORE fits: full-text retrieval for an already-identified paper, feeding the chunk-3 reader agents. Not a discovery source.
+What remains is chunk 3 and beyond:
+
+- The landscape chain proper: `/surveys`, `/landscape`, `/brief` and their agents.
+- The merger, and with it cross-scout dedupe (ticket 09 §5) and interpreted absence
+  claims — both deliberately withheld from a single scout.
+- The matrix-cell and dataset-row schemas, written with their first consumer. The
+  paper-card contract lands in chunk 2, in its minimal scout form.
+- Where CORE fits: full-text retrieval for an already-identified paper, feeding the
+  reader agents. Not a discovery source.
 - Whether `/frame`'s re-entry after `/surveys` is automatic or user-triggered.
-
-Closed by chunk 1: the `model:` policy for judges (Claude-only, `model: inherit`, fresh context plus the concession ladder — no second provider, the user runs `/codex-review` by hand); the shared anti-rationalization file (rejected, rules and refusal tables are inlined per skill); the session-announce hook (not built, no content to announce yet).
+- Whether abandoned directions need their own agent, rather than a general scout
+  stamping the question as not retrieval-shaped.
 
 ## Out of scope
 
