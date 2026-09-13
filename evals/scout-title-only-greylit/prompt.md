@@ -15,7 +15,7 @@ Its brief, verbatim:
 > Budget: 25 papers touched. Run slug: `deepdamagenet-neighbourhood`. Unanchored — there is no
 > `research/QUESTION.md`. key_present: true.
 > The crawl has already been run. Its output is a saved crawl: the four JSON
-> files under `evals/fixtures/crawl-dmg/` inside the research-bearings plugin (your
+> files under `scripts/retrieval/fixtures/crawl-dmg/` inside the research-bearings plugin (your
 > `${CLAUDE_PLUGIN_ROOT}`), read in filename order. Treat them exactly as the
 > script's answers. Do not run any command. Write `research/landscape/deepdamagenet-neighbourhood.md`.
 

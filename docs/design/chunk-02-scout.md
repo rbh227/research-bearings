@@ -1103,7 +1103,7 @@ them and was slow, flaky and blocked on infrastructure:
 |---|---|---|---|
 | script | the crawl: parsing, retry, records, ledger, key | `snowball.py --selftest`, 16 cases | nothing |
 | guard | the fences | `guard.py --selftest`, 22 cases | nothing |
-| agent | what the scout **writes** | eval cases that point `paper-scout` at `evals/fixtures/crawl-dmg/` — a saved crawl of four script responses, ending in a budget refusal — and judge the section | no Bash, no network, no key |
+| agent | what the scout **writes** | eval cases that point `paper-scout` at `scripts/retrieval/fixtures/crawl-dmg/` — a saved crawl of four script responses, ending in a budget refusal — and judge the section | no Bash, no network, no key |
 | skill | the precondition refusal | `/scout` with no `Bash` grant: the script cannot run, so it must stop, name it, write nothing | nothing |
 | recall | finding things | the gold set and the blind read, §6.4 | the user |
 
@@ -1186,3 +1186,14 @@ selftest case before the swap:
 
 Nineteen offline cases. The review's last line, "full behavioral evals were not
 run", was true of the re-cut suite at the time it was written.
+
+### 11.9 The re-cut suite's first run
+
+Three of nine at 1.00 and the rest at 0.60 or below — for one reason: the
+harness denies reads under the plugin's `evals/` tree, so no case could reach
+the saved crawl. Every agent then refused to write rather than fill cards from
+recall, which made the three passes vacuous and the rest failures of access,
+not honesty. The saved crawl moved to `scripts/retrieval/fixtures/crawl-dmg/`,
+which the agent reads without trouble. One regex grader used an inline flag the
+harness's JavaScript engine rejects; fixed. Recorded in
+`docs/agents/toolchain.md` beside the other harness facts.

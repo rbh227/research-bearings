@@ -1,5 +1,5 @@
 ---
 type: regex
-pattern: "(?i)## Status[\\s\\S]*budget"
+pattern: "## Status[\\s\\S]*[Bb]udget"
 weight: 1
 ---

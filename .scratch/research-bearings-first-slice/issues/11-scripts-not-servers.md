@@ -37,7 +37,7 @@ one script".
 - [ ] `/setup` probes the script, not a server; template wording follows.
 - [ ] Deleted: `servers/`, `.mcp.json`, the `userConfig` block, both third-party
       servers, the two-arm eval runner, the live-crawl eval cases.
-- [ ] Eval suite re-cut: agent cases replay `evals/fixtures/crawl-dmg/` and need
+- [ ] Eval suite re-cut: agent cases replay `scripts/retrieval/fixtures/crawl-dmg/` and need
       no network, key or Bash grant; one skill case withholds Bash so the
       precondition must refuse; one invocation runs everything.
 - [ ] No unused code or fixtures left; every shipped `.md` describes the script
