@@ -9,7 +9,7 @@ This repo is a Claude Code plugin. There is no compiler and no package manager, 
 | build | `none` |
 | static checks | `claude plugin validate ./ --strict && claude plugin validate skills/ --strict && claude plugin validate agents/ --strict && python3 scripts/check_headings.py` |
 | one test file | `python3 hooks/guard.py --selftest && python3 servers/s2_snowball.py --selftest` |
-| full suite | `claude plugin eval ./ --tag ci --trust-plugin --judge-model sonnet --mocks off --allow-tools Write Edit Agent WebSearch 'mcp__plugin_research-bearings_s2-snowball__*' 'mcp__plugin_research-bearings_paper-search__*' --threshold 0.8` |
+| full suite | `scripts/run_evals.sh` — two invocations, because one grant cannot express a denial. See the note below. |
 
 Consumers: `/implement`, `/tdd`, `/codex-review`, `/run-tickets`. Run **static checks** before every commit, **one test file** per red-green slice, and **full suite** once before a review gate.
 

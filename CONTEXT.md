@@ -21,7 +21,7 @@ Added with chunk 2. All of these describe one `/research-bearings:scout` run.
 - **hop**: One `get_references` (backward) or `get_citations` (forward) call from one seed. A **round** is a hop in both directions across the current seed set.
 - **touched** / **kept**: Touched is every paper a hop returned and counts against the budget. Kept is the 25–35 that reach `## Papers`. The design once conflated them.
 - **saturation**: A stop reason: a completed round added fewer than three keepers. Not claimable if any hop in that round was truncated.
-- **budget**: A stop reason, and the ceiling that causes it, denominated in papers touched. `budget` always means the section is incomplete.
+- **budget**: A stop reason, and the ceiling that causes it, denominated in papers touched. `budget` always means the section is incomplete. **Enforced by the `s2-snowball` server**, which counts distinct resolved papers and refuses hops past the ceiling; it was a line in the agent's prompt until 2026-09-13, and under that arrangement it did not hold.
 - **truncated**: A hop whose result carried a non-null `next` — the API held rows back, so the hop sampled the edge list rather than reading it. Paging is not built.
 - **unresolvable**: A cited work with no Semantic Scholar record, carrying only title, venue and year. Never hopped from, never counted. Mostly grey literature.
 - **anchored** / **unanchored**: Whether the run took scope and vocabulary from `research/QUESTION.md`. Unanchored runs are stamped as such in the section.

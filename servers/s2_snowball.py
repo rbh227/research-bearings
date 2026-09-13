@@ -78,6 +78,43 @@ HOP_MAX = 100
 
 NESTED = {"references": "citedPaper", "citations": "citingPaper"}
 
+# --------------------------------------------------------------------------
+# the budget
+#
+# "Papers touched" was a sentence in the agent's contract and nothing else, so
+# it did not hold: measured 2026-09-13, three eval runs told to stop at 40
+# touched 114, 130 and 160, then ran past the harness ceiling without ever
+# finishing. An instruction a model can be optimistic about is not a limit.
+#
+# So the server counts. TOUCHED holds the DISTINCT resolved paperIds this
+# process has handed out; once it reaches the caller's ceiling the hop tools
+# refuse before spending a request. Unresolvable rows are not counted, matching
+# the agent contract: they carry title, venue and year only and cannot be
+# hopped from.
+#
+# The counter is per PROCESS, which is per session. A second scout run in one
+# session inherits the first run's count, and that is the honest reading - the
+# session really has touched that many papers.
+TOUCHED: set[str] = set()
+
+
+def note_touched(records: list[dict[str, Any]]) -> None:
+    for rec in records:
+        pid = rec.get("paperId")
+        if pid:
+            TOUCHED.add(pid)
+
+
+def budget_block(budget: int) -> dict[str, Any]:
+    """The accounting every hop and batch response carries."""
+    touched = len(TOUCHED)
+    out: dict[str, Any] = {"touched_total": touched}
+    if budget > 0:
+        out["budget"] = budget
+        out["budget_remaining"] = max(0, budget - touched)
+        out["budget_exhausted"] = touched >= budget
+    return out
+
 
 def err(message: str, attempts: int = 0, status: int | None = None) -> dict[str, Any]:
     """The one error shape. Tools return it; they never raise, because a tool
@@ -469,10 +506,29 @@ def save_all(records: list[dict[str, Any]]) -> int:
 # tools
 
 
-def hop(hop_name: str, paper_id: str, limit: int) -> dict[str, Any]:
+def hop(hop_name: str, paper_id: str, limit: int, budget: int = 0) -> dict[str, Any]:
     paper_id = (paper_id or "").strip()
     if not paper_id:
         return err("paper_id is required")
+    budget = max(0, int(budget or 0))
+    if budget and len(TOUCHED) >= budget:
+        # Refused BEFORE the request, not after. Stopping a crawl that has
+        # already spent the call teaches the agent nothing.
+        return {
+            "stopped": "budget",
+            "message": (
+                f"budget of {budget} papers touched is exhausted "
+                f"({len(TOUCHED)} touched). No hop was made. Write the section "
+                f"now with stop reason `budget`, and say it is INCOMPLETE."
+            ),
+            "seed": paper_id,
+            "hop": hop_name,
+            "papers": [],
+            "unresolvable": [],
+            "resolved_count": 0,
+            "unresolvable_count": 0,
+            **budget_block(budget),
+        }
     limit = max(1, min(int(limit or HOP_MAX), HOP_MAX))
     payload = request(
         hop_name,
@@ -489,13 +545,21 @@ def hop(hop_name: str, paper_id: str, limit: int) -> dict[str, Any]:
     out["hop"] = hop_name
     out["limit"] = limit
     out["records_written"] = save_all(out["papers"])
+    note_touched(out["papers"])
+    out.update(budget_block(budget))
     return out
 
 
-def get_papers_batch(ids: list[str]) -> dict[str, Any]:
+def _batch_budget(records: list[dict[str, Any]], budget: int) -> dict[str, Any]:
+    note_touched(records)
+    return budget_block(budget)
+
+
+def get_papers_batch(ids: list[str], budget: int = 0) -> dict[str, Any]:
     ids = [str(i).strip() for i in (ids or []) if str(i).strip()]
     if not ids:
         return err("ids is required")
+    budget = max(0, int(budget or 0))
     if len(ids) > BATCH_MAX:
         return err(f"at most {BATCH_MAX} ids per call, got {len(ids)}")
     payload = request("batch", "POST", "/paper/batch", {"fields": PAPER_FIELDS}, {"ids": ids})
@@ -527,6 +591,7 @@ def get_papers_batch(ids: list[str]) -> dict[str, Any]:
         "unresolvable_count": len(unresolvable_ids),
         "alias_rows_collapsed": aliases,
         "records_written": save_all(deduped),
+        **_batch_budget(deduped, budget),
     }
 
 
@@ -541,11 +606,21 @@ def health() -> dict[str, Any]:
         "project_dir": os.environ.get("RESEARCH_PROJECT_DIR", "") or None,
         "records_dir": recs or None,
         "records_enabled": bool(recs),
+        "touched_total": len(TOUCHED),
     }
 
 
 # --------------------------------------------------------------------------
 # server
+
+
+BUDGET_DOC = (
+    " Pass `budget` (papers touched) on every call. The server counts distinct "
+    "resolved papers and REFUSES the hop once the ceiling is reached, returning "
+    "a stopped=budget result with no network call. Every response carries "
+    "touched_total and budget_remaining, so those counts are tool-sourced and "
+    "never estimated."
+)
 
 
 def serve() -> None:
@@ -559,26 +634,31 @@ def serve() -> None:
             "Semantic Scholar id or an ARXIV:<id> alias. Rows with no Semantic "
             "Scholar record come back under 'unresolvable' and cannot be hopped "
             "from. A true 'truncated' means the API held rows back: this hop is a "
-            "sample of the reference list, not the reference list."
+            "sample of the reference list, not the reference list." + BUDGET_DOC
         )
     )
-    def get_references(paper_id: str, limit: int = HOP_MAX) -> dict[str, Any]:
-        return hop("references", paper_id, limit)
+    def get_references(
+        paper_id: str, limit: int = HOP_MAX, budget: int = 0
+    ) -> dict[str, Any]:
+        return hop("references", paper_id, limit, budget)
 
     @server.tool(
         description=(
             "Papers citing this one (one forward snowball hop). paper_id takes a "
             "Semantic Scholar id or an ARXIV:<id> alias. A true 'truncated' means "
-            "the API held rows back."
+            "the API held rows back." + BUDGET_DOC
         )
     )
-    def get_citations(paper_id: str, limit: int = HOP_MAX) -> dict[str, Any]:
-        return hop("citations", paper_id, limit)
+    def get_citations(
+        paper_id: str, limit: int = HOP_MAX, budget: int = 0
+    ) -> dict[str, Any]:
+        return hop("citations", paper_id, limit, budget)
 
     server.tool(
         description=(
             "Metadata for many papers at once, up to 500 ids. Aliases are not "
             "collapsed upstream; an arXiv id and its own S2 id are one paper here."
+            + BUDGET_DOC
         )
     )(get_papers_batch)
 
@@ -812,11 +892,60 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
                 f"kept {sorted(origins)}, {len(leftovers)} stray temp files",
             )
 
+    # 13. The budget is counted by the server, and refuses before spending a call.
+    #     This is the case that would have caught the 2026-09-13 overrun: the
+    #     agent was told 40 and touched 114-160, because nothing enforced it.
+    with tempfile.TemporaryDirectory() as tmp:
+        with _env(RESEARCH_PROJECT_DIR=tmp):
+            TOUCHED.clear()
+            calls = {"n": 0}
+
+            def counting_stub(method, url, body, key):
+                calls["n"] += 1
+                return 200, json.dumps(_fixture("refs_dmg_edges.json")).encode()
+
+            with _fetch(counting_stub):
+                first = hop("references", "ARXIV:2405.04800", 100, budget=5)
+                after_first = calls["n"]
+                second = hop("references", "ARXIV:2011.10328", 100, budget=5)
+            check(
+                "13 the budget refuses the next hop, before the network call",
+                first.get("resolved_count", 0) > 5
+                and first["touched_total"] == first["resolved_count"]
+                and first["budget_exhausted"] is True
+                and second.get("stopped") == "budget"
+                and second["resolved_count"] == 0
+                and calls["n"] == after_first,
+                f"first={first.get('resolved_count')} touched={first.get('touched_total')} "
+                f"second={second.get('stopped')} calls={calls['n']} (expected {after_first})",
+            )
+
+    # 14. Touched counts DISTINCT papers, so re-hopping the same edge list does
+    #     not double-charge, and an absent budget enforces nothing.
+    with tempfile.TemporaryDirectory() as tmp:
+        with _env(RESEARCH_PROJECT_DIR=tmp):
+            TOUCHED.clear()
+
+            def same(method, url, body, key):
+                return 200, json.dumps(_fixture("refs_dmg_edges.json")).encode()
+
+            with _fetch(same):
+                a = hop("references", "seedA", 100, budget=0)
+                b = hop("references", "seedB", 100, budget=0)
+            check(
+                "14 touched counts distinct papers; no budget enforces nothing",
+                a["touched_total"] == b["touched_total"] == a["resolved_count"]
+                and "budget_remaining" not in a
+                and b.get("stopped") is None,
+                f"a={a['touched_total']} b={b['touched_total']} resolved={a['resolved_count']}",
+            )
+    TOUCHED.clear()
+
     print()
     if failures:
-        print(f"{len(failures)} of 12 cases failed: {', '.join(failures)}")
+        print(f"{len(failures)} of 14 cases failed: {', '.join(failures)}")
         return 1
-    print("12 of 12 cases passed")
+    print("14 of 14 cases passed")
     return 0
 
 
