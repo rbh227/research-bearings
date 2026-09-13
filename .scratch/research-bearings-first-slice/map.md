@@ -11,7 +11,7 @@ A spec for the first buildable slice of research-bearings, ready for `/to-spec`:
 - **Domain**: a Claude Code plugin that runs the research loop with typed skills and contract-bound agents. Glossary in `CONTEXT.md`: **map** is this artifact only; **landscape** is the plugin's literature deliverable; an **acceptance run** is the user's post-handoff trial.
 - **Inputs**: `academic.md` is "the big sheet", the source rules every skill derives from. `research_plugin_build_plan.md` is one candidate proposal for the loop and its milestones, not the plan.
 - **Standing decisions** (from the build plan, reaffirmed 2026-09-12): Claude Code plugin; this repo is its own marketplace (`marketplace.json` with `source: "./"`, like the Matt-Raphs-Skills fork), retiring `raph-cc`; v1 is eventually the full loop including experiment agents; Claude-only with the judge's `model:` field left open for a second provider; Python for the few scripts; local paper cache is the reference manager; one spec covers schemas and their first consumers together.
-- **Retrieval plumbing**: two MCP servers, `paper-search-mcp` (arXiv, Semantic Scholar, OpenAlex, Crossref, and more) and `openreview-mcp`. Both are 1.x-SDK servers and need `uvx --with 'mcp<2'`. A third server, `s2-snowball`, is the plugin's own single-file server for the references/citations/batch hop (ticket 10). OpenReview is registered at user scope on this machine; paper-search is ticket 04. Neither server exposes references or citations (ticket 02), so the snowball hop needs its own mechanism (ticket 10). A Semantic Scholar API key is effectively required.
+- **Retrieval plumbing**: two MCP servers, `paper-search-mcp` (arXiv, Semantic Scholar, OpenAlex, Crossref, and more) and `openreview-mcp`. Both are 1.x-SDK servers and need `uvx --with 'mcp<2'`. A third server, `s2-snowball`, is the plugin's own single-file server for the references/citations/batch hop (ticket 10). Both are registered at user scope on this machine (ticket 04). Neither server exposes references or citations (ticket 02), so the snowball hop needs its own mechanism (ticket 10). A Semantic Scholar API key is effectively required; it and a CORE key are in `~/.config/paper-search-mcp/.env`.
 - **Acceptance-run topic** (the user's real question, used for smoke runs, never a deliverable): post-disaster building damage assessment from aerial and satellite imagery, plus computer vision and AI in wildfires generally, including fire-spread prediction.
 - **Skills to consult per session**: `grilling` and `domain-modeling` for every grilling ticket; `research` for research tickets; `prototype` for ticket 09. Plugin authoring follows `writing-for-agents`.
 - **Repo**: https://github.com/rbh227/research-bearings. Tracker is local markdown under `.scratch/`.
@@ -24,14 +24,24 @@ A spec for the first buildable slice of research-bearings, ready for `/to-spec`:
 - [Retrieval tool inventory](issues/02-retrieval-tool-inventory.md): no references or citations tool in either MCP; seed search via `search_semantic`, hops must hit the Semantic Scholar Graph API directly; the S2 key is effectively required (429 after two or three unauthenticated calls); Unpaywall email mandatory; arXiv-only papers snowball via `ARXIV:<id>`; pass `use_scihub=False`.
 - [Snowball mechanism](issues/10-snowball-mechanism.md): the plugin owns a single-file MCP server, `servers/s2_snowball.py`, PEP 723 pinning `mcp>=2,<3`, run by `uv run --script`; three tools for references, citations, and batch; prototyped and verified live with an on-disk cache. Chosen over `uvx semantic-scholar-fastmcp` (runner-up) and over a Bash script (rejected: scouts must be denied Bash).
 - [The research loop end to end](issues/05-research-loop-end-to-end.md): six stages plus presentation and a cross-cutting honesty layer; 27 typed skills, 5 composites, 28 agents; three human gates (question, idea selection, compute spend); a row earns its place by implementing the sheet *or* serving one of four goals, so only `/watch` and `/handoff` defer. Outline in `docs/design/skills-and-agents.md`.
+- [The first slice](issues/06-first-slice-skill-set.md): chunk 1 is the plugin skeleton plus the question stage — `/setup` and `/frame`, one agent `question-critic`, no retrieval. Chosen because it is the only chunk not blocked on the pending S2 key. `/frame` is a diverge–converge loop with uninformed divergence labelled as such, re-entrant after `/surveys`.
+- [Shared contracts](issues/07-shared-contracts.md): output root is `research/`, one guard rule. Three schemas only — `CONTEXT.md` (9 headings), `QUESTION.md` (11, deliverable), `framing-log.md` (working record). Methodology rules inlined per skill, not referenced; `academic.md` is not shipped. Deterministic check is `guard.py --selftest`.
+- [Done-check for the spec](issues/08-spec-done-check.md): all three of structural checks, a nine-case `claude plugin eval` suite with the ablation arm, and a live smoke run on the acceptance-run topic outside this repo.
+- [Register paper-search](issues/04-register-paper-search.md): registered at user scope and connected. Semantic Scholar and CORE keys both verified live; credentials in `~/.config/paper-search-mcp/.env`, read by the server itself. The S2 references hop works on `ARXIV:<id>`. CORE is a full-text *retrieval* source, not a discovery one, and its endpoint 301-redirects to a trailing slash.
 
 ## Not yet specified
 
-- Per-skill and per-agent contracts (inputs, dispatched agents, output file and headings, stop condition, anti-rationalization rows), once ticket 06 names the skills and agents.
-- Which `academic.md` rules each skill inlines versus references from a shared file.
-- Hooks: the write-scope guard and session announce, and the shared anti-rationalization file. Sharpens after ticket 03 and ticket 06.
-- The `model:` policy for judge agents and where the second-provider hook lives.
-- Skill eval prompts per skill, two or three each, and how they run.
+Chunk 1 is **specified and built** (`docs/design/chunk-01-question-stage.md`, §10 for results). The plugin installs as `research-bearings@rbh227`; `/setup` and `/frame` work; 8 of 9 eval cases score 1.00; the ninth needs a `Bash` grant this machine cannot give. The live smoke run is the one outstanding item and needs the user.
+
+What remains is chunk 2 and beyond:
+
+- Contracts for the landscape chain: `/surveys`, `/landscape`, `/brief` and their six agents.
+- The paper-card, matrix-cell and dataset-row schemas, written with their first consumer.
+- `.mcp.json` and the `servers/s2_snowball.py` build, once ticket 09 has run by hand. Ticket 04 is closed; keys are live.
+- Where CORE fits: full-text retrieval for an already-identified paper, feeding the chunk-3 reader agents. Not a discovery source.
+- Whether `/frame`'s re-entry after `/surveys` is automatic or user-triggered.
+
+Closed by chunk 1: the `model:` policy for judges (Claude-only, `model: inherit`, fresh context plus the concession ladder — no second provider, the user runs `/codex-review` by hand); the shared anti-rationalization file (rejected, rules and refusal tables are inlined per skill); the session-announce hook (not built, no content to announce yet).
 
 ## Out of scope
 
