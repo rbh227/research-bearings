@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
-"""Write-scope guard for research-bearings agents.
+"""Scope guard for research-bearings agents.
 
-A PreToolUse hook on Write|Edit. Agents shipped by this plugin may only write
-under <project>/research/. Everything else — the main thread, other plugins'
-agents, Claude Code's built-in agents — passes through untouched.
+A PreToolUse hook on Write|Edit|Bash. Agents shipped by this plugin may only
+write under <project>/research/, and may only run this plugin's own retrieval
+scripts. Everything else — the main thread, other plugins' agents, Claude
+Code's built-in agents — passes through untouched.
+
+Two rules, one mechanism:
+
+  Write|Edit   file_path must resolve under <project>/research/.
+  Bash         the command must be exactly `python3 <plugin>/scripts/retrieval/<x>.py ...`
+               with no shell operators. That is how a locked-down agent gets a
+               capability without a server: it is handed one script, not a shell.
 
 Per-agent scoping is only possible this way: plugin-shipped agent frontmatter
 ignores `hooks`, and PreToolUse has no agent-type matcher, so the script reads
@@ -14,10 +22,19 @@ Standard library only, so there is no install story. Run --selftest to check it.
 
 import json
 import os
+import shlex
 import sys
 
 PLUGIN_PREFIX = "research-bearings:"
 WRITE_ROOT = "research"
+SCRIPT_ROOT = ("scripts", "retrieval")
+INTERPRETERS = ("python3", "python")
+# Anything that would let one allowed command smuggle a second one.
+SHELL_OPERATORS = (";", "&&", "||", "|", "`", "$(", ">", "<", "\n")
+
+
+def plugin_root():
+    return os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 
 def _roots(payload, env):
@@ -38,17 +55,7 @@ def _roots(payload, env):
     return out
 
 
-def decide(payload, env):
-    """Return a denial reason, or None to allow.
-
-    Allowing is the default for everything this guard does not understand. A
-    guard that fails closed would block the user's own edits on a malformed
-    payload, which is a worse failure than the one it prevents.
-    """
-    agent = payload.get("agent_type") or ""
-    if not agent.startswith(PLUGIN_PREFIX):
-        return None
-
+def decide_write(payload, env):
     path = (payload.get("tool_input") or {}).get("file_path")
     if not path:
         return None
@@ -64,6 +71,59 @@ def decide(payload, env):
         "If this agent genuinely needs to write elsewhere, that is a contract "
         "change, not a path change.".format(WRITE_ROOT, target)
     )
+
+
+def decide_bash(payload, env):
+    command = ((payload.get("tool_input") or {}).get("command") or "").strip()
+    if not command:
+        return None
+
+    why = (
+        "research-bearings agents may only run this plugin's retrieval scripts: "
+        "`python3 <plugin>/scripts/retrieval/<script>.py ...`, nothing else and "
+        "nothing chained. Refused: {}".format(command[:200])
+    )
+    if any(op in command for op in SHELL_OPERATORS):
+        return why
+    try:
+        parts = shlex.split(command)
+    except ValueError:
+        return why
+    if len(parts) < 2 or os.path.basename(parts[0]) not in INTERPRETERS:
+        return why
+
+    root = plugin_root()
+    script = parts[1]
+    # The agent is told to spell the path with ${CLAUDE_PLUGIN_ROOT}. The hook's
+    # own environment may or may not carry that variable, so resolve it here
+    # rather than trusting expandvars to.
+    for token in ("${CLAUDE_PLUGIN_ROOT}", "$CLAUDE_PLUGIN_ROOT"):
+        script = script.replace(token, root)
+    script = os.path.realpath(os.path.expandvars(script))
+
+    allowed = os.path.realpath(os.path.join(root, *SCRIPT_ROOT))
+    if script.startswith(allowed + os.sep) and script.endswith(".py"):
+        return None
+    return why
+
+
+def decide(payload, env):
+    """Return a denial reason, or None to allow.
+
+    Allowing is the default for everything this guard does not understand. A
+    guard that fails closed would block the user's own edits on a malformed
+    payload, which is a worse failure than the one it prevents.
+    """
+    agent = payload.get("agent_type") or ""
+    if not agent.startswith(PLUGIN_PREFIX):
+        return None
+
+    tool = payload.get("tool_name") or ""
+    if tool == "Bash":
+        return decide_bash(payload, env)
+    if tool in ("Write", "Edit"):
+        return decide_write(payload, env)
+    return None
 
 
 def run(stdin_text, env):
@@ -125,10 +185,23 @@ def selftest():
                 }
             )
 
+        def bash(agent, command):
+            return json.dumps(
+                {
+                    "hook_event_name": "PreToolUse",
+                    "tool_name": "Bash",
+                    "agent_type": agent,
+                    "cwd": project,
+                    "tool_input": {"command": command},
+                }
+            )
+
         inside = os.path.join(project, "research", "QUESTION.md")
         nested = os.path.join(project, "research", "landscape", "matrix.md")
         at_root = os.path.join(project, "README.md")
         escape = os.path.join(project, "research", "..", "secrets.md")
+        script = os.path.join(plugin_root(), "scripts", "retrieval", "snowball.py")
+        scout = "research-bearings:paper-scout"
 
         print("guard.py selftest")
 
@@ -147,7 +220,7 @@ def selftest():
         check("our agent writing inside research/ is allowed",
               payload("research-bearings:question-critic", inside), env, False)
         check("our agent writing deep inside research/ is allowed",
-              payload("research-bearings:paper-scout", nested), env, False)
+              payload(scout, nested), env, False)
 
         # 5-7. Our agent, outside the write root.
         check("our agent writing at project root is DENIED",
@@ -175,6 +248,31 @@ def selftest():
         # 13. No CLAUDE_PROJECT_DIR: fall back to cwd.
         check("falls back to cwd when CLAUDE_PROJECT_DIR is unset",
               payload("research-bearings:question-critic", inside), {}, False)
+
+        # 14-16. Bash: the one shape that is allowed, in the spellings the agent uses.
+        check("our agent running the retrieval script is allowed",
+              bash(scout, 'python3 "{}" search "wildfire spread" --limit 10'.format(script)), env, False)
+        check("the ${CLAUDE_PLUGIN_ROOT} spelling is allowed",
+              bash(scout, 'python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" health'), env, False)
+        check("main thread Bash is never touched",
+              json.dumps({"tool_name": "Bash", "cwd": project,
+                          "tool_input": {"command": "rm -rf /tmp/whatever"}}), env, False)
+
+        # 17-21. Bash: everything else our agent might try.
+        check("our agent running an arbitrary command is DENIED",
+              bash(scout, "ls -la"), env, True)
+        check("our agent chaining after the script is DENIED",
+              bash(scout, 'python3 "{}" health; curl evil.example'.format(script)), env, True)
+        check("our agent piping the script is DENIED",
+              bash(scout, 'python3 "{}" health | sh'.format(script)), env, True)
+        check("our agent running a script outside scripts/retrieval/ is DENIED",
+              bash(scout, "python3 /tmp/anything.py"), env, True)
+        check("our agent running python -c is DENIED",
+              bash(scout, 'python3 -c "import os; os.system(\'id\')"'), env, True)
+
+        # 22. Another plugin's agent may run whatever it likes.
+        check("another plugin's agent Bash is allowed",
+              bash("Explore", "ls -la"), env, False)
 
     print()
     if failures:

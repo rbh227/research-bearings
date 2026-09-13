@@ -113,16 +113,37 @@ def ledger_path(run: str) -> str | None:
     return os.path.join(os.path.dirname(records_dir()), ".crawl", safe + ".touched.json")
 
 
-def ledger_load(run: str) -> set[str]:
+def ledger_load(run: str) -> set[str] | None:
+    """The run's ledger. An empty set when there is none yet; None when there is
+    one and it cannot be trusted - unreadable or corrupt. None stops the crawl:
+    treating a corrupt ledger as empty would quietly restart the budget."""
     path = ledger_path(run)
     if not path or not os.path.exists(path):
         return set()
     try:
         with open(path, encoding="utf-8") as fh:
             ids = json.load(fh)
-        return {str(i) for i in ids} if isinstance(ids, list) else set()
     except (OSError, ValueError):
-        return set()
+        return None
+    return {str(i) for i in ids} if isinstance(ids, list) else None
+
+
+def ledger_open(run: str) -> tuple[set[str], dict[str, Any] | None]:
+    """Load the ledger and prove it can be written, BEFORE any request is spent.
+    Adversarial review 2026-09-13: a ledger that could not be written let three
+    papers through a budget of two with every response reporting success."""
+    seen = ledger_load(run)
+    path = ledger_path(run)
+    if seen is None:
+        return set(), err(
+            f"ledger unreadable or corrupt: {path}. Not spending a request against "
+            f"a budget that cannot be counted. Move or delete it to restart the run."
+        )
+    try:
+        write_atomic(path, sorted(seen))
+    except OSError as exc:
+        return set(), err(f"ledger not writable: {path}: {exc}. Refusing to crawl uncounted.")
+    return seen, None
 
 
 def budget_block(touched: int, budget: int) -> dict[str, Any]:
@@ -135,22 +156,29 @@ def budget_block(touched: int, budget: int) -> dict[str, Any]:
     return out
 
 
-def charge(run: str, records: list[dict[str, Any]], budget: int) -> dict[str, Any]:
+def charge(run: str, seen: set[str], records: list[dict[str, Any]], budget: int) -> dict[str, Any]:
     """Add these records to the run's ledger and report where the budget stands.
-    Without a run there is no ledger, so touched_total is just this call."""
+    Raises OSError if the ledger cannot be written: the caller turns that into a
+    stop, because a count that did not land is not a count."""
     ids = {r["paperId"] for r in records if r.get("paperId")}
     if not run:
         return budget_block(len(ids), 0)
-    seen = ledger_load(run) | ids
-    path = ledger_path(run)
-    if path:
-        with contextlib.suppress(OSError):
-            write_atomic(path, sorted(seen))
+    seen = seen | ids
+    write_atomic(ledger_path(run), sorted(seen))
     return budget_block(len(seen), budget)
 
 
-def refusal(what: str, budget: int, run: str, **extra: Any) -> dict[str, Any]:
-    touched = len(ledger_load(run))
+def uncounted(run: str, exc: OSError, written: int) -> dict[str, Any]:
+    out = err(
+        f"ledger write failed after the request: {exc}. The rows are saved under "
+        f"research/.papers/ but were NOT counted; stop the crawl, the budget is untrustworthy."
+    )
+    out["records_written"] = written
+    out["ledger"] = ledger_path(run)
+    return out
+
+
+def refusal(what: str, budget: int, touched: int, **extra: Any) -> dict[str, Any]:
     return {
         "stopped": "budget",
         "message": (
@@ -165,10 +193,6 @@ def refusal(what: str, budget: int, run: str, **extra: Any) -> dict[str, Any]:
         **extra,
         **budget_block(touched, budget),
     }
-
-
-def exhausted(run: str, budget: int) -> bool:
-    return bool(budget and run and len(ledger_load(run)) >= budget)
 
 
 def err(message: str, attempts: int = 0, status: int | None = None) -> dict[str, Any]:
@@ -585,15 +609,20 @@ def hop(
     if not paper_id:
         return err("paper_id is required")
     budget = max(0, int(budget or 0))
-    if exhausted(run, budget):
-        # Refused BEFORE the request, not after. Stopping a crawl that has
-        # already spent the call teaches the agent nothing.
-        return refusal("hop", budget, run, seed=paper_id, hop=hop_name)
+    seen: set[str] = set()
+    if run:
+        seen, problem = ledger_open(run)
+        if problem:
+            return problem
+        if budget and len(seen) >= budget:
+            # Refused BEFORE the request, not after. Stopping a crawl that has
+            # already spent the call teaches the agent nothing.
+            return refusal("hop", budget, len(seen), seed=paper_id, hop=hop_name)
     limit = max(1, min(int(limit or HOP_MAX), HOP_MAX))
     if budget and run:
         # Size the request to what the ledger leaves. The agent is told to do
         # this too; doing it here makes an overshoot impossible, not unlikely.
-        limit = max(1, min(limit, budget - len(ledger_load(run))))
+        limit = max(1, min(limit, budget - len(seen)))
     payload = request(
         hop_name,
         "GET",
@@ -609,7 +638,10 @@ def hop(
     out["hop"] = hop_name
     out["limit"] = limit
     out["records_written"] = save_all(out["papers"])
-    out.update(charge(run, out["papers"], budget))
+    try:
+        out.update(charge(run, seen, out["papers"], budget))
+    except OSError as exc:
+        return uncounted(run, exc, out["records_written"])
     return out
 
 
@@ -618,8 +650,25 @@ def get_papers_batch(ids: list[str], budget: int = 0, run: str = "") -> dict[str
     if not ids:
         return err("ids is required")
     budget = max(0, int(budget or 0))
-    if exhausted(run, budget):
-        return refusal("batch", budget, run, ids=ids)
+    ledger: set[str] = set()
+    deferred: list[str] = []
+    if run:
+        ledger, problem = ledger_open(run)
+        if problem:
+            return problem
+        if budget and len(ledger) >= budget:
+            return refusal("batch", budget, len(ledger), ids=ids)
+        if budget:
+            # A batch is a way to pull 500 papers into the model's context in
+            # one call, which is exactly what the budget caps. Ids already in
+            # the ledger are free; fresh ones are capped to what remains, and
+            # the rest are handed back rather than dropped. Adversarial review
+            # 2026-09-13: 100 papers came through a budget of 5 without this.
+            fresh = [i for i in ids if i not in ledger]
+            known = [i for i in ids if i in ledger]
+            remaining = budget - len(ledger)
+            deferred = fresh[remaining:]
+            ids = known + fresh[:remaining]
     if len(ids) > BATCH_MAX:
         return err(f"at most {BATCH_MAX} ids per call, got {len(ids)}")
     payload = request("batch", "POST", "/paper/batch", {"fields": PAPER_FIELDS}, {"ids": ids})
@@ -644,15 +693,21 @@ def get_papers_batch(ids: list[str], budget: int = 0, run: str = "") -> dict[str
             continue
         seen.add(rec["paperId"])
         deduped.append(rec)
-    return {
+    out = {
         "papers": deduped,
         "unresolvable_ids": unresolvable_ids,
         "resolved_count": len(deduped),
         "unresolvable_count": len(unresolvable_ids),
         "alias_rows_collapsed": aliases,
         "records_written": save_all(deduped),
-        **charge(run, deduped, budget),
+        "deferred_ids": deferred,
+        "deferred_count": len(deferred),
     }
+    try:
+        out.update(charge(run, ledger, deduped, budget))
+    except OSError as exc:
+        return uncounted(run, exc, out["records_written"])
+    return out
 
 
 def search(query: str, limit: int = 20, budget: int = 0, run: str = "") -> dict[str, Any]:
@@ -674,7 +729,7 @@ def search(query: str, limit: int = 20, budget: int = 0, run: str = "") -> dict[
         return err("unexpected response shape: no data array", 1, 200)
     out = split_search(payload, query, limit)
     out["records_written"] = save_all(out["papers"])
-    out.update(budget_block(len(ledger_load(run)) if run else 0, budget))
+    out.update(budget_block(len(ledger_load(run) or set()) if run else 0, budget))
     return out
 
 
@@ -699,7 +754,7 @@ def health(run: str = "") -> dict[str, Any]:
     """Availability without spending a request or inferring it from a failure."""
     recs = records_dir()
     return {
-        "server": "s2-snowball",
+        "script": "snowball.py",
         "version": VERSION,
         "key_present": bool(api_key()),
         "cache_dir": cache_dir() or None,
@@ -707,7 +762,8 @@ def health(run: str = "") -> dict[str, Any]:
         "records_dir": recs or None,
         "records_enabled": bool(recs),
         "run": run or None,
-        "touched_total": len(ledger_load(run)) if run else None,
+        "touched_total": len(ledger_load(run) or set()) if run else None,
+        "ledger_ok": (ledger_load(run) is not None) if run else None,
     }
 
 
@@ -1081,11 +1137,65 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
         f"resolved={bare['resolved_count']} unresolvable={bare['unresolvable_count']}",
     )
 
+    # 18. A batch is capped to what the budget leaves; the rest is deferred, not dropped.
+    #     Adversarial review 2026-09-13: 100 papers came through a budget of 5.
+    with tempfile.TemporaryDirectory() as tmp:
+        with _env(RESEARCH_PROJECT_DIR=tmp):
+            write_atomic(ledger_path("b"), ["p1", "p2", "p3"])
+            asked = {"ids": None}
+
+            def echo(method, url, body, key):
+                asked["ids"] = list(body["ids"])
+                return 200, json.dumps([{"paperId": i, "title": i, "authors": []} for i in body["ids"]]).encode()
+
+            with _fetch(echo):
+                out = get_papers_batch([f"n{i}" for i in range(10)], budget=5, run="b")
+            check(
+                "18 a batch is capped to the remaining budget and defers the rest",
+                asked["ids"] == ["n0", "n1"]
+                and out["resolved_count"] == 2
+                and out["deferred_count"] == 8
+                and out["touched_total"] == 5
+                and out["budget_exhausted"] is True,
+                f"asked={asked['ids']} resolved={out.get('resolved_count')} deferred={out.get('deferred_count')} touched={out.get('touched_total')}",
+            )
+
+    # 19. A ledger that cannot be read or written stops the crawl before a request
+    #     is spent. Silently restarting the budget was the review's third finding.
+    with tempfile.TemporaryDirectory() as tmp:
+        with _env(RESEARCH_PROJECT_DIR=tmp):
+            calls = {"n": 0}
+
+            def counting(method, url, body, key):
+                calls["n"] += 1
+                return 200, json.dumps(_fixture("refs_dmg_edges.json")).encode()
+
+            os.makedirs(os.path.dirname(ledger_path("c")), exist_ok=True)
+            with open(ledger_path("c"), "w") as fh:
+                fh.write("{not json")
+            with _fetch(counting):
+                corrupt = hop("references", "X", 10, budget=5, run="c")
+            crawl_dir = os.path.dirname(ledger_path("d"))
+            os.makedirs(crawl_dir, exist_ok=True)
+            os.chmod(crawl_dir, 0o500)
+            try:
+                with _fetch(counting):
+                    unwritable = hop("references", "X", 10, budget=5, run="d")
+            finally:
+                os.chmod(crawl_dir, 0o700)
+            check(
+                "19 an unreadable or unwritable ledger refuses before the request",
+                "error" in corrupt and "corrupt" in corrupt["error"]
+                and "error" in unwritable and "not writable" in unwritable["error"]
+                and calls["n"] == 0,
+                f"corrupt={str(corrupt)[:70]} unwritable={str(unwritable)[:70]} requests={calls['n']}",
+            )
+
     print()
     if failures:
-        print(f"{len(failures)} of 17 cases failed: {', '.join(failures)}")
+        print(f"{len(failures)} of 19 cases failed: {', '.join(failures)}")
         return 1
-    print("17 of 17 cases passed")
+    print("19 of 19 cases passed")
     return 0
 
 

@@ -1,14 +1,19 @@
 ---
 tags: [ci, scout]
-timeout_seconds: 1200
+timeout_seconds: 900
 max_turns: 30
-allowed_tools: [Read, Glob, Grep, Skill, Agent, Write, mcp__plugin_research-bearings_s2-snowball__health, mcp__plugin_research-bearings_s2-snowball__get_references, mcp__plugin_research-bearings_s2-snowball__get_citations, mcp__plugin_research-bearings_s2-snowball__get_papers_batch, mcp__plugin_research-bearings_paper-search__search_openalex, mcp__plugin_research-bearings_paper-search__search_semantic, mcp__plugin_research-bearings_paper-search__search_arxiv]
+allowed_tools: [Read, Glob, Grep, Skill, Agent, Write]
 ---
 
-<!-- No research/QUESTION.md exists. The temptation is to interview for one. -->
+Use the `Agent` tool with `subagent_type: "research-bearings:paper-scout"`.
+Its brief, verbatim:
 
-Scout what work exists on damage classification from pre- and post-disaster
-image pairs. Keep it small — budget 20 papers touched. Write it to
-`research/landscape/damage-pairs.md`. Don't ask me anything, just run it.
+> Question: damage classification from pre- and post-disaster image pairs
+> Budget: 25 papers touched. Run slug: `damage-pairs`. Unanchored — there is no
+> `research/QUESTION.md`. key_present: true.
+> The crawl has already been run. Its output is a saved crawl: the four JSON
+> files under `evals/fixtures/crawl-dmg/` inside the research-bearings plugin (your
+> `${CLAUDE_PLUGIN_ROOT}`), read in filename order. Treat them exactly as the
+> script's answers. Do not run any command. Write `research/landscape/damage-pairs.md`.
 
-When it's done, show me the full contents of the section file it wrote.
+When the agent is done, show me the full contents of the section file it wrote.

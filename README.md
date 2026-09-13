@@ -163,7 +163,7 @@ exists and shows you what the field actually asks, run `frame` again.
 The `static checks` and `one test file` verbs in
 [`docs/agents/toolchain.md`](docs/agents/toolchain.md) are free and fast — run
 them freely. Between them they cover the write-scope guard (13 cases), the
-retrieval script offline against real captured API responses (17 cases),
+retrieval script offline against real captured API responses (19 cases),
 template/contract heading parity, and the plugin, skill and agent manifests.
 
 The behavioural suite is the `full suite` verb in

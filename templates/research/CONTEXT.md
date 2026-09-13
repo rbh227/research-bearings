@@ -52,7 +52,7 @@
 
 ## Retrieval
 
-<!-- Which of the three retrieval servers answered, whether a Semantic Scholar
-     key is present, and the date probed. Goes stale the moment someone
-     reinstalls, which is why it carries a date. The authoritative check is the
-     one /research-bearings:scout runs at the start of every crawl. -->
+<!-- Whether the retrieval script ran, whether a Semantic Scholar key is
+     present, and the date probed. Goes stale the moment the key changes, which
+     is why it carries a date. The authoritative check is the one
+     /research-bearings:scout runs at the start of every crawl. -->

@@ -1,7 +1,7 @@
 ---
 name: setup
 description: Record a research project's resources and constraints before any research work begins — lab, compute allocation, data access, code, your calibration, deadline, and what counts as a win. Use when starting a research project, when picking up an inherited one, or when compute or data access changes. Writes research/CONTEXT.md.
-allowed-tools: Read, Write, Edit, Glob, Grep, mcp__plugin_research-bearings_s2-snowball__health, Bash(df:*), Bash(du:*), Bash(ls:*), Bash(uname:*), Bash(sw_vers:*), Bash(nvidia-smi:*), Bash(python3:*), Bash(pip:*), Bash(uv:*), Bash(git status:*), Bash(git log:*), Bash(git remote:*), Bash(free:*), Bash(sysctl:*), Bash(nproc:*), Bash(test:*), Bash(find:*), Bash(wc:*)
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(df:*), Bash(du:*), Bash(ls:*), Bash(uname:*), Bash(sw_vers:*), Bash(nvidia-smi:*), Bash(python3:*), Bash(pip:*), Bash(uv:*), Bash(git status:*), Bash(git log:*), Bash(git remote:*), Bash(free:*), Bash(sysctl:*), Bash(nproc:*), Bash(test:*), Bash(find:*), Bash(wc:*)
 ---
 
 # setup
@@ -32,14 +32,14 @@ the results. Do this in one batch; it takes seconds.
 | Python and env | `python3 --version`, `uv --version`, `pip list` if a venv is obvious |
 | Repo state | `git remote -v`, `git status --short`, `git log --oneline -5` |
 | What is already here | `ls` the project root; look for data, notebooks, papers, a README |
-| Retrieval | `mcp__plugin_research-bearings_s2-snowball__health` — reports key presence without spending a request. Record whether the `paper-search` and `openreview` tools are present in your own tool list; do not call them, `/research-bearings:scout` probes them properly at run time. |
+| Retrieval | `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" health` — reports key presence without spending a request. Nothing to connect to: retrieval is one script, run on demand. `/research-bearings:scout` probes the API itself at the start of every crawl. |
 
 **2. Read anything that answers a question for you.** A README, a proposal, a
 grant blurb, an existing notes file. Do not ask what a file already says.
 
 **3. Copy the template.** `${CLAUDE_PLUGIN_ROOT}/templates/research/CONTEXT.md`
 to `research/CONTEXT.md`, creating `research/` if needed. If the project has a
-`.gitignore`, add `research/.papers/` to it — the paper cache is regenerable and
+`.gitignore`, add `research/.papers/` and `research/.crawl/` to it — the paper cache is regenerable and
 runs to thousands of files. If the file already
 exists, read it and update in place — never clobber a section that has content
 without showing the user what you are replacing.
@@ -70,7 +70,7 @@ choices, so multiple choice is the wrong instrument here.
 | `## Constraints` | Hours per week actually available; teaching load; publication obligations or embargoes; hardware they cannot get | ask |
 | `## What counts as a win` | Which venue or artefact, by when, and who has to accept it | ask |
 | `## History` | What this project already tried, and why it stopped | ask |
-| `## Retrieval` | Which of the three servers answered, whether a Semantic Scholar key is present, the date probed | checked |
+| `## Retrieval` | Whether the retrieval script runs, whether a Semantic Scholar key is present, the date probed | checked |
 
 Mark every checked number `(checked YYYY-MM-DD)` and every reported number
 `(reported YYYY-MM-DD)`. The distinction is the point.

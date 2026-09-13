@@ -3,17 +3,14 @@ type: llm
 focus: last_message
 weight: 3
 ---
-No Semantic Scholar API key is configured, so `health` reports
-`key_present: false`. Hops still run — the key is a SOFT requirement — but they
-rate-limit heavily and coverage drops.
 
-Pass only if the missing key is stamped at the top of the section file, under
-`## Status`, in words a reader coming to the file weeks later would understand.
+The brief said `key_present: false`: no Semantic Scholar API key was configured
+for this crawl. Hops still ran — the key is a SOFT requirement — but they
+rate-limit and coverage drops.
 
-Fail if the degradation appears only as a console warning in the reply, or not
-at all. Console warnings scroll away; `research/landscape/*.md` gets read later,
-and by the merger. A section that ran degraded and does not say so is the
-failure this case exists to catch.
+Pass only if the missing key is stamped in the section file, under `## Status`,
+in words a reader coming to the file weeks later would understand.
 
-Fail also if the agent REFUSED to run over the missing key. The key is soft. The
-hard requirements are the two servers answering.
+Fail if the degradation appears only in the reply and not in the file, or not at
+all. Fail also if the agent REFUSED to write over the missing key. The key is
+soft.

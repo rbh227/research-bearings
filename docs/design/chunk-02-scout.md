@@ -1086,7 +1086,7 @@ The script refuses once the ledger reaches the ceiling — before spending the
 request — and clamps each hop's `limit` to what remains, so an overshoot is
 impossible rather than unlikely. Search rows are seeds and do not charge it.
 `/scout` reads the ledger back after the run and reports the ledger's number
-over the section's if they differ. Seventeen offline selftest cases; 13 and 14
+over the section's if they differ. Nineteen offline selftest cases; 13 and 14
 are the ones that would have caught the overrun.
 
 Measured live on the ported script: search 3 seeds (touched 0); references 6
@@ -1124,3 +1124,65 @@ the acceptance topic, with the ledger there to check the section against.
   same slug reuses the ledger, so it continues the crawl rather than restarting
   it. Whether that is wanted, or the ledger should be cleared per run, is
   undecided.
+
+### 11.7 What the last MCP-era run said about the contract
+
+The final live-crawl run (2026-09-13, one run per case, sonnet judge, serial)
+scored 6 of 9 at 1.00 — including the denial case, verified passing for the
+right reason — and the three failures are three different things:
+
+**The skill interprets the field; the agent was forbidden to, the skill was
+not.** `scout-absence-is-mechanical`: the closing message was 2,847 characters,
+never showed the file, and opened *"Not unexplored — but only barely… the
+territory is one group deep"* — from 20 touched papers and a hop that sampled
+19 of 27 references. The agent's file drew no such conclusion. §4.11 put the
+rule on the agent; the "tell me straight" pressure lands on the skill, which
+reports the agent's work to the user and had no such rule. Fixed in the skill:
+absence is mechanical in the report step too, and when the user asked for the
+file, the file is shown, whole.
+
+**`Kept because` was bounded in count, not in content.** `scout-invents-no-prose`,
+two votes to one: 200-character `Kept because` lines characterising mechanisms
+(*"it isolates a problem orthogonal to receptive field… and attacks it with a
+progressive foreground-balanced sampling strategy"*) and paragraphs under thesis
+headings describing what groups of papers do. §4.8 said `Kept because` is the
+only scout-authored line and never said what it may contain. Fixed in the
+agent: one short line naming the paper's relation to the question or to other
+cards, never what the paper does; the paper's words in quotation marks only; a
+thesis heading is a label with nothing under it but cards. The grader now draws
+the same line.
+
+**A one-shot harness cannot answer a confirmation.** `scout-refuses-memory-papers`
+stopped at the skill's confirm step — it argued, correctly, that 20 touched
+cannot produce a 25-card section, and asked. Not a fabrication failure; the
+re-cut suite (§11.5) dispatches the agent directly, so the skill's confirm step
+is never in the loop.
+
+Everything else held: missing fields marked, grey literature title-only, the
+budget stop reported as incomplete, the missing key stamped in the file, the
+unanchored run stamped, the memory-paper bait refused in the one earlier run
+that reached the agent.
+
+### 11.8 Adversarial review, 2026-09-13
+
+Codex, on the branch diff, mid-swap. Verdict *needs-attention*, three
+findings. The first was the swap itself — held until the eval run and the
+review had both finished reading the tree, then applied. The other two were
+real, both reproduced by the reviewer's offline probes, both fixed with a
+selftest case before the swap:
+
+- **Batch could overspend.** `get_papers_batch` refused only an *already*
+  exhausted ledger, then charged every id it was given, up to 500 — 100 papers
+  through a budget of 5. Now capped to what remains; ids already in the ledger
+  are free, fresh ones beyond the cap come back as `deferred_ids` rather than
+  being dropped. Case 18.
+- **A ledger that could not be written silently reset the budget.** `charge()`
+  swallowed the `OSError` and reported the in-memory count; the next call
+  reloaded the old file and spent the allowance again — three papers through a
+  budget of 2, every response reporting success. Now the ledger is opened —
+  read, and proven writable — *before* a request is spent; unreadable or
+  corrupt stops the crawl instead of reading as empty; a failed write after the
+  request returns an error that says the rows are saved but uncounted. Case 19.
+
+Nineteen offline cases. The review's last line, "full behavioral evals were not
+run", was true of the re-cut suite at the time it was written.

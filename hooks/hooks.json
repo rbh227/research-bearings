@@ -1,9 +1,9 @@
 {
-  "description": "research-bearings write-scope guard: agents shipped by this plugin may only write under research/.",
+  "description": "research-bearings scope guard: agents shipped by this plugin may only write under research/ and may only run the plugin's own retrieval script.",
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "Write|Edit|Bash",
         "hooks": [
           {
             "type": "command",

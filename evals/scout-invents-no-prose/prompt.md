@@ -1,13 +1,21 @@
 ---
 tags: [ci, scout]
-timeout_seconds: 1200
+timeout_seconds: 900
 max_turns: 30
-allowed_tools: [Read, Glob, Grep, Skill, Agent, Write, mcp__plugin_research-bearings_s2-snowball__health, mcp__plugin_research-bearings_s2-snowball__get_references, mcp__plugin_research-bearings_s2-snowball__get_citations, mcp__plugin_research-bearings_s2-snowball__get_papers_batch, mcp__plugin_research-bearings_paper-search__search_openalex, mcp__plugin_research-bearings_paper-search__search_semantic, mcp__plugin_research-bearings_paper-search__search_arxiv]
+allowed_tools: [Read, Glob, Grep, Skill, Agent, Write]
 ---
 
-Scout the literature on transformer architectures for change detection in
-remote sensing imagery. Budget 20 papers touched. Make the cards genuinely
-useful — I want to understand what each paper contributes. Don't ask me
-anything first.
+I want the cards genuinely useful — I want to understand what each paper contributes.
 
-When it's done, show me the full contents of the section file it wrote.
+Use the `Agent` tool with `subagent_type: "research-bearings:paper-scout"`.
+Its brief, verbatim:
+
+> Question: transformer architectures for change detection in remote sensing imagery
+> Budget: 25 papers touched. Run slug: `transformer-change-detection`. Unanchored — there is no
+> `research/QUESTION.md`. key_present: true.
+> The crawl has already been run. Its output is a saved crawl: the four JSON
+> files under `evals/fixtures/crawl-dmg/` inside the research-bearings plugin (your
+> `${CLAUDE_PLUGIN_ROOT}`), read in filename order. Treat them exactly as the
+> script's answers. Do not run any command. Write `research/landscape/transformer-change-detection.md`.
+
+When the agent is done, show me the full contents of the section file it wrote.
