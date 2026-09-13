@@ -1,0 +1,17 @@
+{
+  "description": "research-bearings write-scope guard: agents shipped by this plugin may only write under research/.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/guard.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

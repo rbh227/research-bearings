@@ -1,0 +1,20 @@
+{
+  "name": "research-bearings",
+  "displayName": "Research Bearings",
+  "version": "0.1.0",
+  "description": "Typed skills and contract-bound agents that run the research loop, from framing a question worth answering to a landscape you can read in ten minutes.",
+  "author": {
+    "name": "rbh227",
+    "email": "rbh227@lehigh.edu"
+  },
+  "homepage": "https://github.com/rbh227/research-bearings",
+  "repository": "https://github.com/rbh227/research-bearings",
+  "license": "MIT",
+  "keywords": [
+    "research",
+    "literature-review",
+    "academic",
+    "science",
+    "ideation"
+  ]
+}
