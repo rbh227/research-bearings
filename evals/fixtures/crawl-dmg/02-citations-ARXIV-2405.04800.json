@@ -1,0 +1,143 @@
+{
+ "budget": 25,
+ "budget_exhausted": true,
+ "budget_remaining": 0,
+ "hop": "citations",
+ "limit": 3,
+ "malformed_count": 0,
+ "next": 3,
+ "papers": [
+  {
+   "abstract": "Natural disasters, particularly wildfires, cause severe human, environmental, and economic losses worldwide. Rapid and accurate identification of building footprints and potential potential structural changes is essential for effective emergency response, search-and-rescue operations, and post-disaster recovery planning. To address the challenges of identifying building loss from remote sensing imagery, this study proposes CalFireSegNet, a lightweight hybrid attention\u2013transformer network for post-wildfire building footprint extraction and loss proxy detection from satellite imagery. The proposed architecture integrates depthwise convolutions, convolutional block attention modules (CBAM), atrous spatial pyramid pooling (ASPP), and Transformer blocks to effectively capture both local structural details and long-range contextual dependencies while maintaining low computational complexity. The model was trained and evaluated using benchmark building segmentation datasets (Inria and WHU) and subsequently applied to pre- and post-event satellite imagery from the recent California wildfires. Experimental results demonstrate that CalFireSegNet achieves superior performance compared with several state-of-the-art semantic segmentation models, including U-Net, PSPNet, DeepLabv3+, ENet, HRNet, and SegNet, obtaining 98.45% accuracy, 94.35% mIoU, and 95.03% Dice Similarity Score while requiring only 3.72 million parameters. Furthermore, a lightweight mask-difference framework was developed to generate a spatial proxy of potential building footprint loss using pre- and post-event satellite pairs. Since publicly available building-level damage annotations for recent California wildfire events remain limited, the real-world wildfire experiments are presented as a validation of cross-domain applicability rather than a fully supervised structural loss proxy estimation benchmark.",
+   "authors": [
+    "Abdullah \u015eener",
+    "Vedat T\u00fcmen",
+    "B. Ergen",
+    "Erdal Akin"
+   ],
+   "citationCount": 0,
+   "edges": [
+    {
+     "contexts": [],
+     "describes": "origin_paper",
+     "hop": "citations",
+     "intents": [],
+     "isInfluential": false,
+     "origin": "ARXIV:2405.04800"
+    }
+   ],
+   "externalIds": {
+    "CorpusId": 291175425,
+    "DOI": "10.1038/s41598-026-67452-7",
+    "PubMed": "42608420",
+    "PubMedCentral": "13482386"
+   },
+   "fieldsOfStudy": [
+    "Medicine"
+   ],
+   "missing": [],
+   "paperId": "ce15414720c54deb74da34c5a9856793230b867b",
+   "pdfUrl": "https://www.nature.com/articles/s41598-026-67452-7.pdf",
+   "publicationTypes": [
+    "JournalArticle"
+   ],
+   "referenceCount": 29,
+   "title": "CalFireSegNet: a lightweight hybrid attention\u2013transformer network for post-wildfire building footprint change analysis using high-resolution satellite imagery",
+   "venue": "Scientific Reports",
+   "year": 2026
+  },
+  {
+   "abstract": "Decision-relevant building damage assessment is critical for prioritizing resources and recovery after a disaster, yet most automated methods either flatten damage into a single severity scale (no damage, minor, major, destroyed) or require paired pre- and post-event imagery that is often unavailable for emerging hazards. This paper presents Damage-TriageFormer, a single-image, post-event, footprint-conditioned model that produces a damage typology rather than a severity scale. We contribute: (1) DamageTriage-Bench, a new benchmark built from NOAA Emergency Response Imagery across Hurricane Michael (2018), Hurricane Helene (2024), and the 2025 Los Angeles wildfire complex, with five typology classes that distinguish roof damage from structural damage and, within each, partial from total extent; and (2) Damage-TriageFormer, which extends a DINOv3 ViT-L backbone with a Simple Feature Pyramid for higher-resolution instance pooling, a two-stage gated damage head, and an auxiliary severity-regression objective. Our model achieves macro F1 of 0.624 on validation and 0.619 on a held-out stratified test set, performing strongest where operational triage needs it most, with per-class F1 of 0.91 and 0.84 on undamaged buildings and total structural collapse, respectively. While the rare Total Roof Damage class remains difficult due to its limited examples and an inherently ambiguous label boundary, our results show that single-image post-event imagery can support actionable building damage typing, enabling targeted emergency response and resource allocation without a pre-event reference.",
+   "authors": [
+    "Yiming Xiao",
+    "Yu-Hsuan Ho",
+    "Sanjay Thasma",
+    "Jun-Wei Ma",
+    "Ali Mostafavi"
+   ],
+   "citationCount": 1,
+   "edges": [
+    {
+     "contexts": [
+      {
+       "intents": [],
+       "sentence": "DamageScope [3] and DeepDamageNet [5] use U-Net-style segmentation architectures, while attention-based high-resolution networks and two-step localization/classification pipelines pursue stronger building localization and damage classification under severe class imbalance [31,39]."
+      }
+     ],
+     "describes": "origin_paper",
+     "hop": "citations",
+     "intents": [],
+     "isInfluential": false,
+     "origin": "ARXIV:2405.04800"
+    }
+   ],
+   "externalIds": {
+    "ArXiv": "2606.12248",
+    "CorpusId": 289167276,
+    "DBLP": "journals/corr/abs-2606-12248",
+    "DOI": "10.48550/arXiv.2606.12248"
+   },
+   "fieldsOfStudy": [
+    "Computer Science"
+   ],
+   "missing": [],
+   "paperId": "fa1835679ffb40318d2d641526d63a71d2e78320",
+   "pdfUrl": null,
+   "publicationTypes": [
+    "JournalArticle"
+   ],
+   "referenceCount": 41,
+   "title": "Damage-TriageFormer: A Foundation-Model Framework for Typology-Based Building Damage Assessment from Mono-Temporal Imagery",
+   "venue": "arXiv.org",
+   "year": 2026
+  },
+  {
+   "abstract": "Unmanned Aerial Vehicles (UAVs) enable rapid disaster response, but limited onboard computing demands low-latency inference. Knowledge distillation solves this by transferring knowledge from a large teacher to a lightweight student deployable on UAVs. In UAV-based disaster assessment, different classes have different spatial-frequency requirements. Classes with sharp boundaries\u2014pools, water surfaces, debris\u2014tend to favor high-frequency detail, while large homogeneous surfaces like roads and sand favor low-frequency context. Building damage categories span a spectrum between these extremes. Existing methods like DisasterKD use a single global coefficient to balance low- and high-frequency losses across all classes. This uniform approach limits performance on the categories most critical for rescue: moderately and severely damaged buildings.We propose FreqGate to solve this problem. It is a lightweight extension that replaces the global coefficient with per-class learnable gates, each constrained to (0,1) by a sigmoid function. A per-class loss normalization (with stop-gradient) is introduced to prevent gradient shortcuts caused by scale disparity between low- and high-frequency losses, allowing the gates to capture genuine class-specific frequency preferences. FreqGate adds only C parameters (C = number of classes), if all gates become equal, it reduces exactly to the original DisasterKD. So our method is a strict generalization.We tested FreqGate on the RescueNet benchmark. It improves mIoU by 0.52% over DisasterKD. All four building damage categories gain, with BAD improving by 2.11%. The learned gate values show that classes with sharp boundaries\u2014pools, water with surface ripples, scattered debris\u2014get the highest \u03b1c, while large homogeneous surfaces stay lower.",
+   "authors": [
+    "Song Wang",
+    "Xiangbo Suo",
+    "Yufei Li",
+    "Li Fan"
+   ],
+   "citationCount": 0,
+   "edges": [
+    {
+     "contexts": [
+      {
+       "intents": [],
+       "sentence": "U-Net U-Net [7], DeepLabv3+ [8], and disaster-specific models like DeepDamageNet [9] improved results."
+      }
+     ],
+     "describes": "origin_paper",
+     "hop": "citations",
+     "intents": [],
+     "isInfluential": false,
+     "origin": "ARXIV:2405.04800"
+    }
+   ],
+   "externalIds": {
+    "CorpusId": 291043636,
+    "DOI": "10.1109/EITCE70137.2026.11634487"
+   },
+   "fieldsOfStudy": [],
+   "missing": [],
+   "paperId": "528a9bf46343d5c1c35baa002a9cb5297e0893f3",
+   "pdfUrl": null,
+   "publicationTypes": [
+    "Conference"
+   ],
+   "referenceCount": 12,
+   "title": "Harmonizing Frequency Preferences Across Damage Levels: A Class-Gated Distillation Method for Disaster Assessment",
+   "venue": "2026 10th International Conference on Electronic Information Technology and Computer Engineering (EITCE)",
+   "year": 2026
+  }
+ ],
+ "records_written": 3,
+ "resolved_count": 3,
+ "rows_returned": 3,
+ "seed": "ARXIV:2405.04800",
+ "touched_total": 25,
+ "truncated": true,
+ "unresolvable": [],
+ "unresolvable_count": 0
+}

@@ -8,11 +8,12 @@ with fixed headings, never through conversation. Every methodology rule the
 skills apply traces back to a source in `academic.md`, the sheet this plugin is
 derived from — kept local, not shipped.
 
-**Status: chunk 2 of 6, unverified.** The question stage works. Retrieval is
-built — three bundled MCP servers and one scout that snowballs a citation graph
-into a landscape section — and its plumbing is checked against the live API, but
-**its behavioural eval suite has not been run yet**, so treat `/scout` as working
-rather than proven. The rest of the landscape chain — surveys, the seven-way
+**Status: chunk 2 of 6, being verified.** The question stage works. Retrieval
+is built — one standard-library script that snowballs a citation graph into a
+landscape section — and checked against the live API. Its behavioural eval suite
+first ran on 2026-09-13, found the budget was not being enforced, and is being
+re-cut around the script (chunk 2 spec §11); treat `/scout` as working rather
+than proven until that lands. The rest of the landscape chain — surveys, the seven-way
 fan-out, the merger, the matrix and the brief — plus reading, ideation,
 selection and experiments are not built yet. See
 [`docs/design/skills-and-agents.md`](docs/design/skills-and-agents.md) for the
@@ -60,31 +61,44 @@ enforcement here that is not prompt text.
 
 ## How retrieval works
 
-Three MCP servers ship with the plugin and register as
-`plugin:research-bearings:*`:
+One script, standard library only, run on demand and gone when it exits:
 
-| Server | What it is | Used by |
-|---|---|---|
-| `paper-search` | [`paper-search-mcp`](https://pypi.org/project/paper-search-mcp/) — arXiv, Semantic Scholar, OpenAlex, Crossref and more | seed search |
-| `s2-snowball` | ours, `servers/s2_snowball.py` — references, citations, batch metadata over the Semantic Scholar Graph API | every hop |
-| `openreview` | `openreview-mcp` — bundled, dormant until `/reviews` | nothing yet |
+    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" search|references|citations|batch|health ...
 
-Neither of the off-the-shelf servers exposes a references or citations tool,
-which is why the plugin owns one. `s2-snowball` is a single PEP 723 file run by
-`uv run --script`; it needs no install step and carries an offline selftest over
-real captured API responses.
+It talks to the Semantic Scholar Graph API, the one source here that answers
+"what does this paper cite" and "who cites this paper" — the two questions the
+method (Wohlin, Ré) is built on. Keyword search finds papers that use your words;
+following citations finds what the field is built on. Each call prints one JSON
+object. Nothing stays resident, nothing needs installing, and the scout agent's
+Bash is fenced by the guard to this one script and nothing else.
 
-It keeps two caches, deliberately different things:
+Chunk 2 first shipped this as three MCP servers, two of them third-party. That was
+the wrong packaging — a persistent process, an 80-package dependency tree, a 30 s
+cold start, credentials in a file the eval sandbox could not see — and it was
+replaced the day the suite first ran. The chunk 2 spec §11 records why.
 
-- **`~/.claude/plugins/data/research-bearings-rbh227/s2-cache/`** — raw API
-  responses, shared across projects, disposable. Expiry is direction-aware: a
-  paper's reference list never changes, so it never expires; its citation list
-  grows, so it expires in 30 days.
-- **`<project>/research/.papers/`** — one JSON record per paper the crawl
-  touched, including the ones the scout rejected. Greppable, gitignored, and
-  written by the server rather than routed through the model's context. The
-  rejected papers are the point: the paper nearest a future idea is
-  disproportionately likely to be one a scout threw away.
+**The key.** `SEMANTIC_SCHOLAR_API_KEY` in the environment, or one line in
+`~/.config/research-bearings/s2-api-key`. Optional, but effectively required for
+a crawl: unauthenticated calls 429 after a few requests. Without it the scout runs
+degraded and stamps the section.
+
+**The budget.** Every call takes `--run <slug> --budget <N>`. The script keeps a
+ledger at `research/.crawl/<slug>.touched.json` of the distinct papers it has
+handed out, refuses a hop once the ceiling is reached — before spending the
+request — and sizes each hop to what remains. The ceiling used to be a sentence in
+the agent's prompt; told 40, it touched 114–160.
+
+Two on-disk artifacts:
+
+- **`~/.cache/research-bearings/s2/`** — raw API responses, shared across
+  projects, disposable. Expiry is direction-aware: a paper's reference list never
+  changes, so it never expires; its citation list grows, so it expires after 30
+  days.
+- **`research/.papers/<paperId>.json`** — one record per paper touched, in your
+  project. Written by the script rather than the scout: several hundred records
+  through a model's context costs tokens and invites transcription errors. Both
+  `research/.papers/` and `research/.crawl/` are regenerable; `/setup` adds them
+  to your `.gitignore`.
 
 ## What a scout will not do
 
@@ -127,7 +141,7 @@ exists and shows you what the field actually asks, run `frame` again.
 The `static checks` and `one test file` verbs in
 [`docs/agents/toolchain.md`](docs/agents/toolchain.md) are free and fast — run
 them freely. Between them they cover the write-scope guard (13 cases), the
-snowball server offline against real captured API responses (12 cases),
+retrieval script offline against real captured API responses (16 cases),
 template/contract heading parity, and the plugin, skill and agent manifests.
 
 The behavioural suite is the `full suite` verb in
@@ -135,22 +149,12 @@ The behavioural suite is the `full suite` verb in
 than from a copy here, which is how the two drift apart. That file also explains
 why each flag is present.
 
-`Write`, `Edit`, `Agent` and every `mcp__*` tool are gated and must be granted
-explicitly, or cases fail for reasons that look behavioural. `--mocks off` is
-what actually starts the retrieval servers; the default does not start a plugin
-server that has no mock.
-
-Two cases are out of the `ci` tag because this machine cannot run them honestly:
-`setup-checks-before-asking` needs a `Bash` grant (chunk 1 spec §9), and
-`scout-stamps-no-key` needs a machine with no Semantic Scholar key configured
-(chunk 2 spec §9.6).
-
-**Working inside this repo shows three `Pending approval` MCP entries.** The
-plugin's own `.mcp.json` sits at the repo root, so a session opened here reads it
-as a *project* config as well. Do not approve them — project scope does not
-expand `${CLAUDE_PLUGIN_ROOT}` or `${user_config.*}`, so they would either fail to
-start or shadow the bundled copies. They only appear here, and only because
-`source: "./"` makes the plugin root and the project root the same directory.
+`Write`, `Edit`, `Agent` and `Bash` are gated and must be granted explicitly,
+or cases fail for reasons that look behavioural. This machine cannot grant `Bash`
+inside the harness (chunk 1 spec §9), which is why the scout's agent cases hand it
+a saved crawl and judge only what it writes; the crawl itself is covered by the
+script's offline selftest, and finding things by the gold set. `setup-checks-before-asking`
+stays out of the `ci` tag for the same reason.
 
 ## Layout
 
@@ -159,10 +163,9 @@ start or shadow the bundled copies. They only appear here, and only because
 .claude-plugin/marketplace.json    this repo is its own marketplace
 skills/<name>/SKILL.md             user-invoked, run inline
 agents/<name>.md                   contract-bound, dispatched by skills
-.mcp.json                          three bundled MCP servers, auto-discovered
-servers/s2_snowball.py             the citation walker, PEP 723, --selftest
-servers/fixtures/                  real captured API responses the selftest runs on
-hooks/hooks.json + guard.py        write-scope enforcement
+scripts/retrieval/snowball.py      the citation walker: search, hops, budget ledger, --selftest
+scripts/retrieval/fixtures/        real captured API responses the selftest runs on
+hooks/hooks.json + guard.py        write-scope and Bash-scope enforcement
 scripts/check_headings.py          template / contract parity
 templates/research/                the output headings, in one place
 evals/<case>/                      prompt.md + graders/

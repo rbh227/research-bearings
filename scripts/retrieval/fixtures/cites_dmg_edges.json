@@ -1,0 +1,1141 @@
+{
+ "offset": 0,
+ "data": [
+  {
+   "intents": [],
+   "contextsWithIntent": [],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "ce15414720c54deb74da34c5a9856793230b867b",
+    "externalIds": {
+     "PubMedCentral": "13482386",
+     "DOI": "10.1038/s41598-026-67452-7",
+     "CorpusId": 291175425,
+     "PubMed": "42608420"
+    },
+    "title": "CalFireSegNet: a lightweight hybrid attention\u2013transformer network for post-wildfire building footprint change analysis using high-resolution satellite imagery",
+    "venue": "Scientific Reports",
+    "year": 2026,
+    "referenceCount": 29,
+    "citationCount": 0,
+    "openAccessPdf": {
+     "url": "https://www.nature.com/articles/s41598-026-67452-7.pdf",
+     "status": "GOLD",
+     "license": "CCBY",
+     "disclaimer": "Notice: Paper or abstract available at https://pmc.ncbi.nlm.nih.gov/articles/PMC13482386, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Medicine"
+    ],
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "117925260",
+      "name": "Abdullah \u015eener"
+     },
+     {
+      "authorId": "2484982371",
+      "name": "Vedat T\u00fcmen"
+     },
+     {
+      "authorId": "47199664",
+      "name": "B. Ergen"
+     },
+     {
+      "authorId": "2304790174",
+      "name": "Erdal Akin"
+     }
+    ],
+    "abstract": "Natural disasters, particularly wildfires, cause severe human, environmental, and economic losses worldwide. Rapid and accurate identification of building footprints and potential potential structural changes is essential for effective emergency response, search-and-rescue operations, and post-disaster recovery planning. To address the challenges of identifying building loss from remote sensing imagery, this study proposes CalFireSegNet, a lightweight hybrid attention\u2013transformer network for post-wildfire building footprint extraction and loss proxy detection from satellite imagery. The proposed architecture integrates depthwise convolutions, convolutional block attention modules (CBAM), atrous spatial pyramid pooling (ASPP), and Transformer blocks to effectively capture both local structural details and long-range contextual dependencies while maintaining low computational complexity. The model was trained and evaluated using benchmark building segmentation datasets (Inria and WHU) and subsequently applied to pre- and post-event satellite imagery from the recent California wildfires. Experimental results demonstrate that CalFireSegNet achieves superior performance compared with several state-of-the-art semantic segmentation models, including U-Net, PSPNet, DeepLabv3+, ENet, HRNet, and SegNet, obtaining 98.45% accuracy, 94.35% mIoU, and 95.03% Dice Similarity Score while requiring only 3.72 million parameters. Furthermore, a lightweight mask-difference framework was developed to generate a spatial proxy of potential building footprint loss using pre- and post-event satellite pairs. Since publicly available building-level damage annotations for recent California wildfire events remain limited, the real-world wildfire experiments are presented as a validation of cross-domain applicability rather than a fully supervised structural loss proxy estimation benchmark."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "DamageScope [3] and DeepDamageNet [5] use U-Net-style segmentation architectures, while attention-based high-resolution networks and two-step localization/classification pipelines pursue stronger building localization and damage classification under severe class imbalance [31,39].",
+     "intents": []
+    }
+   ],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "fa1835679ffb40318d2d641526d63a71d2e78320",
+    "externalIds": {
+     "ArXiv": "2606.12248",
+     "DBLP": "journals/corr/abs-2606-12248",
+     "DOI": "10.48550/arXiv.2606.12248",
+     "CorpusId": 289167276
+    },
+    "title": "Damage-TriageFormer: A Foundation-Model Framework for Typology-Based Building Damage Assessment from Mono-Temporal Imagery",
+    "venue": "arXiv.org",
+    "year": 2026,
+    "referenceCount": 41,
+    "citationCount": 1,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/2606.12248, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "2355957172",
+      "name": "Yiming Xiao"
+     },
+     {
+      "authorId": "2253675815",
+      "name": "Yu-Hsuan Ho"
+     },
+     {
+      "authorId": "2441893915",
+      "name": "Sanjay Thasma"
+     },
+     {
+      "authorId": "2152611273",
+      "name": "Jun-Wei Ma"
+     },
+     {
+      "authorId": "2308649960",
+      "name": "Ali Mostafavi"
+     }
+    ],
+    "abstract": "Decision-relevant building damage assessment is critical for prioritizing resources and recovery after a disaster, yet most automated methods either flatten damage into a single severity scale (no damage, minor, major, destroyed) or require paired pre- and post-event imagery that is often unavailable for emerging hazards. This paper presents Damage-TriageFormer, a single-image, post-event, footprint-conditioned model that produces a damage typology rather than a severity scale. We contribute: (1) DamageTriage-Bench, a new benchmark built from NOAA Emergency Response Imagery across Hurricane Michael (2018), Hurricane Helene (2024), and the 2025 Los Angeles wildfire complex, with five typology classes that distinguish roof damage from structural damage and, within each, partial from total extent; and (2) Damage-TriageFormer, which extends a DINOv3 ViT-L backbone with a Simple Feature Pyramid for higher-resolution instance pooling, a two-stage gated damage head, and an auxiliary severity-regression objective. Our model achieves macro F1 of 0.624 on validation and 0.619 on a held-out stratified test set, performing strongest where operational triage needs it most, with per-class F1 of 0.91 and 0.84 on undamaged buildings and total structural collapse, respectively. While the rare Total Roof Damage class remains difficult due to its limited examples and an inherently ambiguous label boundary, our results show that single-image post-event imagery can support actionable building damage typing, enabling targeted emergency response and resource allocation without a pre-event reference."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "U-Net U-Net [7], DeepLabv3+ [8], and disaster-specific models like DeepDamageNet [9] improved results.",
+     "intents": []
+    }
+   ],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "528a9bf46343d5c1c35baa002a9cb5297e0893f3",
+    "externalIds": {
+     "DOI": "10.1109/EITCE70137.2026.11634487",
+     "CorpusId": 291043636
+    },
+    "title": "Harmonizing Frequency Preferences Across Damage Levels: A Class-Gated Distillation Method for Disaster Assessment",
+    "venue": "2026 10th International Conference on Electronic Information Technology and Computer Engineering (EITCE)",
+    "year": 2026,
+    "referenceCount": 12,
+    "citationCount": 0,
+    "openAccessPdf": {
+     "url": "",
+     "status": "CLOSED",
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1109/EITCE70137.2026.11634487?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1109/EITCE70137.2026.11634487, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": null,
+    "publicationTypes": [
+     "Conference"
+    ],
+    "authors": [
+     {
+      "authorId": "2456533632",
+      "name": "Song Wang"
+     },
+     {
+      "authorId": "2292328167",
+      "name": "Xiangbo Suo"
+     },
+     {
+      "authorId": "2457300568",
+      "name": "Yufei Li"
+     },
+     {
+      "authorId": "2265224035",
+      "name": "Li Fan"
+     }
+    ],
+    "abstract": "Unmanned Aerial Vehicles (UAVs) enable rapid disaster response, but limited onboard computing demands low-latency inference. Knowledge distillation solves this by transferring knowledge from a large teacher to a lightweight student deployable on UAVs. In UAV-based disaster assessment, different classes have different spatial-frequency requirements. Classes with sharp boundaries\u2014pools, water surfaces, debris\u2014tend to favor high-frequency detail, while large homogeneous surfaces like roads and sand favor low-frequency context. Building damage categories span a spectrum between these extremes. Existing methods like DisasterKD use a single global coefficient to balance low- and high-frequency losses across all classes. This uniform approach limits performance on the categories most critical for rescue: moderately and severely damaged buildings.We propose FreqGate to solve this problem. It is a lightweight extension that replaces the global coefficient with per-class learnable gates, each constrained to (0,1) by a sigmoid function. A per-class loss normalization (with stop-gradient) is introduced to prevent gradient shortcuts caused by scale disparity between low- and high-frequency losses, allowing the gates to capture genuine class-specific frequency preferences. FreqGate adds only C parameters (C = number of classes), if all gates become equal, it reduces exactly to the original DisasterKD. So our method is a strict generalization.We tested FreqGate on the RescueNet benchmark. It improves mIoU by 0.52% over DisasterKD. All four building damage categories gain, with BAD improving by 2.11%. The learned gate values show that classes with sharp boundaries\u2014pools, water with surface ripples, scattered debris\u2014get the highest \u03b1c, while large homogeneous surfaces stay lower."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "For example, DeepDamageNet, proposed by Alisjahbana et al. ( 2024 ), is best for multi-disaster damage classification using a two-step CNN.",
+     "intents": []
+    }
+   ],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "e354f626d65a03e72a802cba3f172f3a62b3c536",
+    "externalIds": {
+     "DOI": "10.1007/s11069-026-08185-8",
+     "CorpusId": 288328007
+    },
+    "title": "Feature-based framework for evaluating deep learning models in post-disaster building damage assessment under diverse natural hazards",
+    "venue": "Natural Hazards",
+    "year": 2026,
+    "referenceCount": 35,
+    "citationCount": 2,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: The following paper fields have been elided by the publisher: {'abstract'}. Paper or abstract available at https://api.unpaywall.org/v2/10.1007/s11069-026-08185-8?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1007/s11069-026-08185-8, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": null,
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": null,
+      "name": "Milad Farmahini Farahani"
+     },
+     {
+      "authorId": "2515775",
+      "name": "M. Nikoo"
+     },
+     {
+      "authorId": null,
+      "name": "Houshang Dolatshahi Pirooz"
+     },
+     {
+      "authorId": "2188542472",
+      "name": "A. Shadmani"
+     },
+     {
+      "authorId": "2238700690",
+      "name": "Amir H. Gandomi"
+     }
+    ],
+    "abstract": null
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "U-Net-based architecture, including attention mechanism, has also proved to be useful for the change detection task in several past works [14].",
+     "intents": []
+    },
+    {
+     "context": "We got a 8.66% increase in the overall F1 score compared to DeepDamageNet [14] and a 1.27% increase compared with the ranked place 2 in Track 3 of the challenge [15].",
+     "intents": []
+    },
+    {
+     "context": "The work in [14] uses a unified framework that integrates building segmentation with damage classification in the context of the xView2 challenge.",
+     "intents": []
+    }
+   ],
+   "isInfluential": true,
+   "citingPaper": {
+    "paperId": "c7a0da4730bbf13b7ebf3f940972425b33b522e4",
+    "externalIds": {
+     "DBLP": "conf/iccnc/NipaCS26",
+     "DOI": "10.1109/ICNC68183.2026.11416976",
+     "CorpusId": 286434471
+    },
+    "title": "ImpactNet: A Robust Two-Stage Disaster Damage Mapping Model For Cross-Domain Satellite Imagery",
+    "venue": "International Conference on Computing, Networking and Communications",
+    "year": 2026,
+    "referenceCount": 18,
+    "citationCount": 0,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1109/ICNC68183.2026.11416976?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1109/ICNC68183.2026.11416976, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle",
+     "Conference"
+    ],
+    "authors": [
+     {
+      "authorId": "2268562435",
+      "name": "Nishat Ara Nipa"
+     },
+     {
+      "authorId": "2408939526",
+      "name": "Mohammed Hamza Chao"
+     },
+     {
+      "authorId": "2268539529",
+      "name": "Sachin Shetty"
+     }
+    ],
+    "abstract": "Rapid assessment of damage and situational information is essential for effective restoration and recovery following a natural disaster. Addressing the current limitation with manual interpretation, significant efforts have been made to automate the process by leveraging satellite imagery with an unbiased overhead view of pre- and post-disaster scenarios. Existing approaches in segmenting and classifying damaged buildings often fall short in scenarios where damaged and undamaged buildings coexist within close proximity. In this work, we propose a two-stage disaster damage framework that localizes buildings through segmentation and then classifies the associated damage level at an object level. The framework employs a Siamese Vision Transformer (ViT-Small) backbone to create a rich feature representation that is informed by the entire scene. From this map, building-specific features are extracted, enabling robust identification of subtle and complex damage patterns often missed by pixelbased models. Experimental results demonstrate a localization F1 score of 0.8485 and a damage classification F1 score of 0.71, yielding an overall F1 score of 0.7507. These results surpass the baseline by a significant margin and outperform existing state-of-the-art solutions, while ensuring generalizability under high class imbalance and domain shift."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "\u2026combines machine learning and computer vision with satellite imagery to identify buildings damaged in natural disasters, reducing danger and saving time for first responders who would otherwise make manual assessments, while helping search-and-rescue teams quickly identify priority areas (96).",
+     "intents": []
+    }
+   ],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "a1bf62e6e7c3316fb8722ed395fb2885ca2cf1ed",
+    "externalIds": {
+     "PubMedCentral": "12727988",
+     "DOI": "10.3389/fpubh.2025.1707306",
+     "CorpusId": 283871592,
+     "PubMed": "41450491"
+    },
+    "title": "Filling the gap: artificial intelligence-driven one health integration to strengthen pandemic preparedness in resource-limited settings",
+    "venue": "Frontiers in Public Health",
+    "year": 2025,
+    "referenceCount": 109,
+    "citationCount": 6,
+    "openAccessPdf": {
+     "url": "https://public-pages-files-2025.frontiersin.org/journals/public-health/articles/10.3389/fpubh.2025.1707306/pdf",
+     "status": "GOLD",
+     "license": "CCBY",
+     "disclaimer": "Notice: Paper or abstract available at https://pmc.ncbi.nlm.nih.gov/articles/PMC12727988, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Medicine"
+    ],
+    "publicationTypes": [
+     "Review",
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "2398336145",
+      "name": "Disha Mukherjee"
+     },
+     {
+      "authorId": "2307007865",
+      "name": "K. Sagar"
+     },
+     {
+      "authorId": "2130008799",
+      "name": "R. Kobialka"
+     },
+     {
+      "authorId": "2376970774",
+      "name": "Prakash Ghosh"
+     },
+     {
+      "authorId": "2284058341",
+      "name": "Manfred Weidmann"
+     },
+     {
+      "authorId": "6901651",
+      "name": "B. A. Savareh"
+     },
+     {
+      "authorId": "3000455",
+      "name": "S. Joardar"
+     },
+     {
+      "authorId": "2277714142",
+      "name": "Uwe Truyen"
+     },
+     {
+      "authorId": "7342691",
+      "name": "Ahmed Abd El Wahed"
+     },
+     {
+      "authorId": "2274669274",
+      "name": "Arianna Ceruti"
+     }
+    ],
+    "abstract": "Emerging zoonotic pathogens like SARS-CoV-2 and Nipah virus demonstrate the critical need for integrated surveillance systems connecting human, animal, and environmental health. This review examines how artificial intelligence can address One Health integration gaps in pandemic surveillance, focusing on resource-limited settings. While global digitization levels now support Artificial Intelligence (AI)-powered platforms, LMICs face barriers including limited resources and fragmented data systems. Current AI tools remain domain-specific and designed for high-income settings, limiting its applicability to pandemic preparedness in low-resource settings. Existing AI-tools and gaps are described and put into perspective within an AI-driven One Health framework, specifically for LMICs. The framework exemplifies resource optimization, governance, sectoral collaboration, capacity building, health system integration, geographic accessibility, and prioritization. The framework also features an exemplified dual solution combining Graph Neural Networks for integrated risk assessment with offline-first mobile applications for community surveillance. AI technologies offer substantial potential for pandemic preparedness through automated data harmonization, predictive modeling, and resource optimization. However, successful implementation requires concurrent digitization, cultural adaptation, and local capacity building. Prioritizing mobile solutions with minimal infrastructure requirements alongside community engagement will be essential for creating equitable AI-based surveillance systems in LMICs."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "a84c46841f5414eb5a27958dc01eb30626342bf5",
+    "externalIds": {
+     "DOI": "10.1680/jfoen.25.00025",
+     "CorpusId": 283058311
+    },
+    "title": "Damage assessment of bridges using segmentation and shape analysis from aerial imagery",
+    "venue": "Proceedings of the Institution of Civil Engineers: Forensic Engineering",
+    "year": 2025,
+    "referenceCount": 17,
+    "citationCount": 2,
+    "openAccessPdf": {
+     "url": "https://www.emerald.com/jfoen/article-pdf/doi/10.1680/jfoen.25.00025/10682504/jfoen.25.00025en.pdf",
+     "status": "HYBRID",
+     "license": "CCBY",
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1680/jfoen.25.00025?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1680/jfoen.25.00025, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": null,
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "2183524714",
+      "name": "Shiori Kubo"
+     },
+     {
+      "authorId": "2289733430",
+      "name": "Shi-Tao Zheng"
+     },
+     {
+      "authorId": "71578915",
+      "name": "P. Chun"
+     }
+    ],
+    "abstract": "Rapid and quantitative assessment of bridge damage immediately after a disaster is critical for effective emergency response and early recovery. In this study, a method was developed to apply the YOLOv8 segmentation model to aerial imagery for detecting and classifying bridges based on the presence or absence of damage and to estimate bridge length and width from the detected regions to evaluate changes in shape dimensions. The results confirmed that for undamaged bridges, both bridge length and width could be estimated with high accuracy. In contrast, for damaged bridges, debris accumulation and inundation often resulted in only partial detection of the bridge, leading to a tendency for dimensional underestimation, particularly in the bridge length direction. Furthermore, it was confirmed that damage caused changes in the relative scaling relationship between bridge length and width, disrupting the original balance between these dimensions. These findings indicate that the observed dimensional shrinkage is not merely an estimation error but a quantitative characteristic of damage itself. This suggests that analysing changes in shape dimensions is a potentially effective method for detecting the presence of bridge damage."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "Alisjahbana et al. [6] proposed a two-step CNN for building damage segmentation (0.66 F1).",
+     "intents": []
+    }
+   ],
+   "isInfluential": true,
+   "citingPaper": {
+    "paperId": "96770ba7c686fbca795ca70a9b3b2f48ab2d9281",
+    "externalIds": {
+     "ArXiv": "2509.21609",
+     "CorpusId": 286424475
+    },
+    "title": "VLCE: A Knowledge-Enhanced Framework for Image Description in Disaster Assessment",
+    "venue": "",
+    "year": 2025,
+    "referenceCount": 39,
+    "citationCount": 1,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/2509.21609, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": null,
+    "authors": [
+     {
+      "authorId": "2319940604",
+      "name": "Md. Mahfuzur Rahman"
+     },
+     {
+      "authorId": "2275628567",
+      "name": "K. Gupta"
+     },
+     {
+      "authorId": "2212068890",
+      "name": "Marufa Kamal"
+     },
+     {
+      "authorId": "2382761785",
+      "name": "Fahad Rahman"
+     },
+     {
+      "authorId": "2137041681",
+      "name": "Sunzida Siddique"
+     },
+     {
+      "authorId": "2348096444",
+      "name": "Ahmed Rafi Hasan"
+     },
+     {
+      "authorId": "2267048551",
+      "name": "Mohd Ariful Haque"
+     },
+     {
+      "authorId": "2199984312",
+      "name": "Roy George"
+     }
+    ],
+    "abstract": "General-purpose vision-language models (VLMs) such as LLaVA and QwenVL produce descriptions of disaster imagery that lack domain-specific vocabulary and actionable detail. We propose the Vision-Language Caption Enhancer (VLCE), a framework that integrates external semantic knowledge from ConceptNet and WordNet into the caption generation process for post-disaster satellite and UAV imagery. VLCE operates in two stages: first, a baseline VLM generates an initial caption conditioned on YOLOv8 object detections; second, a knowledge-enriched sequential model, a CNN-LSTM or a hierarchical cross-modal Transformer, refines the caption using a vocabulary augmented with 1,566 domain-relevant terms extracted from knowledge graphs. We evaluate VLCE on two disaster benchmarks: xBD (satellite, 6,369 images, 3 damage classes) and RescueNet (UAV, 4,494 images, 12 damage classes), using CLIPScore for semantic alignment and InfoMetIC for informativeness. On RescueNet with the Transformer decoder, VLCE with knowledge graph enrichment produces captions preferred over QwenVL baselines in 95.33% of image pairs on InfoMetIC and 73.64% on CLIPScore. Qualitative analysis shows that without knowledge graph integration, generated captions exhibit hallucinations, word repetition, and semantic incoherence, whereas knowledge-enriched captions maintain factual consistency and domain-appropriate vocabulary."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "In addition, [9] presented Deep DamageNet, a two-stage deep learning model using satellite images for damage classification and multi-disaster building segmentation.",
+     "intents": []
+    }
+   ],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "8528523d746aff9f646c0d12231099bacff07bf2",
+    "externalIds": {
+     "DOI": "10.1109/AiDAS67696.2025.11213776",
+     "CorpusId": 282762352
+    },
+    "title": "Implementation of CNN for Building Damage Classification of Tsunami Post-Disaster in Indonesia",
+    "venue": "2025 6th International Conference on Artificial Intelligence and Data Sciences (AiDAS)",
+    "year": 2025,
+    "referenceCount": 16,
+    "citationCount": 1,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1109/AiDAS67696.2025.11213776?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1109/AiDAS67696.2025.11213776, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": null,
+    "publicationTypes": [
+     "Conference"
+    ],
+    "authors": [
+     {
+      "authorId": "2090963698",
+      "name": "Sidharta Sidharta"
+     },
+     {
+      "authorId": "2085415998",
+      "name": "Haryono Soeparno"
+     },
+     {
+      "authorId": "75044099",
+      "name": "M. Suangga"
+     },
+     {
+      "authorId": "1882065",
+      "name": "Widodo Budiharto"
+     }
+    ],
+    "abstract": "Indonesia suffers frequent natural disasters, including tsunamis, which cause significant damage to infrastructure. One major event is the 2004 Aceh tsunami, which claimed over 170,000 lives and destroyed many buildings. In this context, improving emergency response and enabling post-disaster recovery plans are crucial for accurate and quick categorization of building damage levels. This study employs Convolutional Neural Networks (CNN), a deep learning approach for image data processing, thereby allowing the identification of complex patterns like damage levels and building footprints. The study uses a local dataset including preand post-disaster tsunami images from Indonesia, split into \u201cdamaged\u201d and \u201cnot damaged\u201d categories. Built on the EfficientNet architecture\u2014known for its efficiency in handling visual data\u2014the CNN model was trained on 702 images. Subsequently, the model was tested for accuracy, precision, recall, and F1-score metrics. The results display an accuracy of 80.14%; precision of 73.32%; recall of 77.57%; and an F1-score of 74.78%. Although these findings are promising, the model's damage detection sensitivity still has room for improvement. This study offers a great contribution by using a local dataset, thus producing a model more relevant for the social and geographical settings of Indonesia. The deployment of CNN substantially reduces damage assessment time compared to hand-operated techniques, which then enables faster and more effective decision-making in rehabilitation projects. Additionally, these findings lead to opportunities for further development in technology-based disaster mitigation."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "Similarly, [6] developed a DL pipeline using the xBD dataset, integrating a semantic segmentation for building identification and classification for damage level assessment, both realized through Convolutional Neural Networks (CNNs), effectively addressing post-disaster damage from various natural\u2026",
+     "intents": []
+    }
+   ],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "bc29503f03b5b822bcc00cde522a02dc23f7e05e",
+    "externalIds": {
+     "DOI": "10.1109/IGARSS55030.2025.11242533",
+     "CorpusId": 283271457
+    },
+    "title": "A Deep Learning System for Building Damage Assessment Using VHR COSMO-Skymed Imagery for the 2023 Kahramanmara\u015f Earthquake",
+    "venue": "IEEE International Geoscience and Remote Sensing Symposium",
+    "year": 2025,
+    "referenceCount": 9,
+    "citationCount": 0,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1109/IGARSS55030.2025.11242533?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1109/IGARSS55030.2025.11242533, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": null,
+    "publicationTypes": null,
+    "authors": [
+     {
+      "authorId": "2282136654",
+      "name": "Luigi Russo"
+     },
+     {
+      "authorId": "2303532123",
+      "name": "D. Tapete"
+     },
+     {
+      "authorId": "1698957",
+      "name": "S. Ullo"
+     },
+     {
+      "authorId": "2281740909",
+      "name": "Paolo Gamba"
+     }
+    ],
+    "abstract": "Natural disasters like earthquakes require quick and accurate responses to minimize human and economic losses. This paper presents a method for rapid earthquake damage assessment using very high-resolution (VHR) COSMO-SkyMed (CSK) Synthetic Aperture Radar (SAR) imagery and Deep Learning (DL). In a two-phase pipeline, a lightweight, differencing-based Siamese U-Net with Dice regularization was first trained for binary change detection (CD) and then fine-tuned for multi-class building damage assessment. Training employed pre- and post-event COSMO-SkyMed (CSK) imagery over Malatya and Osmaniye (T\u00fcrkiye), with ground truth (GT) obtained by combining Copernicus Emergency Management Service (CEMS) activation maps and OpenStreetMap (OSM) building polygons from the Humanitarian Data Exchange (HDX) Team. Notably, the Siamese U-Net achieved the best overall performance and outperformed larger models like MS4D-Net and transformer-based architectures such as SegTransformer. Ignoring the Dice term caused a clear drop in accuracy, highlighting its benefit for limited, imbalanced training data. These results confirm that a lightweight Siamese U-Net with Dice loss produces robust and accurate building damage maps, offering a scalable alternative to traditional labor-intensive visual assessments methods. Future work will expand the labeled dataset and investigate domain-adaptation techniques to ensure transferability across different regions and disaster scenarios."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "Deep learning models like U-Net have shown promise in satellite image analysis; however, their applicability in real-time scenarios is constrained by the high-resolution demands of input data [4].",
+     "intents": []
+    },
+    {
+     "context": "As shown in this paper tackled a different but related problem: the use of satellite imagery for damage mapping after natural disasters [4].",
+     "intents": []
+    }
+   ],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "9ed26ea0c47605a6b30bdb9769ca9e62691df044",
+    "externalIds": {
+     "DOI": "10.1109/ITC-Egypt66095.2025.11186605",
+     "CorpusId": 282073431
+    },
+    "title": "Transformer-Based Anomaly Detection in Satellite IoT: A Hybrid Approach with Rotary Embedding and Kernelized Attention",
+    "venue": "2025 International Telecommunications Conference (ITC-Egypt)",
+    "year": 2025,
+    "referenceCount": 15,
+    "citationCount": 0,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1109/ITC-Egypt66095.2025.11186605?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1109/ITC-Egypt66095.2025.11186605, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": null,
+    "publicationTypes": [
+     "Conference"
+    ],
+    "authors": [
+     {
+      "authorId": "2343840966",
+      "name": "Youssef Maaod"
+     },
+     {
+      "authorId": "2385637553",
+      "name": "Ahmed Yasser Lotfy Belaih"
+     },
+     {
+      "authorId": "2257144373",
+      "name": "Nabila Ahmed Ali"
+     },
+     {
+      "authorId": "2385614303",
+      "name": "Jomana Farag Soliman Mohamed"
+     },
+     {
+      "authorId": "37118946",
+      "name": "F. Ahmed"
+     },
+     {
+      "authorId": "2257055767",
+      "name": "Aly Maher Abdelfattah"
+     },
+     {
+      "authorId": "2305929188",
+      "name": "M. Fouad"
+     },
+     {
+      "authorId": "2196344868",
+      "name": "Mohamed Abd Elaziz"
+     }
+    ],
+    "abstract": "Satellite-based Internet of Things (IoT) systems provide crucial connectivity for remote applications; however, they face challenges such as limited bandwidth and noisy data. To address these issues, we propose a novel hybrid Transformer architecture for anomaly detection in satellite IoT imagery. Our model integrates Rotary Positional Encoding to capture spatial relationships and Kernelized Attention for efficient non-linear feature extraction. We compare proposed hybrid approach with Rotary-only and Kernelized-only Transformers, demonstrating that the hybrid model achieves superior performance with an accuracy of 95.62% and a ROC-AUC of 99.44%. The results highlight the potential of our method to enhance the reliability of satellite-based IoT systems, particularly in challenging environments."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "Despite these limitations, AI-driven building segmentation plays a critical role in broader environmental monitoring applications, such as disaster management and post-disaster damage assessment (Alisjahbana et al. 2024; Gupta and Shah 2021).",
+     "intents": []
+    }
+   ],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "28e9d2e0947e8bedd01d3fa468dfd212eccef0ce",
+    "externalIds": {
+     "DOI": "10.1177/27539687251357020",
+     "CorpusId": 280067036
+    },
+    "title": "Artificial intelligence in environmental remote sensing: Progress, way forward and key considerations",
+    "venue": "Progress in Environmental Geography",
+    "year": 2025,
+    "referenceCount": 203,
+    "citationCount": 5,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1177/27539687251357020?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1177/27539687251357020, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": null,
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "82241277",
+      "name": "C. Maniyar"
+     },
+     {
+      "authorId": "2143818450",
+      "name": "Xin Yan"
+     },
+     {
+      "authorId": "2254520205",
+      "name": "Gengchen Mai"
+     },
+     {
+      "authorId": "2352665135",
+      "name": "D. Srivastava"
+     },
+     {
+      "authorId": "2113934",
+      "name": "Sathishkumar Samiappan"
+     },
+     {
+      "authorId": "2372522356",
+      "name": "Arman Oliazadeh"
+     },
+     {
+      "authorId": "2237838133",
+      "name": "Abhishek Kumar"
+     },
+     {
+      "authorId": "2157777140",
+      "name": "Minakshi Kumar"
+     },
+     {
+      "authorId": "2292419990",
+      "name": "Deepak R. Mishra"
+     }
+    ],
+    "abstract": "Environmental remote sensing (ERS) has been a cornerstone technology for decades, allowing for comprehensive monitoring and management of ecosystems. Recent advancements in artificial intelligence (AI), particularly machine learning (ML) and deep learning (DL), have transformed the field of ERS by offering robust, data-driven solutions for analyzing complex, large-scale remote sensing datasets and answering important scientific questions. This intervention explores the diverse applications of AI in ERS, focusing on key domains such as water, agriculture, urban, and wetland monitoring. This work also includes discussions on crucial aspects such as the impact of foundation models in ERS and outlines key points on the ethical and responsible use of AI in ERS. The intervention is concluded by identifying promising next steps for future research."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "Finally, we rigorously evaluate the model\u2019s performance using multiple metrics (e.g., IoU, F1) to demonstrate its utility under real-world conditions, and we discuss the operational implications for disaster response, such as more informed resource allocation and prioritization of recovery efforts.",
+     "intents": []
+    }
+   ],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "9fc6d12bde18154b1089b8cd20f0f412a98aeadf",
+    "externalIds": {
+     "DBLP": "journals/corr/abs-2504-11637",
+     "ArXiv": "2504.11637",
+     "DOI": "10.1016/j.ijdrr.2025.105704",
+     "CorpusId": 277824328
+    },
+    "title": "DamageCAT: A Deep Learning Transformer Framework for Typology-Based Post-Disaster Building Damage Categorization",
+    "venue": "International Journal of Disaster Risk Reduction",
+    "year": 2025,
+    "referenceCount": 55,
+    "citationCount": 17,
+    "openAccessPdf": {
+     "url": "https://doi.org/10.1016/j.ijdrr.2025.105704",
+     "status": "HYBRID",
+     "license": "CCBY",
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/2504.11637, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "2355957172",
+      "name": "Yiming Xiao"
+     },
+     {
+      "authorId": "2307914624",
+      "name": "Ali Mostafavi"
+     }
+    ],
+    "abstract": "Rapid, accurate, and descriptive building damage assessment is critical for directing post-disaster resources, yet current automated methods typically provide only binary (damaged/undamaged) or ordinal severity scales. This paper introduces DamageCAT, a framework that advances damage assessment through typology-based categorical classifications. We contribute: (1) the BD-TypoSAT dataset containing satellite image triplets from Hurricane Ida with four damage categories - partial roof damage, total roof damage, partial structural collapse, and total structural collapse - and (2) a hierarchical U-Net-based transformer architecture for processing pre- and post-disaster image pairs. Our model achieves 0.737 IoU and 0.846 F1-score overall, with cross-event evaluation demonstrating transferability across Hurricane Harvey, Florence, and Michael data. While performance varies across damage categories due to class imbalance, the framework shows that typology-based classifications can provide more actionable damage assessments than traditional severity-based approaches, enabling targeted emergency response and resource allocation."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "In dammage classification using high resolution satellite imagery, B. Strong et al. [3] advocate this using CNN based framework that have achieved higher accuracy in comparison to classical computer vision algorithms.",
+     "intents": []
+    }
+   ],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "8b15e23c157d6a1056381f46ceb0e99cf55f3af5",
+    "externalIds": {
+     "DOI": "10.1109/CCICT65753.2025.00044",
+     "CorpusId": 280391921
+    },
+    "title": "Post-Disaster Damage Analysis Using Deep Learning Techniques and Convolutional Neural Networks (CNNs)",
+    "venue": "2025 Seventh International Conference on Computational Intelligence andCommunication Technologies (CCICT)",
+    "year": 2025,
+    "referenceCount": 29,
+    "citationCount": 0,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1109/CCICT65753.2025.00044?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1109/CCICT65753.2025.00044, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": null,
+    "publicationTypes": [
+     "Conference"
+    ],
+    "authors": [
+     {
+      "authorId": "2343671706",
+      "name": "Sanjay Singla"
+     },
+     {
+      "authorId": "2282218163",
+      "name": "Priyanshu"
+     },
+     {
+      "authorId": "46650321",
+      "name": "Rohit"
+     },
+     {
+      "authorId": "2350016158",
+      "name": "Aryan Swami"
+     },
+     {
+      "authorId": "2396614626",
+      "name": "L. Singh"
+     },
+     {
+      "authorId": "71040569",
+      "name": "Priti Singla"
+     }
+    ],
+    "abstract": "In disaster response and recovery, post disaster damage assessment is an important piece that should be done. Damage assessment methods of the traditional type tend to be laborious, time consuming and prone to human error. This thesis investigates recent advancements in deep learning forums \u2014 such as Convolutional Neural Networks (CNNs) \u2014 in using automated and improved accuracy to automatically and optimize the damage analysis for postdisaster. This work presents a comprehensive framework of post disaster building damage detection through CNN\u2019s trained on high resolution satellite and aerial imagery. Using the state of the art deep learning architectures including multi scale feature extraction and attention mechanism, our proposed approach is able to obtain the increased classification accuracy and increased segmentation precision on detection of damaged structures. CNN\u2019s have proven to be effective in disaster situation scenarios including earthquakes, floods, and hurricanes (disaster caused) already using them to assess structural damage levels [3]. By combining the multi-temporal analysis and explainable AI (XAI) techniques, we improve prior methodologies by bringing model interpretability and decision making [19]. We demonstrate that our model is bereft with errors, valid for a wide range of disasters, and surpasses other methods in terms of accuracy as well as adaptability to different types of disasters obtained on benchmark disaster datasets. Our findings support the effort to enhance AI-driven decision support systems for quick disaster response and asset allocation. We then integrate real time satellite feed and improve the transfer learning strategies for adapting to unseen disaster events domain."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "For instance, the authors of [20] propose to address the limitations in manual interpretation during building damage by using automatic classification by coupling a convolutional neural network (CNN)- based building identification model with a building damage classification CNN.",
+     "intents": []
+    }
+   ],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "3bf59c46d0f31ab87cf3c31f5ddc9d482353172c",
+    "externalIds": {
+     "DBLP": "journals/corr/abs-2412-10756",
+     "ArXiv": "2412.10756",
+     "DOI": "10.48550/arXiv.2412.10756",
+     "CorpusId": 274777501
+    },
+    "title": "Damage Assessment after Natural Disasters with UAVs: Semantic Feature Extraction using Deep Learning",
+    "venue": "arXiv.org",
+    "year": 2024,
+    "referenceCount": 37,
+    "citationCount": 0,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/2412.10756, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "2242950043",
+      "name": "Nethmi S. Hewawiththi"
+     },
+     {
+      "authorId": "2242949119",
+      "name": "M. M. Viduranga"
+     },
+     {
+      "authorId": "2158166603",
+      "name": "Vanodhya G. Warnasooriya"
+     },
+     {
+      "authorId": "34735743",
+      "name": "Tharindu Fernando"
+     },
+     {
+      "authorId": "1748781",
+      "name": "H. Suraweera"
+     },
+     {
+      "authorId": "1729760",
+      "name": "S. Sridharan"
+     },
+     {
+      "authorId": "3140440",
+      "name": "C. Fookes"
+     }
+    ],
+    "abstract": "Unmanned aerial vehicle-assisted disaster recovery missions have been promoted recently due to their reliability and flexibility. Machine learning algorithms running onboard significantly enhance the utility of UAVs by enabling real-time data processing and efficient decision-making, despite being in a resource-constrained environment. However, the limited bandwidth and intermittent connectivity make transmitting the outputs to ground stations challenging. This paper proposes a novel semantic extractor that can be adopted into any machine learning downstream task for identifying the critical data required for decision-making. The semantic extractor can be executed onboard which results in a reduction of data that needs to be transmitted to ground stations. We test the proposed architecture together with the semantic extractor on two publicly available datasets, FloodNet and RescueNet, for two downstream tasks: visual question answering and disaster damage level classification. Our experimental results demonstrate the proposed method maintains high accuracy across different downstream tasks while significantly reducing the volume of transmitted data, highlighting the effectiveness of our semantic extractor in capturing task-specific salient information."
+   }
+  },
+  {
+   "intents": [
+    "background"
+   ],
+   "contextsWithIntent": [
+    {
+     "context": "Research using deep learning in computer vision employed relatively shallow CNNs to assess the condition of buildings [3, 13] and also two-step classifiers for semantic segmentation and further damage assessment of objects in single images [2].",
+     "intents": [
+      "background"
+     ]
+    }
+   ],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "d9ed6292c810ae5b5a0f5d2b7b17491865d8af26",
+    "externalIds": {
+     "DBLP": "journals/corr/abs-2410-21901",
+     "ArXiv": "2410.21901",
+     "DOI": "10.1109/ACCESS.2024.3459424",
+     "CorpusId": 272632870
+    },
+    "title": "Multi-Step Feature Fusion for Natural Disaster Damage Assessment on Satellite Images",
+    "venue": "IEEE Access",
+    "year": 2024,
+    "referenceCount": 59,
+    "citationCount": 6,
+    "openAccessPdf": {
+     "url": "https://doi.org/10.1109/access.2024.3459424",
+     "status": "GOLD",
+     "license": "CCBYNCND",
+     "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/2410.21901, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "117594745",
+      "name": "M. \u017barski"
+     },
+     {
+      "authorId": "1726096",
+      "name": "Jaroslaw Adam Miszczak"
+     }
+    ],
+    "abstract": "Quick and accurate assessment of the damage state of buildings after natural disasters is crucial for undertaking properly targeted rescue and subsequent recovery operations, which can have a major impact on the safety of victims and the cost of disaster recovery. The quality of such a process can be significantly improved by harnessing the potential of machine learning methods in computer vision. This paper presents a novel damage assessment method using an original multi-step feature fusion network for the classification of the damage state of buildings based on pre- and post-disaster large-scale satellite images. We introduce a novel convolutional neural network (CNN) module that performs feature fusion at multiple network levels between pre- and post-disaster images in the horizontal and vertical directions of CNN network. An additional network element \u2013 Fuse Module \u2013 was proposed to adapt any CNN model to analyze image pairs in the issue of pair classification. We use, open, large-scale datasets (IDA-BD and xView2) to verify, that the proposed method is suitable to improve on existing state-of-the-art architectures. We report over a 3 percentage point increase in the accuracy of the Vision Transformer model."
+   }
+  },
+  {
+   "intents": [
+    "methodology"
+   ],
+   "contextsWithIntent": [
+    {
+     "context": "In this study, besides using pre-trained ResNet 34 from ChangeOS (input is pre-and post-event imagery), we train a U-Net model for building localization (BL) and damage classification (DC) as we follow part of the methodology proposed in [8, 13, 14].",
+     "intents": [
+      "methodology"
+     ]
+    },
+    {
+     "context": "Subsequently, we train U-Net only on post-event imagery (cropped drone imagery with building polygons as proposed in [14]) for DC considering that EDDA has no pre-event imagery.",
+     "intents": [
+      "methodology"
+     ]
+    }
+   ],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "fedd10de74ac58f257a07c90197a1e6c9f21b146",
+    "externalIds": {
+     "DBLP": "conf/igarss/NhangumbeNBG24",
+     "DOI": "10.1109/IGARSS53475.2024.10642933",
+     "CorpusId": 272432149
+    },
+    "title": "Post Flooding Scenario Analysis: Case Study of Cyclone IDAI in Mozambique",
+    "venue": "IEEE International Geoscience and Remote Sensing Symposium",
+    "year": 2024,
+    "referenceCount": 16,
+    "citationCount": 0,
+    "openAccessPdf": {
+     "url": "",
+     "status": "CLOSED",
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1109/IGARSS53475.2024.10642933?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1109/IGARSS53475.2024.10642933, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "100520647",
+      "name": "M. Nhangumbe"
+     },
+     {
+      "authorId": "46750903",
+      "name": "A. Nascetti"
+     },
+     {
+      "authorId": "2271780262",
+      "name": "Yi-Fang Ban"
+     },
+     {
+      "authorId": "37350530",
+      "name": "S. Georganos"
+     }
+    ],
+    "abstract": "Floods are one of the most destructive disasters worldwide and although they largely happen in rural, ruther than in urban areas, it is in the urban areas that substantial destruction of infrastructures is observed. Thus, cost effective methods to monitor flood damage and extent are required. In this paper, we investigate the implementation of U-Net on satellite and drone image dataset such as xBD and EDDA for building damage assessment in Mozambique. The recently published dataset EDDA was created by the National Institute for Disaster Management (INGD) and comprises drone imagery of Beira, in Mozambique. Using them, we obtained a dice score of 0.76 on building localization (BL) and mean intersection over the union (mIoU) of 0.54 on damage classification (DC). These are promising results considering that many datasets lack detailed information on African buildings. We also use some pre-trained models models such as ResNet for BL and DC."
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [
+    {
+     "context": "The authors in [11] propose a two-step CNN approach that identifies buildings on the xBD dataset scoring with 0.66 F1.",
+     "intents": []
+    },
+    {
+     "context": "Satellite and unmanned aerial vehicle (UAV) imagery offer high-resolution perspectives of impacted regions, whereas deep learning frameworks have demonstrated significant efficacy in identifying and segmenting damage from aerial photographs [11].",
+     "intents": []
+    }
+   ],
+   "isInfluential": true,
+   "citingPaper": {
+    "paperId": "d86eae9a39261d68de19dd9786d57a92e825c386",
+    "externalIds": {
+     "DBLP": "journals/corr/abs-2509-21609",
+     "DOI": "10.48550/arXiv.2509.21609",
+     "CorpusId": 281658194
+    },
+    "title": "VLCE: A Knowledge-Enhanced Framework for Image Description in Disaster Assessment",
+    "venue": "Proceedings of the 4th Workshop on Advances in Language and Vision Research (ALVR)",
+    "year": 2026,
+    "referenceCount": 41,
+    "citationCount": 1,
+    "openAccessPdf": {
+     "url": "",
+     "status": null,
+     "license": null,
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.48550/arXiv.2509.21609?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.48550/arXiv.2509.21609, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "2319940604",
+      "name": "Md. Mahfuzur Rahman"
+     },
+     {
+      "authorId": "2275628567",
+      "name": "K. Gupta"
+     },
+     {
+      "authorId": "2212068890",
+      "name": "Marufa Kamal"
+     },
+     {
+      "authorId": "2382761785",
+      "name": "Fahad Rahman"
+     },
+     {
+      "authorId": "2137041681",
+      "name": "Sunzida Siddique"
+     },
+     {
+      "authorId": "2348096444",
+      "name": "Ahmed Rafi Hasan"
+     },
+     {
+      "authorId": "2267048551",
+      "name": "Mohd Ariful Haque"
+     },
+     {
+      "authorId": "2199984312",
+      "name": "Roy George"
+     }
+    ],
+    "abstract": "The processes of classification and segmentation utilizing artificial intelligence play a vital role in the automation of disaster assessments. However, contemporary VLMs produce details that are inadequately aligned with the objectives of disaster assessment, primarily due to their deficiency in domain knowledge and the absence of a more refined descriptive process. This research presents the Vision Language Caption Enhancer (VLCE), a dedicated multimodal framework aimed at integrating external semantic knowledge from ConceptNet and WordNet to improve the captioning process"
+   }
+  },
+  {
+   "intents": [],
+   "contextsWithIntent": [],
+   "isInfluential": false,
+   "citingPaper": {
+    "paperId": "8759c9070068052cf624722a1e3d1109ddbdb7c9",
+    "externalIds": {
+     "DBLP": "journals/access/RajuSGRKFEEA25",
+     "DOI": "10.1109/ACCESS.2025.3574451",
+     "CorpusId": 278988064
+    },
+    "title": "GeoDisasterAINet: An Explainable Deep Ensemble Framework for Real-Time Urban and Rural Disaster Classification and Resilience",
+    "venue": "IEEE Access",
+    "year": 2025,
+    "referenceCount": 54,
+    "citationCount": 11,
+    "openAccessPdf": {
+     "url": "https://doi.org/10.1109/access.2025.3574451",
+     "status": "GOLD",
+     "license": "CCBY",
+     "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1109/ACCESS.2025.3574451?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1109/ACCESS.2025.3574451, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+    },
+    "fieldsOfStudy": [
+     "Computer Science"
+    ],
+    "publicationTypes": [
+     "JournalArticle"
+    ],
+    "authors": [
+     {
+      "authorId": "2489064230",
+      "name": "Akella S. Narasimha Raju"
+     },
+     {
+      "authorId": "2129288540",
+      "name": "Seelam Sreekanth"
+     },
+     {
+      "authorId": "51884379",
+      "name": "Ranjith Kumar Gatla"
+     },
+     {
+      "authorId": null,
+      "name": "M. Rajababu"
+     },
+     {
+      "authorId": "2281330897",
+      "name": "D. Kumar"
+     },
+     {
+      "authorId": "1903013",
+      "name": "Aymen Flah"
+     },
+     {
+      "authorId": null,
+      "name": "Claude Ziad El-Bayeh"
+     },
+     {
+      "authorId": "2369586086",
+      "name": "Khaled A. El-Nagdy"
+     },
+     {
+      "authorId": "2345597877",
+      "name": "Ali Alzaed"
+     }
+    ],
+    "abstract": "These Sustainable Development Goal 11 (SDG 11), whose target is to make urban and rural settlements resilient and disaster-prepared, integrates with it the significant objective of having disaster-resilient communities and cities. GeoDisasterAINet is an AI deep learning and machine learning model for distinguishing between rural and urban-area occurrences of floods, cyclones, earthquakes, and wildfires effectively. In this article, we introduce GeoDisasterAINet. There are four successive phases in model performance improvement, with increasingly enhancing classification accuracy, namely an integrated CNN (baseline model), an integrated CNN with XGBoost (feature improvement model), an integrated CNN with XGBoost and Multiclass SVM (refinement model for decision boundary), and LIME segmentation for interpretability and model performance evaluation. EfficientNetB7, ResNet-50, InceptionV3, and DenseNet-201 are architectures in use in GeoDisasterAINet, and these architectures make three settings for an ensemble: ERI-2025 (EfficientNetB7, ResNet-50, InceptionV3), DRI-2025 (DenseNet-201, ResNet-50, InceptionV3), and DE-2025 (DenseNet-201, EfficientNetB7). In balancing out the dataset, we used the Synthetic Minority Over-sampling Technique (SMOTE). With 99.25% accuracy in training, 96.37% accuracy in testing, 98% in precision, 97% in recall, and 97% in F1-score, ERI-2025+ XGBoost + Multiclass SVM, our best model, effectively classified items. LIME-based interpretability uncovered disaster-specific features such as storm behaviour in cyclones, infrastructure loss in earthquakes, wildfire propagation in wildfires, and water build-up in floods, and in confirming that the model was reliable, it helped in an effective location of disasters. GeoDisasterAINet is a strong AI-powered system that addresses directly SDG 11 through its contribution towards safer and disaster-resilient communities and cities. It does this through AI-powered deep learning and machine learning technology for improving disaster detection, evaluation of risk, and preparedness for emergencies in real-time."
+   }
+  }
+ ]
+}

@@ -31,7 +31,7 @@ Human gate: the question. Nothing downstream runs without `QUESTION.md`.
 | `/bits` | — | `BITS.md` | Ré (every cluster has a bit) |
 | `/watch` | `paper-scout` | matrix updates | **deferred to milestone 5.** No sheet source and no goal it uniquely serves. |
 
-`paper-scout` is the agent to get right first: one question in, one section out, snowballing from seeds with the asymptote rule, absence claims naming what was checked. Tools: retrieval MCPs plus Read. No Bash.
+`paper-scout` is the agent to get right first: one question in, one section out, snowballing from seeds with the asymptote rule, absence claims naming what was checked. Tools: Read, Write, and Bash fenced by the guard to one retrieval script. No web tools.
 
 Built in chunk 2 (`docs/design/chunk-02-scout.md`), with two narrowings the spec argued for: cards carry no scout-written characterization of a paper, only metadata plus a citation-context sentence and one `Kept because` line; and absence is **mechanical only** — a scout states facts about its own search and never about the field. Interpreted absence becomes legitimate at the `merger`, which can see seven scouts' coverage at once.
 

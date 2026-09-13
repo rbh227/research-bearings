@@ -1,0 +1,14 @@
+{
+ "budget": 25,
+ "budget_exhausted": true,
+ "budget_remaining": 0,
+ "hop": "references",
+ "message": "budget of 25 papers touched is exhausted (0 touched). No hop was made. Write the section now with stop reason `budget`, and say it is INCOMPLETE.",
+ "papers": [],
+ "resolved_count": 0,
+ "seed": "ARXIV:2011.10328",
+ "stopped": "budget",
+ "touched_total": 25,
+ "unresolvable": [],
+ "unresolvable_count": 0
+}

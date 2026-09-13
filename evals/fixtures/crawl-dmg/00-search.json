@@ -1,0 +1,171 @@
+{
+ "budget": 25,
+ "budget_exhausted": false,
+ "budget_remaining": 25,
+ "limit": 5,
+ "malformed_count": 0,
+ "next": 5,
+ "papers": [
+  {
+   "abstract": "Efficient and accurate building damage assessment is crucial for effective emergency response and resource allocation following natural hazards. However, traditional methods are often time consuming and labor intensive. Recent advancements in remote sensing and artificial intelligence (AI) have made it possible to automate the damage assessment process, and previous studies have made notable progress in machine learning classification. However, the application in postdisaster emergency response requires an end\u2010to\u2010end model that starts with satellite imagery as input and automates the generation of large\u2010scale damage maps as output, which was rarely the focus of previous studies. Addressing this gap, this study integrates satellite imagery, Geographic Information Systems (GIS), and deep learning. This enables the creation of comprehensive, large\u2010scale building damage assessment maps, providing valuable insights into the extent and spatial variation of damage. The effectiveness of this methodology is demonstrated in Galveston County following Hurricane Ike, where the classification of a large ensemble of buildings was automated using deep learning models trained on the xBD data set. The results showed that utilizing GIS can automate the extraction of subimages with high accuracy, while fine\u2010tuning can enhance the robustness of the damage classification to generate highly accurate large\u2010scale damage maps. Those damage maps were validated against historical reports.",
+   "authors": [
+    "Abdullah M. Braik",
+    "Maria Koliou"
+   ],
+   "citationCount": 80,
+   "edges": [],
+   "externalIds": {
+    "CorpusId": 268775127,
+    "DBLP": "journals/cacie/BraikK24",
+    "DOI": "10.1111/mice.13197"
+   },
+   "fieldsOfStudy": [
+    "Computer Science"
+   ],
+   "missing": [],
+   "paperId": "008e6d9e0d45f54cbc61405eeddc5c8da96e9472",
+   "pdfUrl": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1111/mice.13197",
+   "publicationTypes": [
+    "JournalArticle"
+   ],
+   "referenceCount": 68,
+   "title": "Automated building damage assessment and large\u2010scale mapping by integrating satellite imagery, GIS, and deep learning",
+   "venue": "Comput. Aided Civ. Infrastructure Eng.",
+   "year": 2024
+  },
+  {
+   "abstract": null,
+   "authors": [
+    "D. Bhardwaj",
+    "N. Nagabhooshanam",
+    "Ajeet Singh",
+    "B. Selvalakshmi",
+    "Sanjeevkumar Angadi",
+    "S. Shargunam",
+    "Tapas Guha",
+    "G. Singh",
+    "A. Rajaram"
+   ],
+   "citationCount": 23,
+   "edges": [],
+   "externalIds": {
+    "CorpusId": 273872322,
+    "DBLP": "journals/mta/BhardwajNSSASGSR25",
+    "DOI": "10.1007/s11042-024-20300-0"
+   },
+   "fieldsOfStudy": [
+    "Computer Science"
+   ],
+   "missing": [
+    "abstract"
+   ],
+   "paperId": "a057d5837e4c63883aaabfcd16482406610c0f4c",
+   "pdfUrl": null,
+   "publicationTypes": [
+    "JournalArticle"
+   ],
+   "referenceCount": 38,
+   "title": "Enhanced satellite imagery analysis for post-disaster building damage assessment using integrated ResNet-U-Net model",
+   "venue": "Multimedia tools and applications",
+   "year": 2024
+  },
+  {
+   "abstract": "Building damage assessment based on satellite imagery is important to aid disaster response and resource allocation in the affected areas very quickly. Recent developments in deep learning approaches have led to an improvement in automated damage detection, but most existing approaches have had a difficult time combining pre-and post-disaster imagery for effective classification of nuanced types of damage. This gap restricts the precision of the identification of minor and major damage which are crucial for prioritizing recovery efforts. The goal of this research is to propose a novel improved damage assessment framework, CADSNet (Cross-Aligned Dual-Stream Network) with dual stream ResNet34 backbone and deformable cross-alignment for robust feature fusion to overcome these limitations. The methodology includes preprocessing on the xBD dataset to aligned 512x512 tiles using joint percentile stretching and generating building, damage, ignore and change mask for high-quality training samples. Experimental evaluation proves that CADSNet has state-of-the-art performance with a Macro-F1 score of 0.772, Building IoU of 0.686 and Damage AP of 0.880, outperforming several recent benchmarks. These improvements improve both spatial localization and categorical accuracy and allow more reliable and timely assessment of building damages, which can have a very positive effect on disaster management agencies in their decision-making and resource allocation process.",
+   "authors": [
+    "Abdul Rehman",
+    "Tanzila Kehkashan",
+    "Imran Ashraf",
+    "E. Popovic",
+    "N. Ivkovi\u0107",
+    "Adnan Akhunzada"
+   ],
+   "citationCount": 0,
+   "edges": [],
+   "externalIds": {
+    "CorpusId": 286645187,
+    "DOI": "10.1109/ICCA66035.2025.11430890"
+   },
+   "fieldsOfStudy": [],
+   "missing": [],
+   "paperId": "30174c0412fc1a0c0fa9909ce9dfe519850b31a1",
+   "pdfUrl": null,
+   "publicationTypes": [
+    "Conference"
+   ],
+   "referenceCount": 17,
+   "title": "CADSNet: Cross-Aligned Dual-Stream Network for Building Damage Assessment Using Disaster Satellite Imagery",
+   "venue": "International Conferences on Computing Advancements",
+   "year": 2025
+  },
+  {
+   "abstract": null,
+   "authors": [
+    "Huayang Han",
+    "Yundong Li",
+    "Menglong Wu"
+   ],
+   "citationCount": 3,
+   "edges": [],
+   "externalIds": {
+    "CorpusId": 277988290,
+    "DBLP": "journals/ieicetd/HanLW25",
+    "DOI": "10.1587/transinf.2025edl8004"
+   },
+   "fieldsOfStudy": [
+    "Computer Science"
+   ],
+   "missing": [
+    "abstract"
+   ],
+   "paperId": "d97da2fdf70c58a2be8d391b516db75abd4f2c11",
+   "pdfUrl": "https://doi.org/10.1587/transinf.2025edl8004",
+   "publicationTypes": [
+    "JournalArticle"
+   ],
+   "referenceCount": 0,
+   "title": "OS-Mamba: Overall Scanning Mamba for Building Damage Assessment Using Multi-Phase Satellite Imagery",
+   "venue": "IEICE Trans. Inf. Syst.",
+   "year": 2025
+  },
+  {
+   "abstract": "We identify a bias in a commonly used dataset for building damage detection, evaluate its effects on existing deep learning models, and devise mitigation strategies to overcome it. We find that the data contains significantly more groups of damaged buildings than single ones leading to skewed machine learning evaluations. Consequently, deep learning models heavily rely on surrounding context rather than individual building damage when classifying supporting our claim. Specifically, the dataset includes extraneous damage surrounding buildings such as debris, fallen trees, and other damaged buildings which results in deep neural networks overfitting to these features. We analyze the top-5 solutions of the xView2 challenge, which focuses on building damage classification using satellite imagery as provided by the xBD dataset. Our experiments reveal that these models struggle to accurately identify isolated damaged buildings, potentially causing oversights in critical disaster scenarios and delaying humanitarian aid. Finally, we devise a new augmentation strategy to reduce this bias in disaster datasets and show it improves real-world outcomes.",
+   "authors": [
+    "Dennis Melamed",
+    "Cameron Johnson",
+    "Isaac D. Gerg",
+    "Chen Zhao",
+    "Russell Blue",
+    "A. Hoogs",
+    "Brian Clipp",
+    "Philip Morrone"
+   ],
+   "citationCount": 6,
+   "edges": [],
+   "externalIds": {
+    "CorpusId": 272433756,
+    "DBLP": "conf/igarss/MelamedJGZBHCM24",
+    "DOI": "10.1109/IGARSS53475.2024.10642347"
+   },
+   "fieldsOfStudy": [
+    "Computer Science"
+   ],
+   "missing": [],
+   "paperId": "ff86d3288c57ea7b22ddb91d2718e2c7f9972c75",
+   "pdfUrl": null,
+   "publicationTypes": [
+    "JournalArticle"
+   ],
+   "referenceCount": 14,
+   "title": "Uncovering Bias in Building Damage Assessment from Satellite Imagery",
+   "venue": "IEEE International Geoscience and Remote Sensing Symposium",
+   "year": 2024
+  }
+ ],
+ "query": "building damage assessment satellite imagery",
+ "records_written": 5,
+ "resolved_count": 5,
+ "rows_returned": 5,
+ "total": 2461,
+ "touched_total": 0,
+ "truncated": true
+}

@@ -5,3 +5,4 @@ research_plugin_build_plan.md
 research/.papers/
 __pycache__/
 *.pyc
+research/.crawl/

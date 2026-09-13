@@ -1007,3 +1007,116 @@ Did not hold: every hop in the run was truncated and nothing said so. That is
 §9.10's third defect, found here rather than in review, and now fixed in both the
 server and the agent contract. **The run predates that fix and has not been
 repeated.**
+
+---
+
+## 11. Amendment, 2026-09-13: the server was the wrong packaging
+
+Recorded the day the eval suite first ran. This supersedes §4.2, §4.4, §5.1–5.3
+and the `--mocks off` half of §6.3. The methodology is untouched: seeds, then
+backward and forward hops, the asymptote rule, mechanical absence, minimal cards.
+What changed is how the citation walker is delivered to the agent.
+
+### 11.1 What the first honest runs measured
+
+Nine cases, never run, ran. Five defects, two of them in the plugin:
+
+| Defect | Where | Fixed by |
+|---|---|---|
+| `--allow-tools` is a global operator grant nothing can subtract from, so the case built on `s2-snowball` being *absent* was handed the server back | suite | two-arm runner, then made moot by §11.3 |
+| the sandbox has a clean `HOME`: no `~/.config/paper-search-mcp/.env`, no `userConfig` key, so every case ran unkeyed and `search_semantic` returned empty | suite | made moot by §11.3 |
+| one case had no budget line | suite | added |
+| `/scout`'s **hard** precondition probed with `search_semantic`, which needs the **optional** key and returns empty rather than erroring without it — a missing soft credential read as a dead server | plugin | probe moved to a keyless call; empty-twice is the stop |
+| **the budget was a sentence.** Told 40 papers touched, three runs touched 114, 130 and 160, ran past the 600 s ceiling, and two wrote no section at all | plugin | the walker counts and refuses (§11.4) |
+| `paper-search` cold-started in >30 s (80 packages, resolved from the network on every run) and missed the MCP connect ceiling, so three cases failed on a server that never came up | infrastructure | gone (§11.3) |
+
+Two things were verified working under all that: the scout, three times and
+unprompted, stopped on a missing server, named it, refused to substitute
+`WebSearch`, and reported the missing key as soft. And once the budget was
+enforced, the trace showed `budget: 40` on every hop, `limit` sized to what
+remained, and `touched_total` stopping at exactly 40 in six calls.
+
+### 11.2 The user's call
+
+The user asked why there was a server at all, and the honest answer was that the
+plan's reason — "use existing MCP servers so we write no custom code" — had
+already been broken: no existing server walked citations, so `s2_snowball.py`
+was written anyway, 900 lines. Once the code exists, the server is packaging.
+The packaging was what broke three times in one day: a persistent process, a
+dependency tree we do not control, credentials in a file the sandbox cannot see,
+a cold start that exceeds the connect ceiling. The user chose ARS's shape —
+scripts, run on demand — over a simpler *server*, and accepted the rework.
+
+### 11.3 What ships instead
+
+```
+scripts/retrieval/snowball.py     search | references | citations | batch | health | --selftest
+scripts/retrieval/fixtures/       the five captured responses, plus one search response
+hooks/guard.py                    now also fences Bash, for this plugin's agents, to that script
+```
+
+Deleted: `.mcp.json`, `servers/`, the `userConfig` block, both third-party
+servers. Standard library only, one file, no install step, nothing resident.
+The MCP wrapper was ~50 of the 900 lines; the rest — parsing, caching, retry,
+records, grey-literature separation, truncation — is the same code with a
+`main()`.
+
+**Why the agent can have Bash now.** Ticket 10 rejected a script because
+"scouts must be denied Bash" — meaning *arbitrary* Bash. The write-scope guard
+already scopes itself by `agent_type` from stdin; the same hook now matches
+`Bash` and allows exactly `python3 <plugin>/scripts/retrieval/<x>.py ...` with
+no shell operators, for this plugin's agents only. Twenty-two selftest cases,
+seven of them on the Bash rule. A locked-down agent handed one script is the
+same safety property as a locked-down agent handed one tool.
+
+**The key.** `SEMANTIC_SCHOLAR_API_KEY`, else one line in
+`~/.config/research-bearings/s2-api-key`. No plugin config, no secrets store.
+`/setup` records presence and date; `/scout` probes at every run.
+
+### 11.4 The budget is a ledger
+
+Each call is its own process, so the count lives on disk:
+`research/.crawl/<run>.touched.json`, the distinct resolved paperIds the run
+has been handed. Every hop and batch call takes `--run <slug> --budget <N>`.
+The script refuses once the ledger reaches the ceiling — before spending the
+request — and clamps each hop's `limit` to what remains, so an overshoot is
+impossible rather than unlikely. Search rows are seeds and do not charge it.
+`/scout` reads the ledger back after the run and reports the ledger's number
+over the section's if they differ. Sixteen offline selftest cases; 13 and 14
+are the ones that would have caught the overrun.
+
+Measured live on the ported script: search 3 seeds (touched 0); references 6
+(touched 6, 2 left); the same call again, cache hit, ledger unchanged;
+citations clamped, touched 8, exhausted; the next references call refused with
+`stopped: "budget"`; `--budget` without `--run` rejected.
+
+### 11.5 The suite, re-cut
+
+Three tiers, each testing one thing, replacing the one suite that conflated
+them and was slow, flaky and blocked on infrastructure:
+
+| Tier | What | How | Needs |
+|---|---|---|---|
+| script | the crawl: parsing, retry, records, ledger, key | `snowball.py --selftest`, 16 cases | nothing |
+| guard | the fences | `guard.py --selftest`, 22 cases | nothing |
+| agent | what the scout **writes** | eval cases that point `paper-scout` at `evals/fixtures/crawl-dmg/` — a saved crawl of four script responses, ending in a budget refusal — and judge the section | no Bash, no network, no key |
+| skill | the precondition refusal | `/scout` with no `Bash` grant: the script cannot run, so it must stop, name it, write nothing | nothing |
+| recall | finding things | the gold set and the blind read, §6.4 | the user |
+
+The Bash grant this machine cannot give (chunk 1 §9) stops being a blocker: no
+tier that runs here needs it. The live end-to-end run is what the user does on
+the acceptance topic, with the ledger there to check the section against.
+
+### 11.6 Open
+
+- **OpenAlex.** No key, broad, and it carries `referenced_works`. It does not
+  carry citation contexts, which are the only tool-sourced prose on a card.
+  Whether a keyless walker is worth losing `Cited as` is a chunk 3 question.
+- **Two honesty graders failed on completed runs** in the last MCP-era run
+  (`no-interpreted-absence`, `only-kept-because-is-authored`), after passing on
+  runs that died early. Retrieval-independent; the evidence is read against the
+  re-cut suite, and the agent contract tightens if it holds up.
+- **Re-run semantics** (§8) now have a concrete answer: a second `/scout` on the
+  same slug reuses the ledger, so it continues the crawl rather than restarting
+  it. Whether that is wanted, or the ledger should be cleared per run, is
+  undecided.
