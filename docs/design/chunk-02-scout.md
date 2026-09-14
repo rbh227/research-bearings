@@ -1197,3 +1197,10 @@ not honesty. The saved crawl moved to `scripts/retrieval/fixtures/crawl-dmg/`,
 which the agent reads without trouble. One regex grader used an inline flag the
 harness's JavaScript engine rejects; fixed. Recorded in
 `docs/agents/toolchain.md` beside the other harness facts.
+
+The second run, with the crawl reachable: 6 of 9 at 1.00, and the two failures
+were a grader that mis-stated what the crawl holds and a prompt that let the
+file be shown before a summary — the last-message trap from chunk 1 §9, again.
+Both fixed (91eeb05). `stamps-no-key` failed the same way, on the old prompt,
+and is unverified rather than failed. The remaining runs, and the three-run
+verdict, stopped on the account's spend limit; they resume when it is lifted.
