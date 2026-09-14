@@ -1097,6 +1097,16 @@ impossible rather than unlikely. Search rows are seeds and do not charge it.
 over the section's if they differ. Nineteen offline selftest cases; 13 and 14
 are the ones that would have caught the overrun.
 
+**Amended 2026-09-14**, after an adversarial review: `charge()` read its ledger
+snapshot before the request and wrote it back after, so two calls sharing a run
+lost one another's ids — two hops under a budget of 1 each returned a paper, the
+ledger kept one, and a third call would have been let through on the strength of
+it. Charging now re-reads inside an exclusive lock (case 29). The
+check-then-request-then-charge order means two calls already in flight can each
+pass a check the other would have failed; the ledger is correct afterwards and
+the next call refuses, and sequential calls — which is how an agent makes them —
+are exact.
+
 Measured live on the ported script: search 3 seeds (touched 0); references 6
 (touched 6, 2 left); the same call again, cache hit, ledger unchanged;
 citations clamped, touched 8, exhausted; the next references call refused with

@@ -181,9 +181,19 @@ def charge(run: str, seen: set[str], records: list[dict[str, Any]], budget: int)
     ids = {r["paperId"] for r in records if r.get("paperId")}
     if not run:
         return budget_block(len(ids), 0)
-    seen = seen | ids
-    write_atomic(ledger_path(run), sorted(seen))
-    return budget_block(len(seen), budget)
+    path = ledger_path(run)
+    # Re-read INSIDE the lock. `seen` is the snapshot this call took before it
+    # spent its request, and another call sharing the run may have charged since;
+    # unioning the stale snapshot erases their ids. Measured 2026-09-14: two
+    # concurrent hops under a budget of 1 each returned a paper, the ledger kept
+    # one of them, and the next call was let through on the strength of that.
+    with record_lock(path):
+        current = ledger_load(run)
+        if current is None:
+            raise OSError(f"ledger became unreadable while charging: {path}")
+        merged = current | seen | ids
+        write_atomic(path, sorted(merged))
+    return budget_block(len(merged), budget)
 
 
 def uncounted(run: str, exc: OSError, written: int) -> dict[str, Any]:
@@ -806,7 +816,15 @@ def title_match(asked: str, found: str) -> str:
     return "none"
 
 
-RESOLVING_MATCHES = ("exact", "prefix", "substring")
+# Only an exact match, after folding, certifies a paper. Prefix and substring
+# were here until 2026-09-14, when an adversarial review showed what they do:
+# "Attention Is All You Need for Wildfire Damage Assessment" prefix-matched
+# "Attention Is All You Need" and came back resolved, carrying that paper's id.
+# That is the fabrication this verb exists to catch, wearing a checkmark. The
+# folding already handles the variants prefix was added for - a colon that
+# became a dash still compares equal - so exact-only loses nothing real.
+RESOLVING_MATCHES = ("exact",)
+NEAR_MATCHES = ("prefix", "substring")
 
 
 def _id_matches(asked: str, rec: dict[str, Any]) -> bool:
@@ -866,12 +884,29 @@ def verify(titles: list[str], ids: list[str], limit: int = 5) -> dict[str, Any]:
                 "title": None, "year": None, "match": f"search failed: {found['error']}",
             })
             continue
+        order = RESOLVING_MATCHES + NEAR_MATCHES
         ranked = sorted(
             ((title_match(asked, p.get("title") or ""), p) for p in found["papers"]),
-            key=lambda pair: RESOLVING_MATCHES.index(pair[0]) if pair[0] in RESOLVING_MATCHES else 9,
+            key=lambda pair: order.index(pair[0]) if pair[0] in order else 9,
         )
         best_match, best = ranked[0] if ranked else ("none", None)
         ok = best_match in RESOLVING_MATCHES
+        if ok:
+            match = "exact"
+        elif best_match in NEAR_MATCHES:
+            # Deliberately NOT resolved: a near match is the dangerous case, not
+            # the safe one. Name it so the caller can correct a typo, and give
+            # the candidate's id so the correction is one step - but the id does
+            # not go on the card until a human or a later exact check says so.
+            match = (
+                f"{best_match} match only, NOT the same paper unless you say so: "
+                f"{best['title']} (S2 {best['paperId']})"
+            )
+        else:
+            match = (
+                f"no title match in {found['rows_returned']} rows"
+                + (f"; closest: {best['title']}" if best else "")
+            )
         results.append({
             "query": asked,
             "kind": "title",
@@ -879,12 +914,7 @@ def verify(titles: list[str], ids: list[str], limit: int = 5) -> dict[str, Any]:
             "paperId": best["paperId"] if ok and best else None,
             "title": best["title"] if best else None,
             "year": best["year"] if best else None,
-            # On a miss the closest row is still reported: a near-miss is a
-            # typo to fix, a blank is a paper that is not there.
-            "match": best_match if ok else (
-                f"no title match in {found['rows_returned']} rows"
-                + (f"; closest: {best['title']}" if best else "")
-            ),
+            "match": match,
         })
 
     resolved = sum(1 for r in results if r["resolved"])
@@ -1437,6 +1467,57 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
         "26 the CLI dispatches verify and prints JSON",
         rc == 0 and argv_out.get("resolved_count") == 1,
         f"rc={rc} out={buf.getvalue()[:120]!r}",
+    )
+
+    # 27-29. The three an adversarial review found on 2026-09-14, each
+    #        reproduced before it was fixed.
+    near_payload = {"total": 1, "data": [{
+        "paperId": "attn0001", "title": "Attention Is All You Need", "year": 2017,
+        "venue": "NeurIPS", "authors": [{"name": "A. Vaswani"}], "externalIds": {},
+    }]}
+    with _fetch(lambda *a, **k: (200, json.dumps(near_payload).encode())):
+        longer = verify(["Attention Is All You Need for Wildfire Damage Assessment"], [])
+        shorter = verify(["Deep Learning"], [])
+    check(
+        "27 a title that merely contains the found one is NOT resolved",
+        longer["resolved_count"] == 0
+        and longer["results"][0]["paperId"] is None
+        and "NOT the same paper" in longer["results"][0]["match"]
+        and "attn0001" in longer["results"][0]["match"],
+        f"got {longer['results'][0]}",
+    )
+    check(
+        "28 nor is a title the found one merely starts with",
+        shorter["resolved_count"] == 0 and shorter["results"][0]["paperId"] is None,
+        f"got {shorter['results'][0]}",
+    )
+
+    # 29. Two calls sharing a run must not lose each other's charges. Exercised
+    #     on charge() itself: two callers that took the SAME ledger snapshot
+    #     before spending their requests, which is the shape the race has. (A
+    #     fetch stub cannot be used here - it is one module global, so two
+    #     threads would clobber each other's stub and both receive one paper.)
+    with tempfile.TemporaryDirectory() as tmp:
+        with _env(RESEARCH_PROJECT_DIR=tmp):
+            snapshot, problem = ledger_open("race")
+            gate = threading.Barrier(2)
+
+            def charging(pid):
+                def go():
+                    gate.wait(timeout=10)
+                    charge("race", set(snapshot), [{"paperId": pid}], 1)
+                return go
+
+            threads = [threading.Thread(target=charging(p)) for p in ("p1", "p2")]
+            for t in threads:
+                t.start()
+            for t in threads:
+                t.join()
+            final = ledger_load("race") or set()
+    check(
+        "29 concurrent charges on one run do not overwrite each other",
+        problem is None and final == {"p1", "p2"},
+        f"ledger kept {sorted(final)}; both callers charged a distinct paper",
     )
 
     print()

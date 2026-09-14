@@ -69,14 +69,18 @@ a remote-sensing question, is the home field with a wider collar. The test is
 whether a paper in that field would plausibly cite your seeds — if yes, it
 belongs to `/snowball`.
 
-**3. Confirm.** Show the user the shape and the field list, before any search.
-This is the one place a human can steer breadth cheaply: searching is seconds,
-and the framing is the whole run. Let them strike fields, add fields, or rewrite
-the shape.
+**3. Confirm.** Show the user the shape and **every search the run will make** —
+one per field, one per rejected framing, and one per opportunity for its
+`Nearest existing:` line — before making any of them. Let them strike fields,
+add fields, or rewrite the shape.
 
-**4. Search.** One `search "<that field's words>" --limit 10 --run <slug>
---budget <N>` per field. **Never the home vocabulary** — a query in your own
-words finds your own field, which is what `/snowball` is for. A field that
+This step is also the run's only bound, so it has to be complete. Ten fields
+drawn from the question plus eight rejected framings is twice the run the user
+thought they confirmed.
+
+**4. Search.** One `search "<that field's words>" --limit 10` per field.
+**Never the home vocabulary** — a query in your own words finds your own field,
+which is what `/snowball` is for. A field that
 returns nothing gets one re-query in different words; if it is still empty,
 report both queries and their zero counts rather than dropping the field.
 
@@ -117,18 +121,36 @@ not the literature. An absence claim from here becomes an empty cell in
 somebody's matrix, and an empty cell is what sends a person to spend a semester
 on work that already exists. Report the count; let the reader conclude.
 
-## The budget
+## The bound
 
-Default 100 papers touched — ten fields at ten rows. The script's ledger
-enforces it per run, exactly as it does for a crawl.
+**This skill has no budget, and does not pass `--run` or `--budget`.** A crawl
+needs a ledger because it compounds: one seed reaches 44–119 papers and each of
+those reaches as many again, so the ceiling has to be enforced inside the script
+before a request is spent. Search does not compound. Every call returns at most
+`--limit` rows and starts nothing, so the run's size is exactly the number of
+searches times the limit — and the number of searches is the field list, which
+the user reads and approves at step 3.
 
-`verify` charges nothing. The papers were already named; a ceiling that refused
-to check them would be the wrong shape entirely.
+That is the bound: a human, looking at the actual list, before anything runs.
+Ten fields at `--limit 10` is 100 rows, plus one `Nearest existing:` search per
+opportunity. Report the real figures in `## Status` — searches made and rows
+returned — and never a papers-touched count, which for a run that makes no hops
+is always zero and reads as though nothing was retrieved.
+
+Measured 2026-09-14: this skill used to pass `--run` and `--budget` on every
+search and claim the ledger enforced them. It did not and could not — `search`
+reads the ledger and never charges it, by design, because seeds are found
+rather than touched. The budget was decorative, and a decorative safety check
+is worse than none.
+
+`verify` charges nothing either. The papers were already named; a ceiling that
+refused to check them would be the wrong shape entirely.
 
 ## Stop condition
 
-`research/analogs/<slug>.md` exists with all five headings; at least five
-fields, none of them the home field; every paper line carries an S2 id or the
+`research/analogs/<slug>.md` exists with all five headings; `## Status` reports
+searches made and rows returned; at least five fields, none of them the home
+field; every paper line carries an S2 id or the
 unresolved marker; `## Verification`'s counts agree with the lines; every
 opportunity has a `Nearest existing:` line. `python3
 "${CLAUDE_PLUGIN_ROOT}/scripts/check_analogs.py" research/analogs/<slug>.md`

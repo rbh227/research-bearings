@@ -69,8 +69,16 @@ the search is seconds, the framing is the work.
 **Report.** Show the file. Say: fields, papers, unresolved count, and whether
 the run was framed or unframed.
 
-**Budget.** Default 100 touched — ten fields at ten rows. The ledger enforces
-it as before. `verify` does not charge it.
+**Bound.** No budget and no `--run`: a crawl needs a ledger because it
+compounds, and search does not — every call returns at most `--limit` rows and
+starts nothing. The run's size is searches × limit, and the searches are the
+field list the user approves at the confirm step, which is why that step must
+enumerate every search including the `Nearest existing:` ones. `## Status`
+reports searches made and rows returned. **Corrected 2026-09-14**, after an
+adversarial review: the skill passed `--run`/`--budget` on every search and
+claimed the ledger enforced them; `search` reads the ledger and never charges
+it, so the budget was decorative and `## Status` would have reported zero
+papers touched on a run that returned a hundred rows.
 
 **Rules this skill applies.** Narrow-exploration study (force seeds from
 adjacent fields); Swanson (strip the nouns, search each characteristic without
@@ -103,8 +111,13 @@ unexplored — but only barely", and it costs one search.
 One JSON object: `results[]`, each `{query, kind: title|id, resolved: bool,
 paperId, title, year, match}`; `resolved_count`, `unresolved_count`. Titles
 resolve through `search` with the title as the query, matched by normalised
-title comparison (case, punctuation, whitespace folded; stdlib only), and
-`match` reports the comparison so a near-miss is visible. Ids resolve through
+title comparison (case, punctuation, whitespace folded; stdlib only). **Only an
+exact match after folding resolves.** A prefix or substring match is returned
+as `NOT the same paper unless you say so`, naming the candidate and its id:
+measured 2026-09-14, "Attention Is All You Need for Wildfire Damage Assessment"
+prefix-matched "Attention Is All You Need" and came back resolved, carrying that
+paper's id onto a remembered citation — the fabrication this verb exists to
+catch, wearing a checkmark. Ids resolve through
 `batch`. Does not charge the ledger; does write records. Selftest cases:
 exact title, punctuation-variant title, a title that does not exist, an id,
 a bad id, mixed batch.
@@ -131,8 +144,8 @@ Under `## Fields`, one `###` per field, fixed lines:
 ```
 
 `## Verification` lists every paper in the file with resolved/unresolved and
-the counts. `## Status`: date, slug, touched, framed/unframed, key present or
-not.
+the counts. `## Status`: date, slug, searches made, rows returned,
+framed/unframed, key present or not.
 
 ## 6. Done-check
 

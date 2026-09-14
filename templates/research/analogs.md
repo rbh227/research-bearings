@@ -60,7 +60,9 @@
 
 ## Status
 
-<!-- Date. Run slug. Papers touched. Framed or unframed. Key present or not —
-     unkeyed runs rate-limit and may return fewer rows per field, which is a
-     degradation and is stamped here, not silently absorbed. Fields searched,
-     and any field whose search returned zero rows after a re-query. -->
+<!-- Date. Run slug. Searches made, and rows returned across them — not a
+     papers-touched count: this skill makes no hops, so that figure is always
+     zero and reads as though nothing was retrieved. Framed or unframed. Key
+     present or not — unkeyed runs rate-limit and may return fewer rows per
+     field, which is a degradation and is stamped here, not silently absorbed.
+     Any field whose search returned zero rows after a re-query. -->
