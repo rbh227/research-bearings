@@ -622,7 +622,7 @@ Single-run grading has twice failed correct behaviour in this repo.
 **Before the first scout run**, the user writes — from memory, without searching — the
 papers and datasets any competent scout on post-disaster building damage assessment
 must find. Informal is fine: first author and a fragment of a title. Eight is enough;
-twenty is better. Saved as `evals/gold/damage-assessment.md`, resolved to S2 ids by
+twenty is better. Saved as `evals/gold/wildfire-cv.md`, resolved to S2 ids by
 §6.2, and never edited after a run.
 
 Then:
@@ -988,7 +988,7 @@ states `focus` explicitly rather than relying on the default.
 
 ### 10.4 Gold set and blind read — needs the user
 
-`evals/gold/damage-assessment.md` does not exist. §6.4 requires the user to write
+`evals/gold/wildfire-cv.md` is a template with no entries. §6.4 requires the user to write
 it from memory, before the first judged run, and it cannot be generated — a list
 produced by searching is not a test of whether search finds things.
 
