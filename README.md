@@ -1,27 +1,79 @@
 # research-bearings
 
-A Claude Code plugin that runs the research loop with typed skills and
-contract-bound agents.
+A Claude Code plugin for the part of research that is hard to delegate: deciding
+what to work on.
 
-One skill, one job, one output file. Context passes between skills through files
-with fixed headings, never through conversation. Every methodology rule the
-skills apply traces back to a source in `academic.md`, the sheet this plugin is
-derived from — kept local, not shipped.
+Models are good at finding papers in your own field. They are worse at the thing
+that actually moves research along — noticing that somebody in an unrelated field
+already solved the shape of your problem, under different words, in a literature
+that never cites yours.
 
-**Status: chunk 2 of 6, being verified.** The question stage works. Retrieval
-is built — one standard-library script that snowballs a citation graph into a
-landscape section — and checked against the live API. Its offline tiers are
-green (19 script cases, 30 guard cases). Its behavioural tier is four cases in
-of nine: two clean over three runs each, one clean over the one run it finished,
-and one real failure in the scout's `Kept because` line, since fixed and not yet
-re-measured (chunk 2 spec §11.10). Treat `/snowball` as working rather than proven
-until the rest of that tier runs. The rest of the landscape chain — surveys, the seven-way
-fan-out, the merger, the matrix and the brief — plus reading, ideation,
-selection and experiments are not built yet. See
-[`docs/design/skills-and-agents.md`](docs/design/skills-and-agents.md) for the
-whole plan, and the chunk specs for what each one decided:
-[chunk 1](docs/design/chunk-01-question-stage.md),
-[chunk 2](docs/design/chunk-02-scout.md).
+That is what this is for.
+
+## The idea
+
+Your problem has a **shape** underneath its vocabulary. "Post-disaster building
+damage assessment from satellite imagery" is, structurally:
+
+> two captures of one scene at different times, imperfectly aligned; a verdict
+> per region rather than per image; labels that are sparse, noisy and ordered by
+> severity; and a domain shift between one event and the next.
+
+Written that way, it stops being a remote-sensing problem. Crop stress from
+repeat drone flights over a field has that shape. So does lesion change across
+two MRI scans, crack progression in bridge inspections, and transient detection
+in astronomical surveys — where, it turns out, two groups independently
+concluded that the image-alignment step everyone uses should be thrown away,
+because its artefacts dominate the error.
+
+None of those would ever appear in a search of your own literature, and no
+citation graph reaches them. If anyone had cited across, it would not be the
+connection worth finding.
+
+## What it does
+
+Four skills. Each does one job and writes one file.
+
+| | | writes |
+|---|---|---|
+| `/setup` | Records the project's constraints: lab, compute, data access, deadline, and what would count as a win. | `research/CONTEXT.md` |
+| `/frame` | Turns a topic into a question worth answering, then has a critic in a fresh context attack it. | `research/QUESTION.md` |
+| `/scout` | Finds the fields that share your problem's shape but not its citation graph, and what might transfer from each. | `research/analogs/<slug>.md` |
+
+Run `/setup` first. `/frame` needs it. `/scout` needs neither — it will run on
+whatever you type and say so in the file.
+
+### What a `/scout` run looks like
+
+1. **Shape.** Your problem, with your field's nouns removed.
+2. **Fields.** Five to ten that share the shape, each in its own words. Mostly
+   adjacent, one or two genuinely strange.
+3. **Confirm.** It shows you the shape and every search it is about to run. This
+   is where you steer — searching takes seconds, the framing is the work.
+4. **Search.** One query per field, never in your vocabulary.
+5. **Write.** Per field: what shape it shares, what might transfer, what is
+   different, and what you would actually try.
+6. **Verify.** Every paper it named is checked against Semantic Scholar.
+
+A few minutes, a few thousand words, and you read it.
+
+## The rule everything else follows from
+
+**The model may think freely. Its citations get checked.**
+
+You want a model's recall here — it is the thing that knows crop damage and
+lesion change share a shape. What you cannot have is a model quietly inventing a
+citation to go with the insight.
+
+So every paper named in the output is resolved against the record, and anything
+that will not resolve stays in the file **marked as unresolved**, next to the
+closest real thing the search returned. Nothing is deleted, because where recall
+outran the record is exactly what a reader wants to see.
+
+One rule comes with it: the file never says a gap exists. It reports what a
+search returned and lets you draw the conclusion. An absence claim becomes an
+empty cell in somebody's matrix, and an empty cell is what sends a person to
+spend a semester on work that already exists.
 
 ## Install
 
@@ -30,176 +82,44 @@ claude plugin marketplace add ~/Desktop/Research-Skills
 claude plugin install research-bearings@rbh227
 ```
 
-Adding the marketplace by raw `marketplace.json` URL will not work — the plugin
-source is a relative path, and only the manifest gets downloaded that way.
+An API key is optional but worth having — a line in
+`~/.config/research-bearings/s2-api-key`, or `SEMANTIC_SCHOLAR_API_KEY`. Without
+one the API rate-limits after a few calls, coverage drops, and `/scout` stamps
+that in the file rather than quietly returning less.
 
-The plugin asks for a **Semantic Scholar API key** at enable time
-([get one here](https://www.semanticscholar.org/product/api)). It is stored in
-your keychain, not in this repo. It is not required — but the unauthenticated
-pool 429s after two or three calls, so without it the snowball hops rate-limit
-heavily and `/snowball` stamps the reduced coverage at the top of every section it
-writes. To set it non-interactively:
+Everything the plugin writes goes under `research/` in your project. Nothing
+runs in the background and nothing stays resident: retrieval is one standard-library
+script, invoked when it is needed, gone when it exits.
 
-```bash
-claude plugin install research-bearings@rbh227 --config semantic_scholar_api_key=YOUR_KEY
-```
+## Status
 
-`--config` is ignored if the plugin is already installed; uninstall first.
+**Chunk 3 of 6.** The question stage and the breadth tool work. Reading,
+ideation, selection and experiments are designed and not built —
+[`docs/design/skills-and-agents.md`](docs/design/skills-and-agents.md) has the
+whole plan.
 
-## What ships today
-
-| Command | Does | Writes |
-|---|---|---|
-| `/research-bearings:setup` | Records what you have: lab, compute, data, code, your calibration, deadline, what counts as a win. Checks what it can from the machine; asks the rest and dates the answers. | `research/CONTEXT.md` |
-| `/research-bearings:frame` | Turns a topic into a question worth answering. Diverges into candidate framings, converges on Booth's ladder, then a fresh-context critic attacks the survivor. | `research/QUESTION.md`, `research/framing-log.md` |
-| `/research-bearings:scout` | Finds the fields that share your problem's shape but not its citation graph: strips your vocabulary off the problem, searches five to ten other fields in their own words, and writes what might transfer and what you would try. The breadth tool. | `research/analogs/<slug>.md` |
-| `/research-bearings:snowball` | _Parked — works, not being developed._ Maps the citation neighbourhood of one literature question: finds seed papers, walks their references and citations, and writes 25–35 paper cards with the search log behind them. The depth tool. | `research/landscape/<slug>.md` |
-
-Run `setup` first. `frame` will stop if `CONTEXT.md` is missing. Neither `scout`
-nor `snowball` requires it — they run unframed, or unanchored, and say so in the
-file they write.
-
-Everything the plugin writes goes under `research/` in your project. A
-`PreToolUse` hook enforces that for the plugin's agents — it is the only
-enforcement here that is not prompt text.
-
-## How retrieval works
-
-One script, standard library only, run on demand and gone when it exits:
-
-    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" search|references|citations|batch|health|verify ...
-
-It talks to the Semantic Scholar Graph API, the one source here that answers
-"what does this paper cite" and "who cites this paper" — the two questions the
-method (Wohlin, Ré) is built on. Keyword search finds papers that use your words;
-following citations finds what the field is built on. Each call prints one JSON
-object. Nothing stays resident, nothing needs installing, and the scout agent's
-Bash is fenced by the guard to this one script and nothing else.
-
-Chunk 2 first shipped this as three MCP servers, two of them third-party. That was
-the wrong packaging — a persistent process, an 80-package dependency tree, a 30 s
-cold start, credentials in a file the eval sandbox could not see — and it was
-replaced the day the suite first ran. The chunk 2 spec §11 records why.
-
-**The key.** `SEMANTIC_SCHOLAR_API_KEY` in the environment, or one line in
-`~/.config/research-bearings/s2-api-key`. Optional, but effectively required for
-a crawl: unauthenticated calls 429 after a few requests. Without it the scout runs
-degraded and stamps the section.
-
-**The budget.** Every call takes `--run <slug> --budget <N>`. The script keeps a
-ledger at `research/.crawl/<slug>.touched.json` of the distinct papers it has
-handed out, refuses a hop once the ceiling is reached — before spending the
-request — and sizes each hop to what remains. The ceiling used to be a sentence in
-the agent's prompt; told 40, it touched 114–160.
-
-**Other free sources, for the record.** From their public documentation as of
-September 2026; only the first is used and measured by this plugin. The column
-that decided it is *contexts*: the sentence a citing paper writes about the cited
-one, which is the `Cited as` line on every card and the only tool-sourced prose a
-scout gets. Only Semantic Scholar carries it.
-
-| API | Search | Citation graph | Contexts | Credential |
-|---|---|---|---|---|
-| **Semantic Scholar Graph** — used here | yes | references and citations | **yes** | key optional, effectively required (429s unkeyed) |
-| OpenAlex | yes | `referenced_works`, `cites:` filter | no | none; `mailto=` for the polite pool |
-| Crossref | metadata | references where publishers deposit them | no | none; `mailto=` for the polite pool |
-| OpenCitations | no | DOI-to-DOI citations | no | none |
-| arXiv | yes | no | no | none |
-| Europe PMC | yes, biomedical | references and citations | no | none |
-| DBLP | yes, computer science | no | no | none |
-| CORE | yes, full text | no | no | key required |
-| Unpaywall | by DOI, open-access links | no | no | email required |
-| OpenReview | venues, submissions, reviews | no | no | none for public data |
-
-Whether a keyless walker on OpenAlex is worth losing the `Cited as` line is an
-open chunk 3 question (chunk 2 spec §11.6).
-
-Two on-disk artifacts:
-
-- **`~/.cache/research-bearings/s2/`** — raw API responses, shared across
-  projects, disposable. Expiry is direction-aware: a paper's reference list never
-  changes, so it never expires; its citation list grows, so it expires after 30
-  days.
-- **`research/.papers/<paperId>.json`** — one record per paper touched, in your
-  project. Written by the script rather than the scout: several hundred records
-  through a model's context costs tokens and invites transcription errors. Both
-  `research/.papers/` and `research/.crawl/` are regenerable; `/setup` adds them
-  to your `.gitignore`.
-
-## What a scout will not do
-
-It has read no papers, and the contract is built around that. Every line on a
-card is metadata from a tool call or a sentence some other paper wrote — the
-`contextsWithIntent` field, which returns the sentences in which a citing paper
-describes the cited work, tagged `background` / `methodology` / `result`. That
-survives the ~50% missing-abstract rate on backward hops, and it is the citing
-author's own characterization rather than an agent's guess.
-
-The only scout-authored prose on a card is one `Kept because` line.
-
-It also will not tell you a gap exists. A scout may state facts about its own
-search — this query returned zero rows, this hop surfaced nothing matching this
-term — and every section ends with the queries and counts behind it. It may not
-write "no published work combines X and Y." An absence claim becomes an empty
-cell in a matrix, and an empty cell is what sends someone to spend a semester on
-work that already exists. Interpreted absence becomes legitimate at the merger,
-which can see seven scouts' coverage at once.
-
-When a section stops on `budget` rather than `saturation`, it says so, in those
-words, at the top of the file. The failure worth designing against is not
-stopping early — it is stopping early and looking finished.
-
-## Why `frame` diverges before it converges
-
-A skill that only interrogates the question you brought can sharpen it, but it
-can never tell you that you are asking the wrong one. That is usually the most
-valuable thing a framing session can produce. So the loop generates candidate
-framings first — Polya's transformations, Hamming's important-problems question
-— kills them on Booth's ladder and the recursive so-what, and repeats until one
-stands.
-
-Before any literature has been read those candidates are guesses, and the skill
-says so rather than implying otherwise. The stage is re-entrant: once `/surveys`
-exists and shows you what the field actually asks, run `frame` again.
-
-## Development
-
-The `static checks` and `one test file` verbs in
-[`docs/agents/toolchain.md`](docs/agents/toolchain.md) are free and fast — run
-them freely. Between them they cover the scope guard (30 cases), the
-retrieval script offline against real captured API responses (28 cases),
-template/contract heading parity, and the plugin, skill and agent manifests.
-
-The behavioural suite is the `full suite` verb in
-[`docs/agents/toolchain.md`](docs/agents/toolchain.md) — run it from there rather
-than from a copy here, which is how the two drift apart. That file also explains
-why each flag is present.
-
-`Write`, `Edit`, `Agent` and `Bash` are gated and must be granted explicitly,
-or cases fail for reasons that look behavioural. This machine cannot grant `Bash`
-inside the harness (chunk 1 spec §9), which is why the scout's agent cases hand it
-a saved crawl and judge only what it writes; the crawl itself is covered by the
-script's offline selftest, and finding things by the gold set. `setup-checks-before-asking`
-stays out of the `ci` tag for the same reason.
+Not yet done: a live run judged by a human. The automated checks are structural
+only, by design — see [`docs/design/chunk-03-analogs.md`](docs/design/chunk-03-analogs.md) §6.
 
 ## Layout
 
 ```
-.claude-plugin/plugin.json         manifest — no component fields, default layout
-.claude-plugin/marketplace.json    this repo is its own marketplace
-skills/<name>/SKILL.md             user-invoked, run inline
-agents/<name>.md                   contract-bound, dispatched by skills
-scripts/retrieval/snowball.py      the citation walker: search, hops, budget ledger, --selftest
-scripts/retrieval/fixtures/        real captured API responses the selftest runs on
-hooks/hooks.json + guard.py        write-scope and Bash-scope enforcement
-scripts/check_headings.py          template / contract parity
-templates/research/                the output headings, in one place
-evals/<case>/                      prompt.md + graders/
-docs/agents/                       tracker, domain, triage and toolchain conventions
-docs/design/                       what is being built, and why
-.scratch/                          the wayfinder tracker for this effort
+skills/                    setup, frame, scout — one job, one file each
+agents/question-critic.md  attacks a framed question from a fresh context
+scripts/retrieval/         search, batch, verify, health, --selftest
+scripts/check_analogs.py   the structural done-check for a /scout file
+scripts/check_headings.py  templates and the skills that write them agree
+hooks/                     write-scope guard: agents write under research/, nowhere else
+templates/research/        the file formats, and the source of truth for them
+docs/design/               why each decision went the way it did
+evals/                     eval cases, and the gold set for recall
 ```
 
-## Licence
+## Development
 
-MIT.
+Two verbs, both free and fast, in
+[`docs/agents/toolchain.md`](docs/agents/toolchain.md) — manifest validation,
+heading parity, and the two selftests. Run them freely.
+
+The methodology every skill applies traces to a source in `academic.md`, the
+sheet this plugin is derived from. It is kept local and not shipped.

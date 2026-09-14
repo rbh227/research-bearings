@@ -24,15 +24,15 @@ Human gate: the question. Nothing downstream runs without `QUESTION.md`.
 | Skill | Agents | Output | Justification |
 |---|---|---|---|
 | `/scout` | — | `analogs/<slug>.md` | Swanson (ABC model), Uzzi (atypical combinations), narrow-exploration study (force seeds from adjacent fields). **Shipped in chunk 3** (`docs/design/chunk-03-analogs.md`). The breadth tool, and it absorbed what Stage 4 had called `/fingerprint`, `/analogs` and `/flip`: shape, fields, transfer, opportunity, verify, in one skill with no agents. |
-| `/snowball` | `paper-scout` ×1 | `landscape/<slug>.md` | Ré (snowball, asymptote 25–35, group by thesis), Wohlin (snowballing as sampling). **Shipped in chunk 2.** The unit of work `/landscape` fans out seven times, promoted to a user-facing skill so it could be judged before anything depended on it. |
+| `/snowball` | ~~`paper-scout`~~ | ~~`landscape/<slug>.md`~~ | Ré (snowball, asymptote 25–35, group by thesis), Wohlin (snowballing as sampling). Shipped in chunk 2, **deleted 2026-09-14** with its agent, its template and its nine-case eval tier. It was the depth tool — it walks the citation neighbourhood of a question — and the plugin turned out to want breadth. In git at 249188a, along with the hops, the budget ledger and the Bash fence that existed for its agent. |
 | `/surveys` | `survey-differ` | `landscape/surveys.md` | Petersen (mapping studies), vocabulary harvest. **Deferred 2026-09-14**: the landscape chain was chunk 3 until breadth took priority. |
-| `/landscape` | `paper-scout` ×7, `merger` | `landscape/matrix.md`, `timeslice.md` | Ré (bits, snowball, asymptote 25–35, group by thesis), Wohlin (snowballing), Webster/Watson (concept matrix), Petersen (empty cells), Musgrave (reproduced/self-reported/contested), absence claims. Goal: parallel gathering. |
+| `/landscape` | ~~`paper-scout` ×7~~, `merger` | `landscape/matrix.md`, `timeslice.md` | **Deferred 2026-09-14** with the rest of the landscape chain; it fanned out an agent that no longer exists. |
 | `/datasets` | `dataset-scout` | `landscape/datasets.md` | Kapoor (leakage in standard splits) |
 | `/groups` | `author-tracker` | `landscape/groups.md` | goal: competitive landscape. Who is publishing, where they are heading. Hamming is a secondary source, not the reason. |
 | `/bits` | — | `BITS.md` | Ré (every cluster has a bit) |
-| `/watch` | `paper-scout` | matrix updates | **deferred to milestone 5.** No sheet source and no goal it uniquely serves. |
+| `/watch` | — | matrix updates | **deferred to milestone 5.** No sheet source and no goal it uniquely serves, and the agent it named is gone. |
 
-`paper-scout` is the agent to get right first: one question in, one section out, snowballing from seeds with the asymptote rule, absence claims naming what was checked. Tools: Read, Write, and Bash fenced by the guard to one retrieval script. No web tools.
+~~`paper-scout` is the agent to get right first.~~ Deleted 2026-09-14 with `/snowball`. Its one durable lesson is in `/scout`: the only prose a retrieval step may author is why a paper is in the file, and every word of it has to be checkable against what the tool returned.
 
 Built in chunk 2 (`docs/design/chunk-02-scout.md`), with two narrowings the spec argued for: cards carry no scout-written characterization of a paper, only metadata plus a citation-context sentence and one `Kept because` line; and absence is **mechanical only** — a scout states facts about its own search and never about the field. Interpreted absence becomes legitimate at the `merger`, which can see seven scouts' coverage at once.
 
@@ -163,9 +163,9 @@ Only two rows fail both tests: `/watch` (milestone 5 anyway) and `/handoff`.
 
 | Stage | Agents |
 |---|---|
-| Landscape and presentation | 6 (`survey-differ`, `paper-scout`, `merger`, `brief-writer`, `dataset-scout`, `author-tracker`) |
+| Landscape and presentation | 5 (`survey-differ`, `merger`, `brief-writer`, `dataset-scout`, `author-tracker`) — `paper-scout` deleted with `/snowball` |
 | Reading | 6 (`predictor`, `reader`, `scorer`, `leakage-auditor`, `openreview-reader`, `critic`) |
 | Ideation | 2 (`persona-ideator`, `diversity-planner`) — was 7; `analog-scout`, `field-carder`, `transfer-checker`, `flip-generator` and `novelty-checker` collapsed into `/scout`, which has no agents |
 | Selection | 2 (`premortem-agent`, `tournament-judge`) |
 | Experiment | 7 (`baseline-reproducer`, `experiment-designer`, `ablation-planner`, `variance-checker`, `results-tabulator`, `results-critic`, `failure-mode-auditor`) |
-| **Total** | **23** |
+| **Total** | **22** |

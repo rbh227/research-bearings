@@ -13,20 +13,17 @@ Glossary for the research plugin effort. One meaning per word.
 
 ## Retrieval terms
 
-Added with chunk 2. All of these describe one `/research-bearings:snowball` run.
-The skill was called `/scout` until 2026-09-14; the name moved to the breadth
-tool (chunk 3), and the depth tool took the name of what it does.
+Added with chunk 2 for a snowballing skill, replaced with chunk 3's when that
+skill was deleted (2026-09-14). All of these describe one `/research-bearings:scout`
+run.
 
-- **section**: One markdown file under `research/landscape/`, answering one question, written by one `paper-scout`. A landscape is assembled from sections; a section is never a landscape.
-- **card**: One paper's entry inside a section's `## Papers`. Metadata plus one quoted citation sentence plus one `Kept because` line. Never a summary.
-- **seed**: A paper found by search, from which hops start. Seeds are found, not hopped to.
-- **hop**: One `references` (backward) or `citations` (forward) call of the retrieval script from one seed. A **round** is a hop in both directions across the current seed set.
-- **touched** / **kept**: Touched is every paper a hop returned and counts against the budget. Kept is the 25–35 that reach `## Papers`. The design once conflated them.
-- **saturation**: A stop reason: a completed round added fewer than three keepers. Not claimable if any hop in that round was truncated.
-- **budget**: A stop reason, and the ceiling that causes it, denominated in papers touched. `budget` always means the section is incomplete. **Enforced by the retrieval script**, which keeps a ledger per run and refuses hops past the ceiling before spending the request; it was a line in the agent's prompt until 2026-09-13, and under that arrangement it did not hold. Charging is locked, so concurrent calls on one run cannot lose each other's ids (2026-09-14); the check still happens before the request and the charge after it, so two calls in flight at once can each pass a check the other would have failed — the ledger is right afterwards and the next call refuses. Sequential calls, which is how an agent makes them, are exact.
-- **ledger**: `research/.crawl/<slug>.touched.json` — the distinct papers the script has handed a run. The count the section must agree with; `/snowball` reads it back and reports it over the section's figure if they differ.
-- **saved crawl**: A directory of the script's JSON outputs, one per call, read in filename order in place of running the script. How the evals reach the agent and how a crawl is replayed offline.
-- **truncated**: A hop whose result carried a non-null `next` — the API held rows back, so the hop sampled the edge list rather than reading it. Paging is not built.
-- **unresolvable**: A cited work with no Semantic Scholar record, carrying only title, venue and year. Never hopped from, never counted. Mostly grey literature.
-- **anchored** / **unanchored**: Whether the run took scope and vocabulary from `research/QUESTION.md`. Unanchored runs are stamped as such in the section.
-- **degradation stamp**: A line at the top of a section recording that the run was reduced — no API key, truncated hops, a question search cannot answer.
+- **shape**: The problem written without the home field's nouns — what it is structurally, in words any field would recognise. The one step nothing else in the plugin does, and the rest of a run is only as good as it.
+- **field**: One area that shares the shape and not the vocabulary, searched in its own words. A field whose papers would plausibly cite your seeds is not a field, it is the home field with a wider collar.
+- **home vocabulary**: The words `## Vocabulary` in `research/QUESTION.md` lists. Stripped in step 1, banned from field names, and never used as a query — a query in your own words finds your own field.
+- **transfer**: Why a field's method might move to your problem, and what is different about it. Grounded in the rows the search returned.
+- **opportunity**: What you would actually try, per field. The one speculative thing in the file, and labelled as such.
+- **nearest existing**: The opportunity put to the index, with a row count and the closest title. This is the only shape an absence claim may take here; "unexplored", "gap", "novel" and "nobody" do not appear at all.
+- **verify**: Resolving every paper the file names against the record — by id, or by title with case, punctuation and spacing folded. **Only an exact match resolves.** A prefix or substring match is reported as a candidate and not certified: measured 2026-09-14, "Attention Is All You Need for Wildfire Damage Assessment" prefix-matched "Attention Is All You Need" and came back resolved, carrying the wrong paper's id.
+- **unresolved**: A paper `verify` could not match. It stays in the file, marked, with the closest thing the search did return. Never deleted: where recall outran the record is what a reader wants to see.
+- **framed** / **unframed**: Whether the run took its problem from `research/QUESTION.md`. Unframed runs are stamped as such, and are a normal way to use the skill.
+- **bound**: Searches times `--limit`, where the searches are the field list the user approves before any of them run. There is no budget and no ledger: a citation walk compounds and needs a ceiling enforced per request, and search does not.

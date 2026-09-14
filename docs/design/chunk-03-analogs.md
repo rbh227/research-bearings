@@ -54,8 +54,7 @@ the search is seconds, the framing is the work.
 2. **Fields.** 5–10 that share the shape and not the vocabulary, each with
    the words *that* field uses. Uzzi's rule: mostly adjacent, one or two
    strange. The home field is not a field. From recall.
-3. **Papers.** One `search "<field's words>" --limit 10 --run <slug> --budget
-   <N>` per field. Never the home vocabulary. Read what came back; keep two or
+3. **Papers.** One `search "<field's words>" --limit 10` per field. Never the home vocabulary. Read what came back; keep two or
    three per field that look like they carry a movable method; add a
    remembered paper if the search missed it. Then per field: what shape it
    shares, why the method might transfer, what is different, and the
