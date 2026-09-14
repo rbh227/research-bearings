@@ -39,10 +39,12 @@ from __future__ import annotations
 
 import contextlib
 import hashlib
+import io
 import json
 import os
 import random
 import sys
+import unicodedata
 import tempfile
 import time
 import urllib.error
@@ -774,6 +776,126 @@ def split_search(payload: dict[str, Any], query: str, limit: int) -> dict[str, A
     }
 
 
+def normalised_title(text: str) -> str:
+    """A title folded for comparison: case, punctuation and spacing dropped.
+
+    Two records of the same paper differ in punctuation far more often than in
+    words — a colon becomes a dash, an ampersand becomes "and", a subtitle
+    loses its capitals. Folding those away is the difference between "this
+    paper does not exist" and "this paper exists and you typed it from memory".
+    """
+    folded = unicodedata.normalize("NFKD", text or "").lower().replace("&", " and ")
+    kept = [c if (c.isalnum() or c.isspace()) else " " for c in folded]
+    return " ".join("".join(kept).split())
+
+
+def title_match(asked: str, found: str) -> str:
+    """How `found` matches `asked`: exact, prefix, substring, or none."""
+    a, f = normalised_title(asked), normalised_title(found)
+    if not a or not f:
+        return "none"
+    if a == f:
+        return "exact"
+    if a.startswith(f) or f.startswith(a):
+        return "prefix"
+    # A shorter title sitting inside a longer one is a real match only when the
+    # shorter one is long enough to be a title rather than a word or two.
+    shorter = a if len(a) <= len(f) else f
+    if (a in f or f in a) and len(shorter.split()) >= 4:
+        return "substring"
+    return "none"
+
+
+RESOLVING_MATCHES = ("exact", "prefix", "substring")
+
+
+def _id_matches(asked: str, rec: dict[str, Any]) -> bool:
+    """Whether a record answers to the id that was asked for, in any spelling."""
+    a = (asked or "").strip()
+    if not a:
+        return False
+    if a == rec.get("paperId"):
+        return True
+    ext = rec.get("externalIds") or {}
+    low = a.lower()
+    for prefix, key in (("arxiv:", "ArXiv"), ("doi:", "DOI"), ("corpusid:", "CorpusId")):
+        if low.startswith(prefix):
+            return str(ext.get(key) or "").lower() == low[len(prefix):]
+    return any(str(v).lower() == low for v in ext.values())
+
+
+def verify(titles: list[str], ids: list[str], limit: int = 5) -> dict[str, Any]:
+    """Resolve papers named in a written artifact against the record.
+
+    The posture chunk 3 runs on: the model may name a paper from memory, and
+    this is what decides whether that paper exists. Nothing is dropped — an
+    unresolved row comes back marked, with the closest thing the search did
+    return, so a reader sees exactly where memory outran the record.
+
+    Charges no budget. Verification is not discovery: the papers were already
+    named, and a ceiling that refused to check them would be the wrong shape.
+    """
+    titles = [t.strip() for t in (titles or []) if t and t.strip()]
+    ids = [i.strip() for i in (ids or []) if i and i.strip()]
+    if not titles and not ids:
+        return err("verify needs at least one --title or --id")
+
+    results: list[dict[str, Any]] = []
+
+    if ids:
+        got = get_papers_batch(ids)
+        if "error" in got:
+            return got
+        for asked in ids:
+            rec = next((r for r in got["papers"] if _id_matches(asked, r)), None)
+            results.append({
+                "query": asked,
+                "kind": "id",
+                "resolved": rec is not None,
+                "paperId": rec["paperId"] if rec else None,
+                "title": rec["title"] if rec else None,
+                "year": rec["year"] if rec else None,
+                "match": "id" if rec else "no record for this id",
+            })
+
+    for asked in titles:
+        found = search(asked, limit=limit)
+        if "error" in found:
+            results.append({
+                "query": asked, "kind": "title", "resolved": False, "paperId": None,
+                "title": None, "year": None, "match": f"search failed: {found['error']}",
+            })
+            continue
+        ranked = sorted(
+            ((title_match(asked, p.get("title") or ""), p) for p in found["papers"]),
+            key=lambda pair: RESOLVING_MATCHES.index(pair[0]) if pair[0] in RESOLVING_MATCHES else 9,
+        )
+        best_match, best = ranked[0] if ranked else ("none", None)
+        ok = best_match in RESOLVING_MATCHES
+        results.append({
+            "query": asked,
+            "kind": "title",
+            "resolved": ok,
+            "paperId": best["paperId"] if ok and best else None,
+            "title": best["title"] if best else None,
+            "year": best["year"] if best else None,
+            # On a miss the closest row is still reported: a near-miss is a
+            # typo to fix, a blank is a paper that is not there.
+            "match": best_match if ok else (
+                f"no title match in {found['rows_returned']} rows"
+                + (f"; closest: {best['title']}" if best else "")
+            ),
+        })
+
+    resolved = sum(1 for r in results if r["resolved"])
+    return {
+        "results": results,
+        "resolved_count": resolved,
+        "unresolved_count": len(results) - resolved,
+        "checked": len(results),
+    }
+
+
 def health(run: str = "") -> dict[str, Any]:
     """Availability without spending a request or inferring it from a failure."""
     recs = records_dir()
@@ -800,7 +922,7 @@ def main(argv: list[str] | None = None) -> int:
 
     ap = argparse.ArgumentParser(
         prog="snowball.py",
-        description="Semantic Scholar search and citation hops. One JSON result per call.",
+        description="Semantic Scholar search, citation hops and citation checking. One JSON result per call.",
     )
     ap.add_argument("--selftest", action="store_true", help="offline checks, then exit")
     sub = ap.add_subparsers(dest="cmd")
@@ -822,6 +944,10 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("batch", help="metadata for many ids at once")
     p.add_argument("ids", nargs="+")
     scoped(p)
+    p = sub.add_parser("verify", help="do these papers exist? by title or id; charges no budget")
+    p.add_argument("--title", action="append", default=[], help="repeatable")
+    p.add_argument("--id", action="append", default=[], dest="ids", help="repeatable")
+    p.add_argument("--limit", type=int, default=5, help="search rows to consider per title")
 
     args = ap.parse_args(argv)
     if args.selftest:
@@ -830,7 +956,9 @@ def main(argv: list[str] | None = None) -> int:
         ap.print_help()
         return 2
 
-    if args.budget and not args.run:
+    # verify takes no --run/--budget: it charges nothing, so the scoped pair is
+    # absent from its parser and this guard must not assume every verb has them.
+    if getattr(args, "budget", 0) and not getattr(args, "run", ""):
         out: dict[str, Any] = err("--budget needs --run: the ledger that enforces it is per run")
     elif args.cmd == "health":
         out = health(args.run)
@@ -838,6 +966,8 @@ def main(argv: list[str] | None = None) -> int:
         out = search(args.query, args.limit, args.budget, args.run)
     elif args.cmd in ("references", "citations"):
         out = hop(args.cmd, args.paper_id, args.limit, args.budget, args.run)
+    elif args.cmd == "verify":
+        out = verify(args.title, args.ids, args.limit)
     else:
         out = get_papers_batch(args.ids, args.budget, args.run)
 
@@ -868,7 +998,10 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
     os.environ["S2_CACHE_DIR"] = tempfile.mkdtemp(prefix="snowball-cache-")
     os.environ["RESEARCH_PROJECT_DIR"] = tempfile.mkdtemp(prefix="snowball-project-")
 
+    ran: list[str] = []
+
     def check(case: str, ok: bool, detail: str = "") -> None:
+        ran.append(case)
         print(f"{'ok  ' if ok else 'FAIL'} {case}" + (f" — {detail}" if detail and not ok else ""))
         if not ok:
             failures.append(case)
@@ -1215,11 +1348,102 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
                 f"corrupt={str(corrupt)[:70]} unwritable={str(unwritable)[:70]} requests={calls['n']}",
             )
 
+    # 20-25. verify: the citation check chunk 3's posture rests on. A model
+    #        that names a paper from memory is fine; a paper that does not
+    #        exist reaching the page is not.
+    xbd = "Creating xBD: A Dataset for Assessing Building Damage from Satellite Imagery"
+    search_payload = {"total": 1, "data": [{
+        "paperId": "ec58b5946c57f7d4d4a3cff0566941bb93291c95", "title": xbd,
+        "year": 2019, "venue": "CVPR Workshops", "authors": [{"name": "R. Gupta"}],
+        "externalIds": {"DOI": "10.1184/R1/8135576.V1"},
+    }]}
+
+    with _fetch(lambda *a, **k: (200, json.dumps(search_payload).encode())):
+        exact = verify([xbd], [])
+        variant = verify(["creating xBD - a dataset for assessing building damage from satellite imagery"], [])
+    check(
+        "20 an exact title resolves",
+        exact["resolved_count"] == 1 and exact["results"][0]["match"] == "exact"
+        and exact["results"][0]["paperId"] == "ec58b5946c57f7d4d4a3cff0566941bb93291c95",
+        f"got {exact['results'][0]}",
+    )
+    check(
+        "21 punctuation and case do not break a title match",
+        variant["resolved_count"] == 1 and variant["results"][0]["match"] == "exact",
+        f"got {variant['results'][0]['match']}",
+    )
+
+    with _fetch(lambda *a, **k: (200, json.dumps(search_payload).encode())):
+        missing = verify(["A Unified Theory of Nothing Whatsoever"], [])
+    check(
+        "22 a title with no match is unresolved, and names the closest row",
+        missing["resolved_count"] == 0
+        and missing["results"][0]["resolved"] is False
+        and "closest" in missing["results"][0]["match"]
+        and missing["results"][0]["paperId"] is None,
+        f"got {missing['results'][0]['match']}",
+    )
+
+    batch_payload = [{
+        "paperId": "ec58b5946c57f7d4d4a3cff0566941bb93291c95", "title": xbd, "year": 2019,
+        "externalIds": {"DOI": "10.1184/R1/8135576.V1", "ArXiv": None},
+    }, None]
+    with _fetch(lambda *a, **k: (200, json.dumps(batch_payload).encode())):
+        ids = verify([], ["ec58b5946c57f7d4d4a3cff0566941bb93291c95", "DOI:10.0000/nope"])
+    check(
+        "23 a good id resolves and a bad one does not, each named",
+        ids["resolved_count"] == 1 and ids["unresolved_count"] == 1
+        and ids["results"][0]["resolved"] is True
+        and ids["results"][1]["resolved"] is False
+        and ids["results"][1]["query"] == "DOI:10.0000/nope",
+        f"got {ids['results']}",
+    )
+
+    with _fetch(lambda method, url, body, key: (
+        200, json.dumps(batch_payload if "batch" in url else search_payload).encode())):
+        mixed = verify([xbd, "A Unified Theory of Nothing Whatsoever"],
+                       ["ec58b5946c57f7d4d4a3cff0566941bb93291c95"])
+    check(
+        "24 a mixed batch reports every row, in order, ids first",
+        mixed["checked"] == 3 and mixed["resolved_count"] == 2
+        and [r["kind"] for r in mixed["results"]] == ["id", "title", "title"],
+        f"got {[(r['kind'], r['resolved']) for r in mixed['results']]}",
+    )
+
+    # 25. Verification is not discovery: it must not spend the crawl's budget.
+    with tempfile.TemporaryDirectory() as tmp:
+        with _env(RESEARCH_PROJECT_DIR=tmp):
+            with _fetch(lambda *a, **k: (200, json.dumps(search_payload).encode())):
+                verify([xbd], [])
+            after = ledger_load("v") or set()
+    check(
+        "25 verify charges no ledger",
+        after == set() and "error" in verify([], []),
+        f"ledger={len(after)}",
+    )
+
+    # 26. The CLI reaches verify. Case 20 called the function; this calls the
+    #     command, which is where a verb missing --run/--budget first broke.
+    argv_out: dict[str, Any] = {}
+    with _fetch(lambda *a, **k: (200, json.dumps(search_payload).encode())):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = main(["verify", "--title", xbd])
+        try:
+            argv_out = json.loads(buf.getvalue())
+        except ValueError:
+            argv_out = {}
+    check(
+        "26 the CLI dispatches verify and prints JSON",
+        rc == 0 and argv_out.get("resolved_count") == 1,
+        f"rc={rc} out={buf.getvalue()[:120]!r}",
+    )
+
     print()
     if failures:
-        print(f"{len(failures)} of 19 cases failed: {', '.join(failures)}")
+        print(f"{len(failures)} of {len(ran)} cases failed: {', '.join(failures)}")
         return 1
-    print("19 of 19 cases passed")
+    print(f"{len(ran)} of {len(ran)} cases passed")
     return 0
 
 
