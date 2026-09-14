@@ -138,13 +138,31 @@ claim, and it reads to the merger as a finding. The paper's own words go in
 quotation marks with attribution — on the `Cited as` line, or as a marked
 abstract fragment. Your words never describe the paper.
 
-**Watch the second clause.** Measured 2026-09-14, three runs of three: the
-failures were nearly all a checkable first half joined by "and" to an
-unreadable second — "the pre/post twin-tower baseline the seed builds from,
-**and the cross-region generalization result**"; "the seed's instance-
-segmentation component, **and the failure mode it reports there**". One clause,
-out of the crawl, is the whole line. Measured 2026-09-13: 200-character `Kept
-because` lines characterising mechanisms failed the same grader.
+**Watch the second clause.** Measured 2026-09-14: the failures were nearly all
+a checkable first half joined by "and" to an unreadable second — "the pre/post
+twin-tower baseline the seed builds from, **and the cross-region generalization
+result**"; "the seed's instance-segmentation component, **and the failure mode
+it reports there**". One clause, out of the crawl, is the whole line.
+
+**Then watch every adjective.** Measured the same day, after the clause rule
+landed: the lines took the right shape and smuggled the same knowledge in single
+words. "The only one whose **title names a ViT backbone**" — that title reads
+"A Foundation-Model Framework for Typology-Based Building Damage Assessment from
+Mono-Temporal Imagery", so the claim is not merely unchecked, it is false. "The
+**non-learned** image-pair comparison." "The **multi-scale** backbone." "The
+**satellite-specific** one." "The only **natural-image** one among the seed's
+segmentation cites." Every one of those classifies a paper by method or domain
+out of your own knowledge, in a line that otherwise looks sourced.
+
+**So: every word in the line comes from the crawl.** If a term is not in the
+title, the venue, or a sentence you are quoting, it is not available to you —
+and that includes terms that feel like plain description rather than
+characterisation. When a descriptor is doing real work, quote the fragment it
+comes from: "the only title carrying 'Multitemporal'", not "the multitemporal
+one". When no sourced word will carry the line, fall back to what the crawl
+counted — the hop, the seed, `isInfluential`, how many context sentences, where
+the row sat. Measured 2026-09-13: 200-character `Kept because` lines
+characterising mechanisms failed the same grader.
 
 **A thesis group is a bold line — not a heading, not a paragraph.**
 `**Token-based bitemporal attention**` on a line of its own, then its cards.
@@ -182,6 +200,7 @@ needs and what search can give it.
 | "One more hop won't hurt." | The script refuses past the ceiling, before spending the call. Do not argue with it. |
 | "They want to understand what each paper contributes, so `Kept because` will say." | It says why the card is here, in a dozen words. What the paper contributes is `/read`'s job, after someone has read it. |
 | "The first half is from the crawl, the second half just adds colour." | Both halves are the line, and the colour is the part you did not read. Stop at the clause you can check. |
+| "One word of description to place it — it's a ViT, it's multi-scale." | Which crawl field says so? If the answer is "everyone knows", it is your knowledge, not the crawl's, and one of those words was measured false. |
 | "One line under the group heading, to orient the reader." | The heading is the orientation. Anything under it is you describing papers you have not read. |
 | "A quick `curl` / `ls` / `pip` would help here." | Your Bash is one script. The guard denies everything else and the attempt goes in the log. |
 
