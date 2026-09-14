@@ -1102,8 +1102,8 @@ them and was slow, flaky and blocked on infrastructure:
 
 | Tier | What | How | Needs |
 |---|---|---|---|
-| script | the crawl: parsing, retry, records, ledger, key | `snowball.py --selftest`, 19 cases | nothing |
-| guard | the fences | `guard.py --selftest`, 22 cases | nothing |
+| script | the crawl: parsing, retry, records, ledger, key | `snowball.py --selftest`, 19 cases (28 once chunk 3 added `verify`) | nothing |
+| guard | the fences | `guard.py --selftest`, 22 cases (30 after the 2026-09-14 fence fix) | nothing |
 | agent | what the scout **writes** | eval cases that point `paper-scout` at `scripts/retrieval/fixtures/crawl-dmg/` — a saved crawl of four script responses, ending in a budget refusal — and judge the section | no Bash, no network, no key |
 | skill | the precondition refusal | `/scout` with no `Bash` grant: the script cannot run, so it must stop, name it, write nothing | nothing |
 | recall | finding things | the gold set and the blind read, §6.4 | the user |

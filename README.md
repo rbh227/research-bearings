@@ -65,7 +65,7 @@ enforcement here that is not prompt text.
 
 One script, standard library only, run on demand and gone when it exits:
 
-    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" search|references|citations|batch|health ...
+    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" search|references|citations|batch|health|verify ...
 
 It talks to the Semantic Scholar Graph API, the one source here that answers
 "what does this paper cite" and "who cites this paper" — the two questions the
@@ -164,8 +164,8 @@ exists and shows you what the field actually asks, run `frame` again.
 
 The `static checks` and `one test file` verbs in
 [`docs/agents/toolchain.md`](docs/agents/toolchain.md) are free and fast — run
-them freely. Between them they cover the scope guard (22 cases), the
-retrieval script offline against real captured API responses (19 cases),
+them freely. Between them they cover the scope guard (30 cases), the
+retrieval script offline against real captured API responses (28 cases),
 template/contract heading parity, and the plugin, skill and agent manifests.
 
 The behavioural suite is the `full suite` verb in
