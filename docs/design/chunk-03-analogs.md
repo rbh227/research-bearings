@@ -1,142 +1,170 @@
-# Chunk 3: analogs — the breadth tool
+# Chunk 3 spec: `/scout`, the breadth tool
 
-Plan, 2026-09-14. Not yet a spec. Supersedes the chunk 3 the map had pencilled
-in (the landscape chain: `/surveys`, `/landscape`, `/brief`) and re-scopes the
-premise chunk 2 was built on. What it keeps from chunk 2 is the part that
-works: the retrieval script, the ledger, the guard, `/setup`, `/frame`.
+2026-09-14. Supersedes the chunk 3 the map had pencilled in (the landscape
+chain) and re-scopes chunk 2's premise for this skill only. Tickets in
+`.scratch/chunk-03-analogs/issues/`.
 
-## 1. Why this, and why now
+## 1. Decision record
 
-The plugin's founding rule is in the sheet three times over — *never generate
-from the nearest papers alone; force seeds from adjacent fields; look for
-fields that share the shape but not the citation graph* (the narrow-exploration
-study, Swanson, Uzzi). Chunk 2 built a snowball tool, which by construction
-finds only the citation neighbourhood of what you already have. Crop damage
-from drone imagery shares your problem's shape and none of your citation
-graph; a snowball out of hurricane-damage papers cannot reach it. The plan put
-the breadth tools last, in Stage 4, behind three more librarian skills. That
-was the wrong order for what the plugin is for.
+- **Why.** The sheet's founding rule, three times over: never generate from
+  the nearest papers alone; force seeds from adjacent fields; find the fields
+  that share the shape and not the citation graph (narrow-exploration study,
+  Swanson, Uzzi). Chunk 2 built a snowball, which by construction finds only
+  the neighbourhood of what you already have. The plan had scheduled breadth
+  last. Wrong order for what the plugin is for.
+- **Posture.** Trust the model to think; verify what it cites. The model's
+  recall is the source of breadth. The fluent-confident-false failure measured
+  all week is handled by resolving every citation at the end and marking what
+  does not resolve — not by forbidding the thinking. Applies to this skill. The
+  snowball keeps its every-line-tool-sourced contract and is parked.
+- **Naming.** This skill is `/scout` — it is what finds papers broadly. The
+  parked snowball skill becomes `/snowball`. `paper-scout` keeps its name; it
+  is the snowball's agent and is still dispatched by it. One meaning per word.
+- **Shape.** One skill, inline, no new agent, minutes per run. The skill has
+  the session's context, which is the point.
+- **Depth.** All the way to an opportunity per field, labelled speculative,
+  with the transfer argument underneath it and absence kept mechanical.
 
-Chunk 2 also spent its effort on the wrong premise for this job. It assumed
-the model's recall of the literature cannot be trusted, so every line had to
-trace to a tool call — cards, a guard, honesty graders, a 70-minute eval tier.
-The user's call, 2026-09-14: **trust the model to think; verify what it
-cites.** The model's recall is the *source* of breadth — it is the thing that
-knows crop damage and lesion change share a shape — and the failure mode we
-measured all week (fluent, confident, false) is handled by checking the
-citations at the end, not by forbidding the thinking.
+## 2. The skill: `/scout`
 
-That posture applies to this skill. The snowball tool keeps its own; it is
-parked, not repudiated.
+`skills/scout/SKILL.md`. `allowed-tools: Read, Glob, Bash, AskUserQuestion`.
+Writes `research/analogs/<slug>.md`. The guard's Bash fence applies to this
+plugin's *agents*; the skill runs in the main thread, so its Bash is the
+user's own grant. It still calls nothing but the retrieval script.
 
-## 2. What one run does
+**Precondition — soft.** `snowball.py health` must print JSON. `key_present:
+false` is stamped, not a stop. No `research/QUESTION.md` is stamped
+*unframed*, not a stop: a broad "what should I even be looking at" is a valid
+input and the skill says which kind it got.
 
-A user-invoked skill. It starts from whatever framing exists — `/frame`'s
-`research/QUESTION.md` (the question, its scope, its `## Vocabulary`) and
-`research/framing-log.md` (every framing that died on the way: alternative
-shapes of the same interest, worth searching too) — plus whatever the user
-says when invoking it, which may widen or narrow all of that. A broad "what
-should I even be looking at" and a sharp "this paper's problem, elsewhere" are
-both valid inputs; the skill reports which it was given.
+**Input.** In this order, each overriding the last: `research/QUESTION.md`
+(`## Question`, scope, `## Vocabulary`); `research/framing-log.md` `##
+Rejected framings` (alternative shapes of the same interest — searched as
+shapes in their own right, ticket 04 decides how many); the invocation text.
 
-Four steps.
+**Confirm.** Show the user the shape (step 1) and the field list (step 2)
+before any search. This is the one place a human can steer breadth cheaply;
+the search is seconds, the framing is the work.
 
-**1. Shape.** Strip the problem to what it is without the home field's nouns.
-"Per-region change classification on paired overhead imagery, sparse and
-noisy labels, domain shift between events" — not "post-disaster building
-damage assessment". The `## Vocabulary` heading is the list of words to remove.
-The model does this from its own understanding; it is the step nothing else
-can do.
+**Steps.**
 
-**2. Fields.** Name 5–10 fields that share the shape and not the vocabulary,
-each with the words *that field* would use. The model does this from recall.
-Uzzi's rule shapes the set: mostly adjacent, plus one or two that are genuinely
-strange.
+1. **Shape.** The problem without the home field's nouns. `## Vocabulary` is
+   the list of words to remove. Written by the skill from its own
+   understanding.
+2. **Fields.** 5–10 that share the shape and not the vocabulary, each with
+   the words *that* field uses. Uzzi's rule: mostly adjacent, one or two
+   strange. The home field is not a field. From recall.
+3. **Papers.** One `search "<field's words>" --limit 10 --run <slug> --budget
+   <N>` per field. Never the home vocabulary. Read what came back; keep two or
+   three per field that look like they carry a movable method; add a
+   remembered paper if the search missed it. Then per field: what shape it
+   shares, why the method might transfer, what is different, and the
+   opportunity — what you would try. The opportunity is speculative and says
+   so.
+4. **Verify.** `snowball.py verify` over every paper named anywhere in the
+   file — by id where there is one, by title where there is not. Resolved
+   papers get their S2 id written in. Unresolved ones stay, marked in place as
+   `_unresolved: not found by title_`. Nothing is silently dropped.
 
-**3. Papers.** For each field, one `search` in that field's own words — never
-the home field's — through the retrieval script. Real rows, real ids. The model
-reads what came back, picks two or three that look like they carry a method
-worth moving, and may add a paper it remembers that the search missed. Then it
-writes, per field: the shape it shares, why the method might transfer, what is
-different, and **the opportunity** — what you would actually try. That last
-part is speculative on purpose and labelled as such.
+**Report.** Show the file. Say: fields, papers, unresolved count, and whether
+the run was framed or unframed.
 
-**4. Verify.** Every paper named anywhere in the output is resolved through the
-script — by id where there is one, by title search where there is not. A paper
-that does not resolve is not removed; it is marked, in place, as unresolved,
-so the reader sees exactly where the model's memory outran the record.
+**Budget.** Default 100 touched — ten fields at ten rows. The ledger enforces
+it as before. `verify` does not charge it.
 
-Output: `research/analogs/<slug>.md`, a few thousand characters. Readable in
-five minutes. Run time: minutes — the model writes a dozen paragraphs, not
-twenty thousand characters of bibliography.
+**Rules this skill applies.** Narrow-exploration study (force seeds from
+adjacent fields); Swanson (strip the nouns, search each characteristic without
+the home vocabulary); Uzzi (conventional core, strange injection); *absence is
+mechanical* (§3).
 
-## 3. The one honesty rule that survives
+**Refusals.**
 
-Absence stays mechanical. "What you would try" may be as bold as the model
-likes. "Nobody has done this" may not appear. What appears instead is what the
-search returned: *a search for `<the opportunity, in the analog field's
-words>` returned N rows; the closest were these.* The reader draws the
-conclusion; the section carries the evidence. This is the rule that would have
-stopped the 2,847-character "not unexplored — but only barely" from chunk 2,
-and it costs nothing here.
+| The shortcut | Why not |
+|---|---|
+| "These are well-known papers, I'll skip verify." | The well-known ones are the ones memory gets wrong. Measured 2026-09-14: a title that did not say ViT, cited as saying ViT. |
+| "Nobody has done this." | Show what the search returned. The reader concludes. |
+| "I'll search with the question's own terms first, to anchor." | The home vocabulary finds the home field. That is `/snowball`'s job. |
+| "Remote sensing counts as an adjacent field." | It is the home field with a wider collar. A field that shares the citation graph is not an analog. |
+| "One field, ten papers, done properly." | Breadth is the deliverable. Five fields minimum. |
+| "The search returned nothing, so the field is empty." | It returned nothing *for those words*. Re-query once in different words, then report both. |
 
-## 4. What it reuses, adds, and parks
+## 3. Absence stays mechanical
 
-**Reused, unchanged:** `scripts/retrieval/snowball.py` (`search`, `batch`,
-`health`, the key, the cache, the ledger), `hooks/guard.py`, `/setup`,
-`/frame`, `question-critic`.
+The one chunk 2 rule that survives the posture change. Per opportunity, one
+line: `Nearest existing: \`<the opportunity, in the field's words>\` → N rows;
+closest: <title> (S2 id)`. "Unexplored", "gap", "novel", "nobody" do not
+appear. This is what would have stopped chunk 2's 2,847-character "not
+unexplored — but only barely", and it costs one search.
 
-**Added:**
-- The skill. Inline — no new agent. The skill has the session's context,
-  which the user identified as the point: it knows what was actually wanted.
-  A fresh-context critic that attacks the analogies (the plan's
-  `transfer-checker`) is a later addition if the analogies turn out to be
-  glib; it is not needed to ship.
-- A `verify` verb on the script: takes titles and/or ids, returns
-  resolved/unresolved with the matched record. Small. Makes step 4 one call
-  and the done-check mechanical.
-- A template, `templates/research/analogs.md`, with fixed headings so the
-  heading-parity check covers it.
+## 4. The script: `verify`
 
-**Parked, not deleted:** the snowball skill and `paper-scout`, their section
-format, their eval tier (the cases stay and still run; they stop being
-developed), the section-renderer idea (moot), `/landscape`, `/surveys`,
-`/brief`. The chunk 2 spec stands as the record of that tool.
+`snowball.py verify [--title "<t>"]... [--id <S2|ARXIV:|DOI:>]...`
 
-**Superseded in `skills-and-agents.md`:** Stage 4's `/fingerprint`,
-`/analogs` and `/flip` collapse into this one skill; `analog-scout`,
-`field-carder`, `transfer-checker`, `flip-generator` and `novelty-checker`
-come off the agent count.
+One JSON object: `results[]`, each `{query, kind: title|id, resolved: bool,
+paperId, title, year, match}`; `resolved_count`, `unresolved_count`. Titles
+resolve through `search` with the title as the query, matched by normalised
+title comparison (case, punctuation, whitespace folded; stdlib only), and
+`match` reports the comparison so a near-miss is visible. Ids resolve through
+`batch`. Does not charge the ledger; does write records. Selftest cases:
+exact title, punctuation-variant title, a title that does not exist, an id,
+a bad id, mixed batch.
 
-## 5. Done-check
+## 5. The template
 
-No three-run judge tier. Three checks, in this order:
+`templates/research/analogs.md`, registered with `check_headings.py` against
+`skills/scout/SKILL.md`. Fixed headings:
 
-1. **Mechanical.** `verify` over the output file: every cited paper resolves.
-   No field name contains a word from the home `## Vocabulary`. At least five
-   fields. Run in seconds, no LLM.
-2. **The user reads it,** on the real question, and says whether the
+`## Question` · `## Shape` · `## Fields` · `## Verification` · `## Status`
+
+Under `## Fields`, one `###` per field, fixed lines:
+
+```
+### <field, in its own words>
+- Shares: <the shape element>
+- Searched: `<query>` → <N> rows
+- Papers:
+  - <title> · <year> · S2 `<id>`
+  - <title> · <year> · _unresolved: not found by title_
+- Transfer: <one paragraph>
+- Opportunity (speculative): <one paragraph>
+- Nearest existing: `<query>` → <N> rows; closest: <title> (S2 `<id>`)
+```
+
+`## Verification` lists every paper in the file with resolved/unresolved and
+the counts. `## Status`: date, slug, touched, framed/unframed, key present or
+not.
+
+## 6. Done-check
+
+1. **Mechanical, seconds, no LLM.** Every `- <title> ·` line under `## Fields`
+   carries either an S2 id or the unresolved marker; `## Verification`'s
+   counts agree with the lines; no `###` field name contains a word from `##
+   Vocabulary`; at least five `###` fields; the four banned absence words are
+   absent. One script, `scripts/check_analogs.py`, run by the static-checks
+   verb.
+2. **The user reads it** on the acceptance topic and says whether the
    farming-from-the-air kind of result showed up and whether the transfer
-   arguments are worth anything. A run is minutes, so this is the loop.
-3. **The gold set changes meaning.** `evals/gold/wildfire-cv.md` was a depth
-   test — in-field recall. It gains a heading: *work from another field that
-   turned out to matter to me*. That is the breadth recall test, and it is the
-   one this chunk is measured on.
+   arguments are worth anything. A run is minutes; this is the loop.
+3. **Breadth recall.** `evals/gold/wildfire-cv.md` gains a heading, *work from
+   another field that turned out to matter to me*. That list against the
+   file's fields is the number this chunk is measured on.
 
-## 6. Open
+No judge tier. The snowball's eval cases stay and still run under their tag;
+they stop being developed.
 
-- **Naming.** The user calls this "the scout" — it is what finds papers
-  broadly. Recommendation: this skill takes `/scout`; the parked snowball
-  skill becomes `/snowball`, which is what it does. One meaning per word.
-- **Whether step 2's field list is the model's alone,** or whether the
-  framing log's rejected framings are searched as shapes in their own right.
-  Cheap to do both; decide after the first real run.
-- **A fresh-context critic** for the analogies. Not before the first run
-  shows they need one.
+## 7. Cleanup
 
-## 7. Order
+A ticket of its own (07): after the rename and the new skill land, nothing in
+the tree is unreferenced. Every function in `snowball.py` and `guard.py` has a
+caller or a selftest; every fixture is read by a case or a selftest; every
+eval case targets a shipped skill or agent by its current name; no shipped
+`.md` names a path, tool, or skill that no longer exists; the design docs
+mark what is parked. What is *parked* stays — the snowball, its agent, its
+template, its tier — and is labelled parked wherever it appears. Dead is
+deleted.
 
-1. `verify` verb, with selftest cases. Half a day.
-2. The template and the skill. A day.
-3. Static checks green; one run on the acceptance topic; the user reads it.
-4. The gold set's new heading, and the map.
+## 8. Order
+
+01 `verify` verb → 02 rename → 03 template + heading parity → 04 the skill →
+05 `check_analogs.py` → 06 first run, the user reads, gold set heading → 07
+cleanup. 04 depends on 01–03; 07 is last on purpose.
