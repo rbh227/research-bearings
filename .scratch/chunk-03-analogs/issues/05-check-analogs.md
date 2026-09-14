@@ -1,7 +1,7 @@
 # `scripts/check_analogs.py` — the mechanical done-check
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Blocked by: 03
 
 ## What
@@ -20,6 +20,17 @@ file existing so a project without an analogs file is not a failure.
 
 ## Acceptance
 
-- [ ] Selftest 3/3; the script runs clean on ticket 04's dry-run output.
-- [ ] `toolchain.md` static checks include it; README's development section
+- [x] Selftest 3/3; the script runs clean on ticket 04's dry-run output.
+- [x] `toolchain.md` static checks include it; README's development section
       mentions it in one line.
+
+## Resolution
+
+2026-09-14. `scripts/check_analogs.py`, seven selftest cases, wired into both
+the static-checks and one-test-file verbs.
+
+Seven rather than six: the first version failed any file containing the word
+"novel", which is in paper titles constantly - "A Novel Approach to ..." is a
+title, not a claim about a field. The absence scan now runs over the
+scout-authored prose only, with paper lines, the `closest:` title and the whole
+of `## Verification` blanked out first.

@@ -52,10 +52,12 @@ claude plugin install research-bearings@rbh227 --config semantic_scholar_api_key
 |---|---|---|
 | `/research-bearings:setup` | Records what you have: lab, compute, data, code, your calibration, deadline, what counts as a win. Checks what it can from the machine; asks the rest and dates the answers. | `research/CONTEXT.md` |
 | `/research-bearings:frame` | Turns a topic into a question worth answering. Diverges into candidate framings, converges on Booth's ladder, then a fresh-context critic attacks the survivor. | `research/QUESTION.md`, `research/framing-log.md` |
+| `/research-bearings:scout` | Finds the fields that share your problem's shape but not its citation graph: strips your vocabulary off the problem, searches five to ten other fields in their own words, and writes what might transfer and what you would try. The breadth tool. | `research/analogs/<slug>.md` |
 | `/research-bearings:snowball` | Maps the citation neighbourhood of one literature question: finds seed papers, walks their references and citations, and writes 25–35 paper cards with the search log behind them. The depth tool. | `research/landscape/<slug>.md` |
 
-Run `setup` first. `frame` will stop if `CONTEXT.md` is missing. `snowball` does
-not require either — it runs unanchored and says so in the file.
+Run `setup` first. `frame` will stop if `CONTEXT.md` is missing. Neither `scout`
+nor `snowball` requires it — they run unframed, or unanchored, and say so in the
+file they write.
 
 Everything the plugin writes goes under `research/` in your project. A
 `PreToolUse` hook enforces that for the plugin's agents — it is the only

@@ -7,8 +7,8 @@ This repo is a Claude Code plugin. There is no compiler and no package manager, 
 | Verb | Command |
 | --- | --- |
 | build | `none` |
-| static checks | `claude plugin validate ./ --strict && claude plugin validate skills/ --strict && claude plugin validate agents/ --strict && python3 scripts/check_headings.py` |
-| one test file | `python3 hooks/guard.py --selftest && python3 scripts/retrieval/snowball.py --selftest` |
+| static checks | `claude plugin validate ./ --strict && claude plugin validate skills/ --strict && claude plugin validate agents/ --strict && python3 scripts/check_headings.py && python3 scripts/check_analogs.py --selftest` |
+| one test file | `python3 hooks/guard.py --selftest && python3 scripts/retrieval/snowball.py --selftest && python3 scripts/check_analogs.py --selftest` |
 | full suite | `scripts/run_evals.sh` — one invocation, or `CASE=<name>` one case at a time when memory is tight. No case needs a network, a key or a Bash grant. See the notes. |
 
 Consumers: `/implement`, `/tdd`, `/codex-review`, `/run-tickets`. Run **static checks** before every commit, **one test file** per red-green slice, and **full suite** once before a review gate.
@@ -16,6 +16,7 @@ Consumers: `/implement`, `/tdd`, `/codex-review`, `/run-tickets`. Run **static c
 Notes:
 
 - **Static checks and one test file are free and fast.** Run them freely.
+- **`check_analogs.py` is the whole automated done-check for chunk 3.** There is no judge tier for `/scout`: every rule it has — a checkable id on every paper line, counts that agree, no home-field names, five fields, no absence claims — can be decided by looking, so nothing there needs a model. Point it at a written file (`python3 scripts/check_analogs.py research/analogs/<slug>.md`) or run `--selftest` for its seven fixtures.
 - **`validate ./` alone is weaker than it looks.** Pointed at this repo it validates the *marketplace* manifest and stops, because `marketplace.json` is what it finds first. Skill and agent frontmatter is only checked when you point it at `skills/` and `agents/` directly — hence three calls. Pointing it at a single `.md` file does not work: it tries to parse the file as a JSON manifest.
 - **`validate .claude-plugin/plugin.json --strict` fails on this repo by design.** It walks components and warns that a root `CLAUDE.md` is not loaded as plugin context. That warning is correct and permanent: this repo is both the plugin and a project, and the `CLAUDE.md` is the project's. Not part of the verb.
 - **The full suite launches a real Claude child per case**, three runs each by default, one at a time — two children plus their tooling OOM this machine. `RUNS=1` is fine while iterating but is **not** a pass: single-run LLM grading is noisy and has twice failed correct behaviour here. Use the full form before any gate.

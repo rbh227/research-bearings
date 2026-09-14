@@ -1,7 +1,7 @@
 # The analogs template and its heading-parity registration
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Blocked by:
 
 ## What
@@ -16,9 +16,21 @@ make the registration part of 04's acceptance instead and say so here.
 
 ## Acceptance
 
-- [ ] Template file with `## Question` · `## Shape` · `## Fields` ·
+- [x] Template file with `## Question` · `## Shape` · `## Fields` ·
       `## Verification` · `## Status`, and the per-field block verbatim from
       the spec in a comment under `## Fields`.
-- [ ] `/setup` does not need to know about it (it is written by `/scout`, not
+- [x] `/setup` does not need to know about it (it is written by `/scout`, not
       scaffolded) — confirm and note.
-- [ ] Registration in `check_headings.py`, or the deferral recorded.
+- [x] Registration in `check_headings.py`, or the deferral recorded.
+
+## Resolution
+
+2026-09-14. `templates/research/analogs.md` with the five headings and the
+per-field block. Registered in `check_headings.py` in this ticket rather than
+deferred to 04, because the deferral was only needed if the checker could not
+express "consumer pending" - it could not, it crashed with a traceback, so the
+checker now reports a missing consumer as a named failure. That is a better
+failure mode for any template that lands a ticket ahead of its skill.
+
+`/setup` does not need to know about the template: `/scout` writes it, nothing
+scaffolds it.

@@ -1,7 +1,7 @@
 # Rename: the snowball skill becomes `/snowball`; `/scout` is freed
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Blocked by:
 
 ## What
@@ -23,12 +23,27 @@ the record of that run.
 
 ## Acceptance
 
-- [ ] `grep -rn "research-bearings:scout\|/scout\b" --include=*.md .` outside
+- [x] `grep -rn "research-bearings:scout\|/scout\b" --include=*.md .` outside
       `docs/design/chunk-0[12]-*.md` and `evals/results/` returns nothing that
       means the snowball.
-- [ ] `claude plugin validate skills/ --strict` green; heading parity green
+- [x] `claude plugin validate skills/ --strict` green; heading parity green
       (`section.md` → `skills/snowball/SKILL.md`).
-- [ ] `TAG=snowball CASE=snowball-refuses-without-script RUNS=1` passes: the
+- [x] `TAG=snowball CASE=snowball-refuses-without-script RUNS=1` passes: the
       renamed skill still refuses without the script.
-- [ ] Both chunk specs carry one line each saying the skill was renamed and
+- [x] Both chunk specs carry one line each saying the skill was renamed and
       why, dated.
+
+## Resolution
+
+2026-09-14. `skills/scout` -> `skills/snowball`, `evals/scout-*` ->
+`evals/snowball-*`, tag `scout` -> `snowball`, and every invocation in
+CONTEXT.md, the templates, README, setup's resource table and
+skills-and-agents.md. `paper-scout` keeps its name.
+
+One change beyond the rename: `snowball-refuses-without-script` used to open
+"Scout the literature on ..." and relied on the description matching that verb.
+With the verb reassigned it names the skill outright, which is a better test of
+a precondition anyway. Verified: 1.00, 59 seconds.
+
+Chunk 2's spec carries a banner - everything below it reads `/scout` and means
+`/snowball`.

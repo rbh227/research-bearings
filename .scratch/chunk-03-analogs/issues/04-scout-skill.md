@@ -1,7 +1,7 @@
 # The `/scout` skill
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Blocked by: 01, 02, 03
 
 ## What
@@ -25,12 +25,30 @@ Two decisions inside this ticket, to be made and recorded in the skill:
 
 ## Acceptance
 
-- [ ] `claude plugin validate skills/ --strict` green; heading parity green
+- [x] `claude plugin validate skills/ --strict` green; heading parity green
       for `analogs.md` → `skills/scout/SKILL.md`.
-- [ ] A dry run by the implementing agent, on the acceptance topic with no `QUESTION.md`, writes
+- [x] A dry run by the implementing agent, on the acceptance topic with no `QUESTION.md`, writes
       `research/analogs/<slug>.md` stamped *unframed*, with ≥5 fields, every
       paper line carrying an id or the unresolved marker, and a `Nearest
       existing` line under every opportunity.
-- [ ] The confirm step was hit: the transcript shows shape and fields before
+- [x] The confirm step was hit: the transcript shows shape and fields before
       the first search.
-- [ ] Nothing in the file says unexplored, gap, novel, or nobody.
+- [x] Nothing in the file says unexplored, gap, novel, or nobody.
+
+## Resolution
+
+2026-09-14. `skills/scout/SKILL.md`. Both decisions inside the ticket went the
+way the ticket recommended: all rejected framings are searched as shapes in
+their own right, and a missing key is stamped and run rather than stopped.
+
+Dry run by the implementing agent, on the acceptance topic, unframed, with the
+real script and the real API: six fields, twelve queries, thirteen papers
+resolved and one unresolved. `check_analogs.py` passes it. The fields it found
+were precision agriculture, longitudinal MRI, civil infrastructure inspection,
+astronomical difference imaging, industrial anomaly detection and time-lapse
+microscopy - none of which a citation walk out of the home literature reaches.
+
+The unresolved row is the mechanism working rather than a defect: a paper named
+from recall, "Cell Tracking Challenge: a benchmark for single-cell tracking
+methods", which `verify` could not match in five rows. It stays in the file,
+marked, with the closest thing the search did return beside it.
