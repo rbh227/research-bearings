@@ -70,7 +70,7 @@ Both unknowns the spec flagged are resolved: `userConfig` does reach the server
 from a local marketplace (spec §9.4), and `claude plugin eval` can grant MCP
 tools with `--allow-tools mcp__*` plus `--mocks off` (§9.5).
 
-Chunk 3 is **re-planned, 2026-09-14** (`docs/design/chunk-03-analogs.md`).
+Chunk 3 is **specified and built, 2026-09-14** (`docs/design/chunk-03-analogs.md`).
 Not the landscape chain. The user's read of chunk 2: it is a depth tool — it
 walks the citation neighbourhood of what you already have — and the plugin
 exists for breadth: the field that shares your problem's shape and none of
@@ -88,10 +88,30 @@ Uzzi) and the plan had put it last. Two decisions taken:
   Absence stays mechanical. Done-check is a script pass plus the user reading
   the output on the real question; no judge tier.
 
-Parked: the snowball skill and `paper-scout` (proposed rename `/snowball`; the
-new skill takes `/scout`), their eval tier, the renderer, `/landscape`,
-`/surveys`, `/brief`. Open in the plan: the naming, whether rejected framings
-are searched as shapes, a fresh-context critic if the analogies prove glib.
+Built: `verify` on the script (9 new selftest cases, 28 in all); the rename —
+the depth tool is `/snowball`, `paper-scout` keeps its name; the analogs
+template; `/scout` itself; `check_analogs.py` as the entire automated
+done-check, seven cases, no judge tier; and a cleanup audit that found no dead
+code and renamed the last MCP-era function.
+
+Both plan-level questions were decided in the build: rejected framings are
+searched as shapes in their own right, and a missing key is stamped and run.
+A dry run on the acceptance topic, unframed, against the live API returned six
+fields — precision agriculture, longitudinal MRI, bridge inspection,
+astronomical difference imaging, industrial anomaly detection, time-lapse
+microscopy — none of them reachable by a citation walk out of the home
+literature. Two had independently concluded the image-subtraction step should
+be dropped.
+
+Parked, labelled as such in four places: the snowball skill, `paper-scout`,
+their eval tier, the renderer, `/landscape`, `/surveys`, `/brief`.
+
+Deferred and recorded rather than lost: the live run with the user reading the
+output cold, and the breadth heading in `evals/gold/wildfire-cv.md` (*work from
+another field that turned out to matter to me*), which is the recall number this
+tool is eventually measured on. The user's call: no testing until the skillset
+is together. Still open: a fresh-context critic, if the transfer arguments turn
+out glib.
 
 ## Out of scope
 
