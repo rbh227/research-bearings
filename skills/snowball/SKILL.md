@@ -1,10 +1,10 @@
 ---
-name: scout
-description: Answer one literature question by searching and snowballing — find seed papers, walk their references and citations, and write a section of 25-35 paper cards with the search log behind it. Use when you want to know what work exists on something, before any matrix or brief. Writes research/landscape/<slug>.md.
+name: snowball
+description: Map the citation neighbourhood of one literature question — find seed papers, walk their references and citations, and write a section of 25-35 paper cards with the search log behind it. The depth tool: it finds the conversation a question is already part of. Use when you want to know what work exists on something. For work in other fields that shares your problem's shape, use scout. Writes research/landscape/<slug>.md.
 allowed-tools: Read, Glob, AskUserQuestion, Bash, Agent
 ---
 
-# scout
+# snowball
 
 One job: dispatch one `paper-scout` at one question, and report where it landed.
 
@@ -123,7 +123,7 @@ does not bound the write.
 the user wants more. Lower it inside anything with a wall clock.
 
 **Re-running a slug continues its crawl; it does not restart it.** The ledger is
-kept per run slug, so a second `/scout` on the same slug picks up where the first
+kept per run slug, so a second `/snowball` on the same slug picks up where the first
 stopped. That is what you want after a `budget` stop — and it only works if you
 raise the ceiling. Re-run at the *same* budget and the ledger is already at it:
 the first hop comes back `stopped: "budget"`, and the section gets rewritten from

@@ -14,7 +14,7 @@ landscape section — and checked against the live API. Its offline tiers are
 green (19 script cases, 30 guard cases). Its behavioural tier is four cases in
 of nine: two clean over three runs each, one clean over the one run it finished,
 and one real failure in the scout's `Kept because` line, since fixed and not yet
-re-measured (chunk 2 spec §11.10). Treat `/scout` as working rather than proven
+re-measured (chunk 2 spec §11.10). Treat `/snowball` as working rather than proven
 until the rest of that tier runs. The rest of the landscape chain — surveys, the seven-way
 fan-out, the merger, the matrix and the brief — plus reading, ideation,
 selection and experiments are not built yet. See
@@ -37,7 +37,7 @@ The plugin asks for a **Semantic Scholar API key** at enable time
 ([get one here](https://www.semanticscholar.org/product/api)). It is stored in
 your keychain, not in this repo. It is not required — but the unauthenticated
 pool 429s after two or three calls, so without it the snowball hops rate-limit
-heavily and `/scout` stamps the reduced coverage at the top of every section it
+heavily and `/snowball` stamps the reduced coverage at the top of every section it
 writes. To set it non-interactively:
 
 ```bash
@@ -52,9 +52,9 @@ claude plugin install research-bearings@rbh227 --config semantic_scholar_api_key
 |---|---|---|
 | `/research-bearings:setup` | Records what you have: lab, compute, data, code, your calibration, deadline, what counts as a win. Checks what it can from the machine; asks the rest and dates the answers. | `research/CONTEXT.md` |
 | `/research-bearings:frame` | Turns a topic into a question worth answering. Diverges into candidate framings, converges on Booth's ladder, then a fresh-context critic attacks the survivor. | `research/QUESTION.md`, `research/framing-log.md` |
-| `/research-bearings:scout` | Answers one literature question: finds seed papers, walks their references and citations, and writes 25–35 paper cards with the search log behind them. | `research/landscape/<slug>.md` |
+| `/research-bearings:snowball` | Maps the citation neighbourhood of one literature question: finds seed papers, walks their references and citations, and writes 25–35 paper cards with the search log behind them. The depth tool. | `research/landscape/<slug>.md` |
 
-Run `setup` first. `frame` will stop if `CONTEXT.md` is missing. `scout` does
+Run `setup` first. `frame` will stop if `CONTEXT.md` is missing. `snowball` does
 not require either — it runs unanchored and says so in the file.
 
 Everything the plugin writes goes under `research/` in your project. A

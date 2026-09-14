@@ -1,5 +1,5 @@
 ---
-tags: [ci, scout]
+tags: [ci, snowball]
 timeout_seconds: 900
 max_turns: 30
 allowed_tools: [Read, Glob, Grep, Skill, Agent, Write]

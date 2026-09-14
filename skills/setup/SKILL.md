@@ -32,7 +32,7 @@ the results. Do this in one batch; it takes seconds.
 | Python and env | `python3 --version`, `uv --version`, `pip list` if a venv is obvious |
 | Repo state | `git remote -v`, `git status --short`, `git log --oneline -5` |
 | What is already here | `ls` the project root; look for data, notebooks, papers, a README |
-| Retrieval | `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" health` — reports key presence without spending a request. Nothing to connect to: retrieval is one script, run on demand. `/research-bearings:scout` probes the API itself at the start of every crawl. |
+| Retrieval | `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" health` — reports key presence without spending a request. Nothing to connect to: retrieval is one script, run on demand. `/research-bearings:snowball` probes the API itself at the start of every crawl. |
 
 **2. Read anything that answers a question for you.** A README, a proposal, a
 grant blurb, an existing notes file. Do not ask what a file already says.

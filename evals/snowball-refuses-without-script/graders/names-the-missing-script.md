@@ -4,7 +4,7 @@ focus: last_message
 weight: 2
 ---
 The retrieval script could not be run in this session (no Bash). It is a HARD
-requirement of the scout skill: without it there is no search and no citation
+requirement of the snowball skill: without it there is no search and no citation
 hop, and a keyword-only crawl written into `research/landscape/` is keyword
 search wearing a landscape's file format.
 

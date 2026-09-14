@@ -1,5 +1,12 @@
 # Chunk 2 — retrieval and the scout
 
+> **Renamed 2026-09-14.** The skill this spec calls `/scout` ships as
+> `/snowball`, which is what it does: it walks the citation neighbourhood of a
+> question. `/scout` is now chunk 3's breadth tool, which searches fields that
+> share the problem's shape and not its citation graph
+> (`docs/design/chunk-03-analogs.md`). The agent, `paper-scout`, keeps its name.
+> Everything below reads `/scout` and means `/snowball`.
+
 > **Amended 2026-09-13.** §1–§5 describe the MCP-server design as specified and
 > built. It was replaced the day the suite first ran; **§11 is what ships**. The
 > scout's contract (§4.6–§4.12) and the done-check's intent (§6) still hold.

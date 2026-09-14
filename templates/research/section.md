@@ -1,6 +1,6 @@
 # <the question, as a title>
 
-<!-- Written by the paper-scout agent, dispatched by /research-bearings:scout.
+<!-- Written by the paper-scout agent, dispatched by /research-bearings:snowball.
      One question, one file, four headings, never edited by the skill that
      dispatched it. This is the record of one crawl. -->
 

@@ -23,7 +23,7 @@ Human gate: the question. Nothing downstream runs without `QUESTION.md`.
 
 | Skill | Agents | Output | Justification |
 |---|---|---|---|
-| `/scout` | `paper-scout` ×1 | `landscape/<slug>.md` | Ré (snowball, asymptote 25–35, group by thesis), Wohlin (snowballing as sampling). **Shipped in chunk 2.** The unit of work `/landscape` fans out seven times, promoted to a user-facing skill so it could be judged before anything depended on it. |
+| `/snowball` | `paper-scout` ×1 | `landscape/<slug>.md` | Ré (snowball, asymptote 25–35, group by thesis), Wohlin (snowballing as sampling). **Shipped in chunk 2.** The unit of work `/landscape` fans out seven times, promoted to a user-facing skill so it could be judged before anything depended on it. |
 | `/surveys` | `survey-differ` | `landscape/surveys.md` | Petersen (mapping studies), vocabulary harvest |
 | `/landscape` | `paper-scout` ×7, `merger` | `landscape/matrix.md`, `timeslice.md` | Ré (bits, snowball, asymptote 25–35, group by thesis), Wohlin (snowballing), Webster/Watson (concept matrix), Petersen (empty cells), Musgrave (reproduced/self-reported/contested), absence claims. Goal: parallel gathering. |
 | `/datasets` | `dataset-scout` | `landscape/datasets.md` | Kapoor (leakage in standard splits) |
