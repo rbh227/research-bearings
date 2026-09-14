@@ -12,8 +12,8 @@ Counts: 27 typed skills plus 5 composites, 28 agents, 4 scripts.
 
 | Skill | Agents | Output | Justification |
 |---|---|---|---|
-| `/onboard` | — | `CONTEXT.md` | goal: simple to use. Stage one for a new project. |
-| `/grill` | — | `QUESTION.md` | Booth (topic→question→problem, so-what), Heilmeier (8 questions), Hamming (important problems), Wagstaff (metric ties to a decision) |
+| `/setup` | — | `CONTEXT.md` | goal: simple to use. Stage one for a new project. |
+| `/frame` | `question-critic` | `QUESTION.md` | Booth (topic→question→problem, so-what), Heilmeier (8 questions), Hamming (important problems), Wagstaff (metric ties to a decision) |
 
 Human gate: the question. Nothing downstream runs without `QUESTION.md`.
 
@@ -139,7 +139,7 @@ Thirty typed commands are unusable without a front door. These serve the "simple
 | Skill | Does |
 |---|---|
 | `/router` | picks the skill from what you say. The front door. |
-| `/start` | `/onboard` + `/grill` |
+| `/start` | `/setup` + `/frame` |
 | `/orient` | `/surveys` + `/landscape` + `/brief` |
 | `/think` | `/bits` + `/analogs` + `/ideas` + `/rank` |
 | `/handoff` | **deferred.** No goal it uniquely serves yet. |

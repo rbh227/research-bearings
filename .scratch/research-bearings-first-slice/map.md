@@ -70,18 +70,28 @@ Both unknowns the spec flagged are resolved: `userConfig` does reach the server
 from a local marketplace (spec §9.4), and `claude plugin eval` can grant MCP
 tools with `--allow-tools mcp__*` plus `--mocks off` (§9.5).
 
-What remains is chunk 3 and beyond:
+Chunk 3 is **re-planned, 2026-09-14** (`docs/design/chunk-03-analogs.md`).
+Not the landscape chain. The user's read of chunk 2: it is a depth tool — it
+walks the citation neighbourhood of what you already have — and the plugin
+exists for breadth: the field that shares your problem's shape and none of
+your citation graph. Crop damage from drone imagery, for hurricane damage from
+satellites. The sheet says this three times (narrow-exploration study, Swanson,
+Uzzi) and the plan had put it last. Two decisions taken:
 
-- The landscape chain proper: `/surveys`, `/landscape`, `/brief` and their agents.
-- The merger, and with it cross-scout dedupe (ticket 09 §5) and interpreted absence
-  claims — both deliberately withheld from a single scout.
-- The matrix-cell and dataset-row schemas, written with their first consumer. The
-  paper-card contract lands in chunk 2, in its minimal scout form.
-- Where CORE fits: full-text retrieval for an already-identified paper, feeding the
-  reader agents. Not a discovery source.
-- Whether `/frame`'s re-entry after `/surveys` is automatic or user-triggered.
-- Whether abandoned directions need their own agent, rather than a general scout
-  stamping the question as not retrieval-shaped.
+- **Trust the model to think; verify what it cites.** The model's recall is the
+  source of breadth. Citations are checked by the script at the end, in place;
+  what does not resolve is marked, not removed. This supersedes chunk 2's
+  every-line-tool-sourced premise *for this skill*. The snowball tool keeps its
+  own posture and is parked.
+- **One skill, no new agents, minutes per run.** Shape → fields → one search
+  per field in that field's words → transfer argument and opportunity → verify.
+  Absence stays mechanical. Done-check is a script pass plus the user reading
+  the output on the real question; no judge tier.
+
+Parked: the snowball skill and `paper-scout` (proposed rename `/snowball`; the
+new skill takes `/scout`), their eval tier, the renderer, `/landscape`,
+`/surveys`, `/brief`. Open in the plan: the naming, whether rejected framings
+are searched as shapes, a fresh-context critic if the analogies prove glib.
 
 ## Out of scope
 
