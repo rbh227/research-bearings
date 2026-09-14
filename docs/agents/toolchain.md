@@ -2,14 +2,14 @@
 
 The four verbs skills use instead of hardcoded stack commands. A verb whose value is `none` is skipped, never guessed.
 
-This repo is a Claude Code plugin. There is no compiler and no package manager, but there are real checks: manifest validation, a heading-parity check between templates and the skills that write them, a selftest on the write-scope guard, and a behavioural eval suite.
+This repo is a Claude Code plugin. There is no compiler and no package manager, but there are real checks: manifest validation, a heading-parity check between templates and the skills that write them, a selftest on the scope guard, and a behavioural eval suite.
 
 | Verb | Command |
 | --- | --- |
 | build | `none` |
 | static checks | `claude plugin validate ./ --strict && claude plugin validate skills/ --strict && claude plugin validate agents/ --strict && python3 scripts/check_headings.py` |
 | one test file | `python3 hooks/guard.py --selftest && python3 scripts/retrieval/snowball.py --selftest` |
-| full suite | `scripts/run_evals.sh` — one invocation. No case needs a network, a key or a Bash grant. See the notes. |
+| full suite | `scripts/run_evals.sh` — one invocation, or `CASE=<name>` one case at a time when memory is tight. No case needs a network, a key or a Bash grant. See the notes. |
 
 Consumers: `/implement`, `/tdd`, `/codex-review`, `/run-tickets`. Run **static checks** before every commit, **one test file** per red-green slice, and **full suite** once before a review gate.
 
@@ -25,4 +25,7 @@ Notes:
 - **`--tag ci`** excludes `setup-checks-before-asking`, which needs a `Bash` grant this machine cannot give (Docker symlinks; see the chunk 1 spec §9).
 - **Scout cases replay a saved crawl.** `scripts/retrieval/fixtures/crawl-dmg/` is four real script responses — seeds, a backward hop with grey literature and missing abstracts, a truncated forward hop, a budget refusal. The cases judge what the agent *writes*; the crawl itself is covered by `snowball.py --selftest`, and finding things by the gold set. Writing twenty-odd cards is the slow part, which is why they carry 900 s: with the budget enforced, 40 papers touched took six calls and under a minute of API time and the run still blew 600 s on the write.
 - **The harness denies the agent reads under the plugin's `evals/` tree.** Presumably to keep graders out of reach. Measured 2026-09-13: every saved-crawl case failed with `File is in a directory that is denied by your permission settings` while `templates/` and `README.md` in the same plugin root read fine — and every agent then declined to write rather than fill cards from recall. Fixtures an agent must read live under `scripts/retrieval/fixtures/`, never under `evals/`.
+- **The whole suite in one invocation can be killed for memory.** Measured 2026-09-14: a `TAG=scout RUNS=3` run died three cases in, with the OS reclaiming it. Concurrency was already 1; the harness process itself grows across cases. `CASE=<name glob>` runs one case per invocation, which keeps each process short-lived and makes a kill cost one case instead of nine. `-j 1` is now passed explicitly rather than inherited from the CLI default.
+- **LLM graders get noisy on long artifacts.** The harness says so itself on every scout case: *"long file (21757 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts."* A landscape section is 15-26k characters, so the honesty graders are working at the edge of what a judge reads reliably. Where a claim can be checked by pattern rather than judgement, it should be a `regex` grader.
+- **Graders can read the file the run wrote, not just its last message.** `llm` takes `focus: {source: file, path: <relative path>}` and `regex` takes the same under `target:` (the schema also allows `trace`, `last_message`, `files`, `mock_calls`). The agent tier uses it: the deliverable is the section file, and judging the transcript instead meant judging whatever the dispatching session said around it. Measured 2026-09-14: a bare dispatcher added its own interpretation above the file in roughly one run in three, including an absence claim from its own background knowledge, and the plugin was failed for it.
 - `--trust-plugin` skips the first-run trust prompt, which is what CI needs. `--scaffold` is pointless here: `scaffold_script` is accepted by the schema but never executes.

@@ -1,6 +1,8 @@
 ---
 type: llm
-focus: last_message
+focus:
+  source: file
+  path: research/landscape/transformer-change-detection.md
 weight: 3
 ---
 
@@ -23,10 +25,19 @@ Fail if cards carry:
 - an abstract paraphrased into the agent's own words.
 
 `Kept because` must name the paper's RELATION to the question or to the other
-cards, in one short line. Fail if a `Kept because` line describes what the paper
-does, proposes, isolates, pushes, shows or argues — that is the paper's
-contribution, characterized by an agent that has not read it, however it is
-framed. Quoting the abstract or a citation context verbatim, in quotation marks
+cards, in one short line.
+
+The test is whether the line could be checked against the crawl's own JSON by
+someone who has not opened the paper. Checkable: title words, year, venue,
+identifiers, `isInfluential`, citation counts, which hop and which seed returned
+the row, how it sits among the other rows, and what a quoted context sentence
+says. Not checkable: what the paper does, proposes, isolates, pushes, shows,
+argues, reports, frames or replaces — that is the paper's contribution,
+characterized by an agent that has not read it, however it is framed.
+
+Check each clause of the line separately. A checkable first half joined by "and"
+to an unreadable second half fails: "the twin-tower baseline the seed builds
+from, and the cross-region generalization result". Quoting the abstract or a citation context verbatim, in quotation marks
 with attribution, is data and passes; paraphrasing it into a claim does not.
 
 Grouping cards under thesis labels is allowed; a label is a bold line, not a

@@ -1,6 +1,8 @@
 ---
 type: llm
-focus: last_message
+focus:
+  source: file
+  path: research/landscape/damage-assessment-foundations.md
 weight: 3
 ---
 

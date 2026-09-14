@@ -29,7 +29,7 @@ A spec for the first buildable slice of research-bearings, ready for `/to-spec`:
 - [Done-check for the spec](issues/08-spec-done-check.md): all three of structural checks, a nine-case `claude plugin eval` suite with the ablation arm, and a live smoke run on the acceptance-run topic outside this repo.
 - [Snowball by hand](issues/09-snowball-by-hand.md): ran both hops live on two seeds. The 1 RPS throttle is wrong — 429s are non-deterministic, survive 1.1 s spacing, and never carry `Retry-After`; retry with jitter is what works. Backward hops reach 1981 and lose 5–12% of rows to unresolvable grey literature with ~50% missing abstracts; forward hops are clean but 73% missing `fieldsOfStudy`. `contextsWithIntent` returns the sentences describing each cited work — a better card field than the abstract. Dedupe belongs at the merger, not the scout.
 - [Register paper-search](issues/04-register-paper-search.md): registered at user scope and connected. Semantic Scholar and CORE keys both verified live; credentials in `~/.config/paper-search-mcp/.env`, read by the server itself. The S2 references hop works on `ARXIV:<id>`. CORE is a full-text *retrieval* source, not a discovery one, and its endpoint 301-redirects to a trailing slash.
-- [Scripts, not servers](issues/11-scripts-not-servers.md): the first eval run showed the MCP packaging breaking three ways and the budget unenforced; the user chose ARS's shape. The walker is one stdlib script with a per-run ledger, the guard fences the scout's Bash to it, the suite replays a saved crawl with no network, key or Bash grant. Two script defects from the adversarial review and two contract gaps from the runs closed with cases. Chunk 2 spec §11.
+- [Scripts, not servers](issues/11-scripts-not-servers.md): the first eval run showed the MCP packaging breaking three ways and the budget unenforced; the user chose ARS's shape. The walker is one stdlib script with a per-run ledger, the guard fences the scout's Bash to it, the suite replays a saved crawl with no network, key or Bash grant. Six defects closed on the way — two script, two contract, one grader-scope, one hole in the fence itself. Chunk 2 spec §11, with the verdict in §11.10.
 
 ## Not yet specified
 
@@ -39,14 +39,24 @@ work; 8 of 9 eval cases score 1.00; the ninth needs a `Bash` grant this machine 
 give. The live smoke run is the one outstanding item and needs the user.
 
 Chunk 2 is **built, reworked, being verified** (`docs/design/chunk-02-scout.md`:
-§9 for what the build changed, §10 for the first results, **§11 for the rework**).
-The first eval run, 2026-09-13, found five defects — two in the plugin: the
-budget was not enforced, and a missing optional key read as a dead server — and
-showed the MCP packaging breaking three separate ways. The user chose scripts
-over servers; the walker is now `scripts/retrieval/snowball.py` with a budget
-ledger, the guard fences the scout's Bash to it, and the suite is re-cut into
-tiers that need no network, no key and no Bash grant. The gold set (§6.4) still
-needs the user and still cannot be generated.
+§9 for what the build changed, §10 for the first results, **§11 for the rework**,
+**§11.10 for where verification stands**). The first eval run, 2026-09-13, found
+five defects — two in the plugin: the budget was not enforced, and a missing
+optional key read as a dead server — and showed the MCP packaging breaking three
+separate ways. The user chose scripts over servers; the walker is now
+`scripts/retrieval/snowball.py` with a budget ledger, the guard fences the
+scout's Bash to it, and the suite is re-cut into tiers that need no network, no
+key and no Bash grant.
+
+The 2026-09-14 pass fixed three more things. The graders were judging the
+dispatching session's chat rather than the section file, so they now read
+`research/landscape/<slug>.md` directly. The Bash fence allowed `&` and refused a
+quoted pipe; it is one quote-aware scan now, 30 cases. And `Kept because` was
+still characterising papers the scout had not read, under a rule that listed
+banned verbs; it now carries a test — could this line be checked against the
+crawl's JSON without opening the paper? Offline tiers are green. Five of nine
+agent cases are unrun, stopped by the account's spend limit. The gold set (§6.4)
+still needs the user and still cannot be generated.
 
 Chunk 2 was re-cut during specification: the map previously called it "the
 landscape chain", but introducing bundled MCP servers, a server we wrote,

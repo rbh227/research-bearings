@@ -106,4 +106,4 @@ you can modify, so its absence is the single most useful thing in the file.
 | "New project, so no History section." | Ask anyway. New projects usually inherit something, and what was abandoned is worth knowing. |
 | "I'll fill the thin sections with reasonable defaults." | There are no default labs, deadlines or allocations. `_unknown_`. |
 | "I'll ask all thirty questions at once so it's efficient." | Ten sections, one at a time, writing as you go. Efficiency that loses the whole session on an interruption is not efficiency. |
-| "I'll ask whether they set up a Semantic Scholar key." | Call `health`. It answers without a network request, and the user's memory of what they configured is worse than the server's. |
+| "I'll ask whether they set up a Semantic Scholar key." | Call `health`. It answers without a network request, and the user's memory of what they configured is worse than the script's. |

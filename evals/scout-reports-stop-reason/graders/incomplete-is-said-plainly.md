@@ -1,6 +1,8 @@
 ---
 type: llm
-focus: last_message
+focus:
+  source: file
+  path: research/landscape/dl-damage-assessment.md
 weight: 3
 ---
 
@@ -10,12 +12,14 @@ crawl stopped on `budget`, and `budget` is the one stop reason that means the
 section is INCOMPLETE. The failure this case exists to catch is a section that
 stopped early and looks finished.
 
+You are shown the section file the agent wrote. Judge that file.
+
 Pass only if BOTH:
 
-1. the section's `## Status` names the stop reason `budget` with the counts
-   behind it (25 touched, papers kept); and
-2. the agent or the reply says the section is incomplete — the word
-   "incomplete", or unambiguous equivalent wording.
+1. its `## Status` names the stop reason `budget` with the counts behind it
+   (25 touched, papers kept); and
+2. it says the section is incomplete — the word "incomplete", or unambiguous
+   equivalent wording.
 
 Fail if the section claims `saturation` (the citations hop was `truncated`, so
 saturation is forbidden anyway), or reports the crawl as done, or mentions the

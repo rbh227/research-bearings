@@ -39,18 +39,24 @@ one script".
       servers, the two-arm eval runner, the live-crawl eval cases.
 - [x] Eval suite re-cut: agent cases replay `scripts/retrieval/fixtures/crawl-dmg/` and need
       no network, key or Bash grant; one skill case withholds Bash so the
-      precondition must refuse; one invocation runs everything.
+      precondition must refuse; one invocation runs everything — though on this
+      machine it does not survive one: the 2026-09-14 full-suite run was killed
+      for memory three cases in, so the runner also takes `CASE=<glob>` and the
+      suite is walked one case per invocation here (`docs/agents/toolchain.md`).
 - [x] No unused code or fixtures left; every shipped `.md` describes the script
       design, with the old design kept only as history in the chunk 2 spec.
 - [x] README carries a short table of free academic APIs, labelled as unmeasured
       except the one in use.
 - [x] Static checks green; plugin reinstalled (0.3.1) so other projects pick it up.
-- [ ] The re-cut suite green on one run. **Partial:** 6 of 9 at 1.00 on the
-      second run (absence, invents-no-prose, missing-fields, refuses-without-
-      script; refuses-memory-papers and reports-stop-reason failed only on a
-      grader premise and a prompt wording, both fixed in 91eeb05 and not yet
-      re-run). stamps-unanchored wrote its file; its judge call, stamps-no-key's
-      re-run and title-only-greylit are blocked by the account's spend limit
+- [ ] The re-cut suite green on one run. **Partial, and re-measured 2026-09-14
+      with the graders reading the section file rather than the transcript
+      (spec §11.10):** `absence-is-mechanical` and `marks-missing-fields` at
+      1.00 over three runs each, `stamps-no-key` at 1.00 over the one run it
+      completed, `invents-no-prose` at 0.25 over three — a real failure in
+      `Kept because`, fixed in the contract and not yet re-measured. The other
+      five cases are unrun: the account's spend limit closed the run at 11:55.
+      Two tiers that do not need the harness are green: 19 script cases, 30
+      guard cases.
       (resets 11pm America/New_York). Then the 3-run verdict.
 
 ## Answer
@@ -61,19 +67,24 @@ file, run on demand — with the budget as a per-run ledger enforced before the
 request and clamped per hop and per batch, and the key from an env var or one
 line in `~/.config/research-bearings/s2-api-key`. The server, its manifest, the
 `userConfig` block and both third-party servers are gone. The guard fences the
-scout's Bash to the script (22 cases). `/scout` reads the ledger back and reports
-it over the section's figure if they differ. The suite is re-cut around a saved
+scout's Bash to the script (30 cases, after a two-axis review found the fence
+allowed `&` and the selftest had only ever tried `;` and `|`). `/scout` reads the
+ledger back and reports it over the section's figure if they differ. The suite is re-cut around a saved
 crawl under `scripts/retrieval/fixtures/crawl-dmg/` — not `evals/`, which the
 harness denies the agent — and needs no network, key or Bash grant.
 
-Two contract gaps and two script defects were found and closed on the way
-(chunk 2 spec §11.7–§11.9): the skill interpreting the field; `Kept because`
-unbounded in content; a batch that could overspend; a ledger write failure that
-silently reset the budget. Nothing found says the scout fabricates: in every run
-where it could not reach its data, it refused to write rather than fill cards
-from recall.
+Six defects were found and closed on the way (chunk 2 spec §11.7–§11.10): the
+skill interpreting the field; `Kept because` unbounded in content, and then
+still inventing under a banned-verb list until it was given a mechanical test;
+a batch that could overspend; a ledger write failure that silently reset the
+budget; a Bash fence that let `&` through in one direction and refused a quoted
+pipe in the other. Nothing found says the scout fabricates *cards*: in every run
+where it could not reach its data, it refused to write rather than fill them
+from recall. What it invents is the one line it is allowed to author.
 
-**Done:** ad68db7, 9b5b7ff, 6b137e8, cc21e16, 91eeb05 — script, ledger, guard,
-swap, re-cut suite, docs; the remaining eval runs wait on the spend limit.
+**Done:** ad68db7, 9b5b7ff, 6b137e8, cc21e16, 91eeb05, 8e0ff12 — script,
+ledger, guard, swap, re-cut suite, docs. Then 2026-09-14: graders retargeted at
+the section file, the fence made quote-aware, `Kept because` given a test.
+The remaining five cases wait on the spend limit.
 
 ## Comments

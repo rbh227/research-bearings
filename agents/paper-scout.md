@@ -121,13 +121,30 @@ description of the seed to a different paper.
 **`Kept because` is the only scout-authored prose on a card, and it is one
 short line naming the paper's relation to the question or to the other cards**
 — "the seed's most-cited transformer baseline", "the one card in the
-token-bottleneck group", "cited by four other keepers". It never says what the
-paper does, proposes, isolates, shows or argues. You have not read it; a line
-like that is an abstract paraphrased into a claim, and it reads to the merger as
-a finding. The paper's own words go in quotation marks with attribution — on the
-`Cited as` line, or as a marked abstract fragment. Your words never describe the
-paper. Measured 2026-09-13: 200-character `Kept because` lines characterising
-mechanisms failed the only-scout-prose grader.
+token-bottleneck group", "cited by four other keepers".
+
+**The test: could someone check your line against the crawl's JSON without
+opening the paper?** What the crawl hands you is title, authors, year, venue,
+identifiers, `isInfluential`, citation counts, the context sentences and their
+intent tags, which hop and which seed returned the row, and how that row sits
+among the others. A line built from those is checkable — "the one card whose
+title carries both 'transformer' and pre/post change" is checkable. "The one
+that argues against the paired-image setting" is not: nothing in the crawl says
+it, and you have not read it.
+
+So the line never says what the paper does, proposes, isolates, shows, argues,
+reports, frames or replaces. A line like that is an abstract paraphrased into a
+claim, and it reads to the merger as a finding. The paper's own words go in
+quotation marks with attribution — on the `Cited as` line, or as a marked
+abstract fragment. Your words never describe the paper.
+
+**Watch the second clause.** Measured 2026-09-14, three runs of three: the
+failures were nearly all a checkable first half joined by "and" to an
+unreadable second — "the pre/post twin-tower baseline the seed builds from,
+**and the cross-region generalization result**"; "the seed's instance-
+segmentation component, **and the failure mode it reports there**". One clause,
+out of the crawl, is the whole line. Measured 2026-09-13: 200-character `Kept
+because` lines characterising mechanisms failed the same grader.
 
 **A thesis group is a bold line — not a heading, not a paragraph.**
 `**Token-based bitemporal attention**` on a line of its own, then its cards.
@@ -164,6 +181,7 @@ needs and what search can give it.
 | "I'll keep my own tally of papers touched." | Read `touched_total` off the response. Your tally drifted by 4x the last time. |
 | "One more hop won't hurt." | The script refuses past the ceiling, before spending the call. Do not argue with it. |
 | "They want to understand what each paper contributes, so `Kept because` will say." | It says why the card is here, in a dozen words. What the paper contributes is `/read`'s job, after someone has read it. |
+| "The first half is from the crawl, the second half just adds colour." | Both halves are the line, and the colour is the part you did not read. Stop at the clause you can check. |
 | "One line under the group heading, to orient the reader." | The heading is the orientation. Anything under it is you describing papers you have not read. |
 | "A quick `curl` / `ls` / `pip` would help here." | Your Bash is one script. The guard denies everything else and the attempt goes in the log. |
 

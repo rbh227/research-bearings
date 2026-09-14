@@ -10,10 +10,12 @@ derived from — kept local, not shipped.
 
 **Status: chunk 2 of 6, being verified.** The question stage works. Retrieval
 is built — one standard-library script that snowballs a citation graph into a
-landscape section — and checked against the live API. Its behavioural eval suite
-first ran on 2026-09-13, found the budget was not being enforced, and is being
-re-cut around the script (chunk 2 spec §11); treat `/scout` as working rather
-than proven until that lands. The rest of the landscape chain — surveys, the seven-way
+landscape section — and checked against the live API. Its offline tiers are
+green (19 script cases, 30 guard cases). Its behavioural tier is four cases in
+of nine: two clean over three runs each, one clean over the one run it finished,
+and one real failure in the scout's `Kept because` line, since fixed and not yet
+re-measured (chunk 2 spec §11.10). Treat `/scout` as working rather than proven
+until the rest of that tier runs. The rest of the landscape chain — surveys, the seven-way
 fan-out, the merger, the matrix and the brief — plus reading, ideation,
 selection and experiments are not built yet. See
 [`docs/design/skills-and-agents.md`](docs/design/skills-and-agents.md) for the
@@ -162,7 +164,7 @@ exists and shows you what the field actually asks, run `frame` again.
 
 The `static checks` and `one test file` verbs in
 [`docs/agents/toolchain.md`](docs/agents/toolchain.md) are free and fast — run
-them freely. Between them they cover the write-scope guard (13 cases), the
+them freely. Between them they cover the scope guard (22 cases), the
 retrieval script offline against real captured API responses (19 cases),
 template/contract heading parity, and the plugin, skill and agent manifests.
 

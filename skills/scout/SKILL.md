@@ -122,6 +122,16 @@ does not bound the write.
 250 is a starting value and a guess. Raise it when a run stops on `budget` and
 the user wants more. Lower it inside anything with a wall clock.
 
+**Re-running a slug continues its crawl; it does not restart it.** The ledger is
+kept per run slug, so a second `/scout` on the same slug picks up where the first
+stopped. That is what you want after a `budget` stop — and it only works if you
+raise the ceiling. Re-run at the *same* budget and the ledger is already at it:
+the first hop comes back `stopped: "budget"`, and the section gets rewritten from
+seeds with no hops behind them. So: **same slug and a higher ceiling to continue,
+a new slug to start over.** Say which of the two you are doing at the confirm
+step, and if the user wants a clean run under the old name, delete
+`research/.crawl/<slug>.touched.json` first and say that you did.
+
 Kept is 25–35. Touched is the crawl, and one seed alone reaches 44–119 papers,
 so eight seeds at one hop is several hundred. The two numbers are not the same
 number and the design once conflated them.

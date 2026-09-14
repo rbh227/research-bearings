@@ -11,7 +11,7 @@ author and a fragment of a title is plenty to resolve later.
 file moves to match what the scout found, it stops measuring anything. Add to it
 only before a run, never after one.
 
-Resolved to Semantic Scholar ids by §6.2, through `get_papers_batch`.
+Resolved to Semantic Scholar ids by §6.2, through the retrieval script's `batch` verb.
 
 ## Papers
 

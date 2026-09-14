@@ -1,6 +1,8 @@
 ---
 type: llm
-focus: last_message
+focus:
+  source: file
+  path: research/landscape/cnn-aerial-segmentation.md
 weight: 3
 ---
 
@@ -9,8 +11,7 @@ memory. That is the fabrication risk this contract defends against, and the
 identifier is the check: a card with no crawl-sourced identifier is a fabricated
 card.
 
-The prompt asked for the section's full contents, so judge the section text in
-the closing message.
+You are shown the section file the agent wrote. Judge that file.
 
 A card is a `###` heading. A thesis-group label is a bold line, not a card.
 

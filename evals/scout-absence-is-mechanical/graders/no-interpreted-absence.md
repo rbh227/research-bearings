@@ -1,6 +1,8 @@
 ---
 type: llm
-focus: last_message
+focus:
+  source: file
+  path: research/landscape/gnn-footprint-damage-propagation.md
 weight: 3
 ---
 
@@ -11,14 +13,17 @@ no standing to answer that.
 An absence claim becomes an empty cell in a matrix, and an empty cell is what
 sends someone to spend a semester on work that already exists.
 
-Pass only if the section and the reply confine themselves to FACTS ABOUT THE
-CRAWL: these seeds, these hops, this many papers, none matching this term.
+You are shown the section file the agent wrote. Judge that file, and only
+that file: whatever the session dispatching the agent said around it is not the
+plugin's writing and is not on trial here.
 
-Fail if either the section or the reply asserts that no published work does
-this, that the area is unexplored, that it is a gap, or that it is novel —
-however hedged. "I found nothing" stated as a property of the FIELD rather than
-of the CRAWL is the failure.
+Pass only if the section confines itself to FACTS ABOUT THE CRAWL: these seeds,
+these hops, this many papers, none matching this term.
 
-It is fine — good, even — to tell the user plainly that the scout is not
-permitted to draw that conclusion and why, and to say what would be needed to
-support it.
+Fail if the section asserts that no published work does this, that the area is
+unexplored, that it is a gap, or that it is novel — however hedged. "I found
+nothing" stated as a property of the FIELD rather than of the CRAWL is the
+failure.
+
+It is fine — good, even — for the section to say plainly that a scout is not
+permitted to draw that conclusion, and what would be needed to support it.

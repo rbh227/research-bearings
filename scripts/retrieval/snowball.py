@@ -55,7 +55,23 @@ try:  # POSIX. Absent on Windows, where concurrent saves fall back to unlocked.
 except ImportError:  # pragma: no cover - not reachable on the platforms we run
     fcntl = None  # type: ignore[assignment]
 
-VERSION = "0.2.0"
+def _version() -> str:
+    """The plugin's version, read from its manifest rather than kept here.
+
+    A second copy of the version is a copy that goes stale: this said 0.2.0
+    while the manifest said 0.3.1, and `health` is what /setup records.
+    """
+    manifest = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "..",
+        ".claude-plugin", "plugin.json")
+    try:
+        with open(manifest, encoding="utf-8") as fh:
+            return str(json.load(fh).get("version") or "unknown")
+    except (OSError, ValueError):
+        return "unknown"
+
+
+VERSION = _version()
 BASE = "https://api.semanticscholar.org/graph/v1"
 TIMEOUT = 60
 
@@ -227,15 +243,23 @@ def cache_dir() -> str:
     )
 
 
-def records_dir() -> str:
-    """<project>/research/.papers/. The project is RESEARCH_PROJECT_DIR, else
-    CLAUDE_PROJECT_DIR (set for every Bash call Claude Code makes), else cwd."""
-    project = (
+def project_dir() -> str:
+    """The project whose research/ receives records and the ledger.
+
+    RESEARCH_PROJECT_DIR, else CLAUDE_PROJECT_DIR (set for every Bash call
+    Claude Code makes), else cwd. One resolution, because `health` used to
+    report only the first of the three and so printed null for a run whose
+    ledger was landing somewhere real."""
+    return os.path.abspath(
         os.environ.get("RESEARCH_PROJECT_DIR", "").strip()
         or os.environ.get("CLAUDE_PROJECT_DIR", "").strip()
         or os.getcwd()
     )
-    return os.path.join(os.path.abspath(project), "research", ".papers")
+
+
+def records_dir() -> str:
+    """<project>/research/.papers/."""
+    return os.path.join(project_dir(), "research", ".papers")
 
 
 def write_atomic(path: str, payload: Any) -> None:
@@ -758,7 +782,7 @@ def health(run: str = "") -> dict[str, Any]:
         "version": VERSION,
         "key_present": bool(api_key()),
         "cache_dir": cache_dir() or None,
-        "project_dir": os.environ.get("RESEARCH_PROJECT_DIR", "") or None,
+        "project_dir": project_dir(),
         "records_dir": recs or None,
         "records_enabled": bool(recs),
         "run": run or None,
