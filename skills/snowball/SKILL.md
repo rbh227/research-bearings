@@ -6,6 +6,12 @@ allowed-tools: Read, Glob, AskUserQuestion, Bash, Agent
 
 # snowball
 
+<!-- Parked 2026-09-14. This skill works and its eval tier still runs; it is not
+     being developed. The plugin's active retrieval skill is /scout, which finds
+     fields that share a problem's shape rather than its citation graph
+     (docs/design/chunk-03-analogs.md). Nothing here is deprecated: a question
+     whose neighbourhood you want is still this skill's job. -->
+
 One job: dispatch one `paper-scout` at one question, and report where it landed.
 
 You do not search. You do not write the section. The agent does both, in its own

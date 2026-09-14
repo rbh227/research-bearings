@@ -23,8 +23,9 @@ Human gate: the question. Nothing downstream runs without `QUESTION.md`.
 
 | Skill | Agents | Output | Justification |
 |---|---|---|---|
+| `/scout` | — | `analogs/<slug>.md` | Swanson (ABC model), Uzzi (atypical combinations), narrow-exploration study (force seeds from adjacent fields). **Shipped in chunk 3** (`docs/design/chunk-03-analogs.md`). The breadth tool, and it absorbed what Stage 4 had called `/fingerprint`, `/analogs` and `/flip`: shape, fields, transfer, opportunity, verify, in one skill with no agents. |
 | `/snowball` | `paper-scout` ×1 | `landscape/<slug>.md` | Ré (snowball, asymptote 25–35, group by thesis), Wohlin (snowballing as sampling). **Shipped in chunk 2.** The unit of work `/landscape` fans out seven times, promoted to a user-facing skill so it could be judged before anything depended on it. |
-| `/surveys` | `survey-differ` | `landscape/surveys.md` | Petersen (mapping studies), vocabulary harvest |
+| `/surveys` | `survey-differ` | `landscape/surveys.md` | Petersen (mapping studies), vocabulary harvest. **Deferred 2026-09-14**: the landscape chain was chunk 3 until breadth took priority. |
 | `/landscape` | `paper-scout` ×7, `merger` | `landscape/matrix.md`, `timeslice.md` | Ré (bits, snowball, asymptote 25–35, group by thesis), Wohlin (snowballing), Webster/Watson (concept matrix), Petersen (empty cells), Musgrave (reproduced/self-reported/contested), absence claims. Goal: parallel gathering. |
 | `/datasets` | `dataset-scout` | `landscape/datasets.md` | Kapoor (leakage in standard splits) |
 | `/groups` | `author-tracker` | `landscape/groups.md` | goal: competitive landscape. Who is publishing, where they are heading. Hamming is a secondary source, not the reason. |
@@ -71,9 +72,6 @@ The three-agent read protocol is the sheet's own design: `predictor` sees only t
 | Skill | Agents | Output | Justification |
 |---|---|---|---|
 | `/brainstorm` | `persona-ideator` ×4–6 | appends to `IDEAS.md` | STORM (personas ask their own questions), Polya (transformations), Hamming |
-| `/fingerprint` | — | problem shape, domain nouns stripped | Swanson (ABC model) |
-| `/analogs` | `analog-scout`, `field-carder`, `transfer-checker` | `landscape/analogs.md` | Swanson, Uzzi (atypical combinations) |
-| `/flip` | `flip-generator`, `novelty-checker` | appends to `IDEAS.md` | Ré (flip the bit), Nova (novelty is a retrieval result) |
 | `/ideas` | `diversity-planner`, + the loop | `ideas/<slug>.md`, appends to `IDEAS.md` | Nova (iterative retrieval planning), narrow-exploration study (diversity threshold), negative space (abandoned directions), Kuhn (contradictions as seeds) |
 
 **`IDEAS.md` is the running idea log** (Schulman). `/brainstorm`, `/flip` and `/ideas` all append to it, so ideas accumulate across sessions instead of dying with one run.
@@ -82,7 +80,7 @@ The three-agent read protocol is the sheet's own design: `predictor` sees only t
 
 **Typicality** (Uzzi) stays a written note on the idea page. Nothing computes it. That is deliberate.
 
-`novelty-checker` runs in a fresh context, calls `similarity.py`, never sees the generator's reasoning. Nova's rule: novelty is retrieval, not a feeling.
+**Novelty is a retrieval result, not a feeling** (Nova). `/scout` applies that rule directly — an opportunity carries a `Nearest existing:` line with what the index returned for it — so the separate `novelty-checker` and its `similarity.py` are not needed at the ideation stage they were drawn for. If a fresh-context critic is wanted later, it attacks the transfer arguments, not the novelty (chunk 3 spec §6, open).
 
 ---
 
@@ -167,7 +165,7 @@ Only two rows fail both tests: `/watch` (milestone 5 anyway) and `/handoff`.
 |---|---|
 | Landscape and presentation | 6 (`survey-differ`, `paper-scout`, `merger`, `brief-writer`, `dataset-scout`, `author-tracker`) |
 | Reading | 6 (`predictor`, `reader`, `scorer`, `leakage-auditor`, `openreview-reader`, `critic`) |
-| Ideation | 7 (`persona-ideator`, `analog-scout`, `field-carder`, `transfer-checker`, `flip-generator`, `novelty-checker`, `diversity-planner`) |
+| Ideation | 2 (`persona-ideator`, `diversity-planner`) — was 7; `analog-scout`, `field-carder`, `transfer-checker`, `flip-generator` and `novelty-checker` collapsed into `/scout`, which has no agents |
 | Selection | 2 (`premortem-agent`, `tournament-judge`) |
 | Experiment | 7 (`baseline-reproducer`, `experiment-designer`, `ablation-planner`, `variance-checker`, `results-tabulator`, `results-critic`, `failure-mode-auditor`) |
-| **Total** | **28** |
+| **Total** | **23** |

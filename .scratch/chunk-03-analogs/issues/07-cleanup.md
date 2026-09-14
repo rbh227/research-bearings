@@ -1,7 +1,7 @@
 # Cleanup: nothing unreferenced in the tree
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Blocked by: 02, 04, 05
 
 ## What
@@ -42,10 +42,51 @@ The audit, concretely:
 
 ## Acceptance
 
-- [ ] A list, on this ticket, of every deletion with one line of why, and
+- [x] A list, on this ticket, of every deletion with one line of why, and
       every "parked" label added with its location.
-- [ ] Both selftests green with the same or fewer cases, each remaining case
+- [x] Both selftests green with the same or fewer cases, each remaining case
       still meaningful; static checks green; heading parity green.
-- [ ] `TAG=snowball RUNS=1` still runs — the parked tier is intact.
-- [ ] The grep list above returns nothing outside `docs/design/chunk-0[12]-*`
+- [x] `TAG=snowball RUNS=1` still runs — the parked tier is intact.
+- [x] The grep list above returns nothing outside `docs/design/chunk-0[12]-*`
       and `evals/results/`.
+
+## Resolution
+
+2026-09-14. The audit found less dead code than expected and one real rename.
+
+**Deleted:** nothing. Every top-level function in `snowball.py` (44),
+`guard.py` (9), `check_headings.py` (3) and `check_analogs.py` (7) has a caller,
+a CLI verb or a selftest case. Every fixture has a reader: the five loose ones
+are named by selftest cases, and `crawl-dmg/` is read by the eval prompts as a
+directory. The MCP era left no orphans behind — the port in ad68db7 took the
+functions and left the wrapper.
+
+**Renamed:** `get_papers_batch` → `batch_papers`, the last MCP-era name in
+shipped code and the only one out of step with `hop`, `search`, `health` and
+the CLI's own `batch` verb.
+
+**Labelled parked**, in four places: `skills/snowball/SKILL.md`,
+`agents/paper-scout.md`, the README's skill table and `toolchain.md`. Each says
+the same thing — it works, its tier still runs, it is not being developed, and
+nothing about it is deprecated.
+
+**Design docs:** chunk 1 gained a banner, because "no `.mcp.json`, no
+`servers/`, no `scripts/`" was true of chunk 1 and is no longer true of the
+plugin. Chunk 2 already had one from ticket 02. `skills-and-agents.md` collapsed
+`/fingerprint`, `/analogs` and `/flip` into `/scout`, deferred `/surveys` with
+the rest of the landscape chain, and dropped the agent count from 28 to 23:
+`analog-scout`, `field-carder`, `transfer-checker`, `flip-generator` and
+`novelty-checker` are gone, because `/scout` does that work inline and its
+`Nearest existing:` line is Nova's rule applied directly.
+
+**Greps clean.** `servers/`, `.mcp.json`, `userConfig`, `mcp__`, `paper-search`,
+`openreview-mcp`, `s2-snowball`, `get_papers_batch`, `get_references`,
+`get_citations`, `--mocks`, `two-arm` and `evals/scout-` appear nowhere outside
+the chunk specs (history, both bannered) and the tickets that record the
+decisions. `evals/results/`, `academic.md`, `research_plugin_build_plan.md`,
+`research/.papers/` and `research/.crawl/` are all gitignored and none is
+tracked.
+
+**Green:** manifests, heading parity, `check_analogs.py` 7/7, `guard.py` 30/30,
+`snowball.py` 28/28, and the parked tier still runs — `snowball-refuses-without-script`
+at 1.00.

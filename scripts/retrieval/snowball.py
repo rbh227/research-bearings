@@ -671,7 +671,7 @@ def hop(
     return out
 
 
-def get_papers_batch(ids: list[str], budget: int = 0, run: str = "") -> dict[str, Any]:
+def batch_papers(ids: list[str], budget: int = 0, run: str = "") -> dict[str, Any]:
     ids = [str(i).strip() for i in (ids or []) if str(i).strip()]
     if not ids:
         return err("ids is required")
@@ -843,7 +843,7 @@ def verify(titles: list[str], ids: list[str], limit: int = 5) -> dict[str, Any]:
     results: list[dict[str, Any]] = []
 
     if ids:
-        got = get_papers_batch(ids)
+        got = batch_papers(ids)
         if "error" in got:
             return got
         for asked in ids:
@@ -969,7 +969,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "verify":
         out = verify(args.title, args.ids, args.limit)
     else:
-        out = get_papers_batch(args.ids, args.budget, args.run)
+        out = batch_papers(args.ids, args.budget, args.run)
 
     json.dump(out, sys.stdout, indent=1, sort_keys=True)
     sys.stdout.write("\n")
@@ -1306,7 +1306,7 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
                 return 200, json.dumps([{"paperId": i, "title": i, "authors": []} for i in body["ids"]]).encode()
 
             with _fetch(echo):
-                out = get_papers_batch([f"n{i}" for i in range(10)], budget=5, run="b")
+                out = batch_papers([f"n{i}" for i in range(10)], budget=5, run="b")
             check(
                 "18 a batch is capped to the remaining budget and defers the rest",
                 asked["ids"] == ["n0", "n1"]

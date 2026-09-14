@@ -1,5 +1,11 @@
 # Chunk 1 — the question stage
 
+> **Superseded in part, 2026-09-14.** "No `.mcp.json`, no `servers/`, no
+> `scripts/`" below was true of chunk 1 and is not true of the plugin: chunk 2
+> added `scripts/retrieval/snowball.py` and chunk 3 `scripts/check_analogs.py`.
+> The question stage itself — `/setup`, `/frame`, `question-critic` — ships as
+> specified here and still makes no network calls.
+
 Spec for the first buildable chunk of `research-bearings`. Ready for `/to-spec`.
 
 Resolves tickets 06 (first slice), 07 (shared contracts) and 08 (done-check), for chunk 1 only.
