@@ -27,7 +27,7 @@ Two decisions inside this ticket, to be made and recorded in the skill:
 
 - [ ] `claude plugin validate skills/ --strict` green; heading parity green
       for `analogs.md` → `skills/scout/SKILL.md`.
-- [ ] A dry run on the acceptance topic with no `QUESTION.md` writes
+- [ ] A dry run by the implementing agent, on the acceptance topic with no `QUESTION.md`, writes
       `research/analogs/<slug>.md` stamped *unframed*, with ≥5 fields, every
       paper line carrying an id or the unresolved marker, and a `Nearest
       existing` line under every opportunity.

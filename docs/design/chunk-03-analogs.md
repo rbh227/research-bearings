@@ -136,21 +136,23 @@ not.
 
 ## 6. Done-check
 
-1. **Mechanical, seconds, no LLM.** Every `- <title> ·` line under `## Fields`
-   carries either an S2 id or the unresolved marker; `## Verification`'s
-   counts agree with the lines; no `###` field name contains a word from `##
-   Vocabulary`; at least five `###` fields; the four banned absence words are
-   absent. One script, `scripts/check_analogs.py`, run by the static-checks
-   verb.
-2. **The user reads it** on the acceptance topic and says whether the
-   farming-from-the-air kind of result showed up and whether the transfer
-   arguments are worth anything. A run is minutes; this is the loop.
-3. **Breadth recall.** `evals/gold/wildfire-cv.md` gains a heading, *work from
-   another field that turned out to matter to me*. That list against the
-   file's fields is the number this chunk is measured on.
+Mechanical only, for now. The user's call, 2026-09-14: no testing yet — the
+point of this chunk is the skillset coming together, and a live run is judged
+once there is a set to judge.
 
-No judge tier. The snowball's eval cases stay and still run under their tag;
-they stop being developed.
+1. **`scripts/check_analogs.py`, seconds, no LLM.** Every `- <title> ·` line
+   under `## Fields` carries either an S2 id or the unresolved marker;
+   `## Verification`'s counts agree with the lines; no `###` field name
+   contains a word from `## Vocabulary`; at least five `###` fields; the four
+   banned absence words are absent. Run by the static-checks verb.
+2. **Static checks green** — manifests, heading parity, both selftests.
+
+Deferred, and recorded here so it is not lost: a live run on the acceptance
+topic with the user reading the output cold, and a breadth heading in
+`evals/gold/wildfire-cv.md` (*work from another field that turned out to
+matter to me*) as the recall number this tool is eventually measured on. No
+judge tier, then or now. The snowball's eval cases stay and still run under
+their tag; they stop being developed.
 
 ## 7. Cleanup
 
@@ -166,5 +168,6 @@ deleted.
 ## 8. Order
 
 01 `verify` verb → 02 rename → 03 template + heading parity → 04 the skill →
-05 `check_analogs.py` → 06 first run, the user reads, gold set heading → 07
-cleanup. 04 depends on 01–03; 07 is last on purpose.
+05 `check_analogs.py` → 07 cleanup. 04 depends on 01–03; 07 is last on
+purpose. There is no 06: the first live run is deferred until the skillset is
+together.
