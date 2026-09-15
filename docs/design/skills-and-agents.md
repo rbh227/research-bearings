@@ -4,7 +4,16 @@ Every skill and agent from `research_plugin_build_plan.md`, joined to what justi
 
 **Two tests, not one.** A row earns its place if it implements an entry in `academic.md` **or** if it serves one of the four goals: parallel gathering, simple presentation, planning directions, simple to use. The sheet documents research methodology and says nothing about usability, so a row backed only by a goal is fully justified.
 
-Counts: 27 typed skills plus 5 composites, 28 agents, 4 scripts.
+Counts, 2026-09-14: **3 skills built** (`/setup`, `/frame`, `/scout`), 1 agent
+(`question-critic`), 4 scripts. Planned and unbuilt: 24 more skill rows, 5
+composites, 21 more agents.
+
+That planned number flatters itself and should be read with care. Much of Stage
+2 and 2b is librarian tooling layered on a landscape artifact that no longer
+exists, and two rows — `/landscape` and `/watch` — fan out `paper-scout`, which
+was deleted on 2026-09-14. The loop that actually matters is four skills:
+`/scout` finds a direction, `/read` reads what it turns up, `/rank` picks, and
+Stage 6 tries it. Three of those four are unbuilt.
 
 ---
 

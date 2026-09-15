@@ -16,10 +16,13 @@ chain) and re-scopes chunk 2's premise for this skill only. Tickets in
   recall is the source of breadth. The fluent-confident-false failure measured
   all week is handled by resolving every citation at the end and marking what
   does not resolve — not by forbidding the thinking. Applies to this skill. The
-  snowball keeps its every-line-tool-sourced contract and is parked.
+  snowball kept its every-line-tool-sourced contract and was parked; it was
+  **deleted outright later the same day**, along with `paper-scout`, its
+  template and its nine-case tier, when the user's rule became "what we got rid
+  of, remove the code" (commit 45508e6).
 - **Naming.** This skill is `/scout` — it is what finds papers broadly. The
-  parked snowball skill becomes `/snowball`. `paper-scout` keeps its name; it
-  is the snowball's agent and is still dispatched by it. One meaning per word.
+  snowball skill became `/snowball` — then was deleted. `paper-scout` went with
+  it. One meaning per word, and now only one retrieval skill to name.
 - **Shape.** One skill, inline, no new agent, minutes per run. The skill has
   the session's context, which is the point.
 - **Depth.** All the way to an opportunity per field, labelled speculative,
@@ -173,9 +176,11 @@ the tree is unreferenced. Every function in `snowball.py` and `guard.py` has a
 caller or a selftest; every fixture is read by a case or a selftest; every
 eval case targets a shipped skill or agent by its current name; no shipped
 `.md` names a path, tool, or skill that no longer exists; the design docs
-mark what is parked. What is *parked* stays — the snowball, its agent, its
-template, its tier — and is labelled parked wherever it appears. Dead is
-deleted.
+mark what is superseded. As written, this ticket parked the snowball and
+labelled it. **The user overrode that after the ticket closed**: parked became
+deleted, and with it went the hops, the budget ledger, the edge parsing and the
+guard's Bash fence, which existed only because `paper-scout` had Bash. Dead is
+deleted — and so, in the end, was parked.
 
 ## 8. Order
 

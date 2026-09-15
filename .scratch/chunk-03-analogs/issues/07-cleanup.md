@@ -90,3 +90,17 @@ tracked.
 **Green:** manifests, heading parity, `check_analogs.py` 7/7, `guard.py` 30/30,
 `snowball.py` 28/28, and the parked tier still runs — `snowball-refuses-without-script`
 at 1.00.
+
+## Superseded, same day
+
+The user's call after this ticket closed: *"everything that we got rid of also
+remove the code."* Parked became deleted. The `/snowball` skill, `paper-scout`,
+`section.md`, the nine eval cases, the crawl fixtures and `run_evals.sh` are
+gone, and with them everything in `snowball.py` that only they used — the hops,
+the `references`/`citations` verbs, edge parsing and direction, the whole budget
+ledger — plus the guard's Bash fence, which could no longer fire once the only
+agent with Bash was deleted. 1,582 lines to 927; 11,465 deleted against 1,294
+added. Commit 45508e6.
+
+The audit above still stands as the record of what was found — no dead code,
+one rename — but its rule, *parked is labelled*, no longer describes the tree.

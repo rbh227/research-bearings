@@ -82,7 +82,7 @@ Uzzi) and the plan had put it last. Two decisions taken:
   source of breadth. Citations are checked by the script at the end, in place;
   what does not resolve is marked, not removed. This supersedes chunk 2's
   every-line-tool-sourced premise *for this skill*. The snowball tool keeps its
-  own posture and is parked.
+  own posture, was parked, and was then deleted outright (below).
 - **One skill, no new agents, minutes per run.** Shape → fields → one search
   per field in that field's words → transfer argument and opportunity → verify.
   Absence stays mechanical. Done-check is a script pass plus the user reading
@@ -103,8 +103,19 @@ microscopy — none of them reachable by a citation walk out of the home
 literature. Two had independently concluded the image-subtraction step should
 be dropped.
 
-Parked, labelled as such in four places: the snowball skill, `paper-scout`,
-their eval tier, the renderer, `/landscape`, `/surveys`, `/brief`.
+**Deleted, 2026-09-14** (45508e6), on the user's rule that what we set aside
+should lose its code rather than gain a label: the `/snowball` skill,
+`paper-scout`, `section.md`, its nine eval cases, the crawl fixtures,
+`run_evals.sh` — and then everything only they used inside the script, which was
+most of it: the hops, the `references`/`citations` verbs, edge parsing, the
+whole budget ledger, and the guard's Bash fence, which existed because
+`paper-scout` was handed one script instead of a shell. 1,582 lines to 927; the
+session closed −11,465/+1,294.
+
+Still planned but now unfooted: `/landscape` and `/watch` fanned out
+`paper-scout`. `/surveys`, `/brief` and the rest of Stage 2b are librarian
+tooling over a landscape artifact that no longer exists. What remains coherent
+is the loop: `/scout` → `/read` → `/rank` → experiment.
 
 Deferred and recorded rather than lost: the live run with the user reading the
 output cold, and the breadth heading in `evals/gold/wildfire-cv.md` (*work from
