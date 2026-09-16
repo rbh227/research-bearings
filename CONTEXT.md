@@ -56,3 +56,20 @@ Added with chunk 5 (2026-09-15), the gathering cycle: `/surveys`, `/landscape`, 
 - **cell probe**: One `search` per formulation × data regime pair, run by `/landscape` after the sections return and written as `sections/cells.md`, so the merger can name the query behind an empty cell without running one.
 - **blocked**: The vocabulary a searcher's query may not use. In `/scout` it is the home vocabulary; the script refuses the query, so the home field cannot leak in by accident.
 - **stop reason**: Why a walk ended: `complete`, `saturation` (a block of five seeds added under 5 percent), or `budget` (400 papers). Always recorded in `## What was searched`.
+
+## Reading terms
+
+Added with chunk 7 (2026-09-16), the reading milestone: `/read` and the seven
+ledger and judgement skills built on the cards it writes.
+
+- **card**: One paper, understood, at `research/papers/<slug>.md`. Sixteen fixed headings. Written by the `scorer` at the end of a `/read` run and edited afterwards only by the skill that owns a section. The unit every skill after this one reads.
+- **pass**: Which of Keshav's three passes the read stopped at, recorded on every card. `full` is the three-agent protocol; `1` is a skim. A skim that does not say it is a skim is a full read to everything downstream, which is why `check_cards` requires the value.
+- **intro text** / **full text**: The two files `fetch` writes per paper, in the cache. The intro text ends where the introduction ends. The predictor is handed the intro text and nothing else, so the rule that it must not see the method is a file boundary and not a sentence in a prompt.
+- **split**: How `fetch` decided where the introduction ends: `heading` (the first section heading after it, named) or `page-cut` (the fallback, two pages). Recorded on the metadata record, because a page cut is the case where the predictor may have seen a little of the method.
+- **unplaced**: A card written with no matrix to place it in, or whose paper appears in no cell. Marked, never guessed: a card that invents its own cell disagrees with the landscape later. `/read --place` fills it once a matrix exists.
+- **tag**: What `/verify` appends to a reference line: `verified`, the candidate marker, or `not found` with the indexes checked. A reference with no tag is a `check_cards` failure. A not-found reference stays in the file, marked, exactly as an unresolved paper does in a section.
+- **review notes**: The `## Reviews` section of a card, from OpenReview: ratings, the objections that recur, what the authors conceded, the decision. Reviewers say what authors will not.
+- **leakage flag**: One line under `## Leakage`, one per Kapoor and Narayanan leakage type, each carrying a quoted passage or "could not determine, checked X and Y". Flags and evidence; no score and no verdict.
+- **thesis group**: A set of cards that share a thesis, named by `/bits` on its first run and recorded in `BITS.md` with its slugs. Ré groups by thesis, not by topic, and the landscape has no such grouping to inherit: sections are per question and cells are formulation by data regime. Recorded rather than recomputed, so the file `/ideas` reads does not reshuffle between runs.
+- **bit**: The assumption one thesis group shares, in one sentence, with the cards behind it and the cells they sit in. Method, evaluation or dataset. A group of one card is too thin to carry one, and is listed as such.
+- **critique**: One fresh-context attack on one file, at `research/critiques/<file>-<date>.md`. Findings, then rebuttals scored one to five on the concession ladder. Never edits the file it judges.

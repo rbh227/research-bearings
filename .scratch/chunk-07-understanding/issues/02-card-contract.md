@@ -1,7 +1,7 @@
 # 02: The card contract
 
 Type: task
-Status: ready-for-agent
+Status: done
 Blocked by: None (can start immediately)
 
 ## What to build
@@ -31,7 +31,30 @@ tag, review notes, leakage flag, group, thesis group, bit, critique.
 
 ## Acceptance
 
-- [ ] A hand-written card from the template passes `check_cards`.
-- [ ] Each of the five failure kinds is caught by its own case; the checker prints the file and the reason.
-- [ ] The glossary has the reading section with one meaning per term.
-- [ ] Heading-checker entries exist for the three templates.
+- [x] A hand-written card from the template passes `check_cards`.
+- [x] Each of the five failure kinds is caught by its own case; the checker prints the file and the reason.
+- [x] The glossary has the reading section with one meaning per term.
+- [x] Heading-checker entries exist for the three templates.
+
+## Resolution
+
+2026-09-16. `templates/research/card.md` (16 headings), `prediction.md` (5),
+`reading.md` (11), `scripts/check_cards.py` (13 cases), heading-checker
+registration, and the glossary's reading section (11 terms).
+
+Two shapes decided inside the ticket:
+
+- **A section a later skill owns carries `_not run_`, never nothing.** An empty
+  `## Reviews` and an unrun one look identical to a reader and to a grep, and
+  the difference matters: one means nobody looked, the other means OpenReview
+  had no record. The checker fails an empty one.
+- **A full read must carry a prediction score.** If `## Prediction score` says
+  `_not run_` while `## Identity` says `pass full`, either the scorer did not
+  run or the pass is really 1. Both are worth failing on, because the card is
+  claiming a protocol it did not go through.
+
+Heading parity is red on purpose until ticket 03: the three registered
+consumers (`agents/scorer.md`, `agents/predictor.md`, `agents/reader.md`,
+`skills/read/SKILL.md`) do not exist yet. The checker names each one as a
+MISSING line rather than tracebacking, which is the case its own comment was
+written for.

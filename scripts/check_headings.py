@@ -25,6 +25,9 @@ CONTRACTS = {
     "templates/research/matrix.md": ["agents/merger.md", "skills/landscape/SKILL.md"],
     "templates/research/timeslice.md": ["agents/merger.md", "skills/landscape/SKILL.md"],
     "templates/research/surveys.md": ["agents/survey-differ.md", "skills/surveys/SKILL.md"],
+    "templates/research/card.md": ["agents/scorer.md", "skills/read/SKILL.md"],
+    "templates/research/prediction.md": ["agents/predictor.md"],
+    "templates/research/reading.md": ["agents/reader.md"],
 }
 
 # agent -> the output headings its contract must define
