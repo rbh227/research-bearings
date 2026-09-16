@@ -30,7 +30,8 @@
 
      ### <field, in its own words>
      - Shares: <which element of the shape>
-     - Searched: `<query>` → <N> rows
+     - Section: research/analogs/sections/<field-slug>.md
+     - Searched: `<query>` → <N> papers in the neighborhood; stop: <reason>
      - Papers:
        - <title> · <year> · S2 `<id>`            (or OpenAlex `W…`, arXiv `…`, DOI `…`)
        - <title> · <year> · _candidate: prefix match only, <nearest title> (S2 `<id>`)_
@@ -40,10 +41,11 @@
      - Opportunity (speculative): <one paragraph — what you would actually try.
        Labelled speculative because it is: it is the one part of this file that
        is not sourced from anything.>
-     - Nearest existing: `<query>` → <N> rows; closest: <title> (S2 `<id>`)
+     - Nearest existing: `<query, in the home vocabulary>` → <N> papers; top: <title> · <year> (S2 `<id>`)
 
-     The "Nearest existing" line is the absence rule. It reports what a search
-     for the opportunity returned, and lets the reader conclude. "Unexplored",
+     The "Nearest existing" line is the absence rule. It reports what a small
+     neighborhood walk in your own field returned for the opportunity, and
+     lets the reader conclude. "Unexplored",
      "gap", "novel" and "nobody" do not appear in this file. -->
 
 ## Verification
@@ -63,11 +65,9 @@
 
 ## Status
 
-<!-- Date. Run slug. Searches made, and rows returned across them — not a
-     papers-touched count: this skill makes no hops, so that figure is always
-     zero and reads as though nothing was retrieved. Framed or unframed. Key
-     present or not — unkeyed runs rate-limit and may return fewer rows per
-     field, which is a degradation and is stamped here, not silently absorbed.
+<!-- Date. Run slug. Searchers dispatched, and each field's neighborhood size
+     and stop reason. Framed or unframed. Which sections reported a degraded
+     index — that is a degradation and is stamped here, not silently absorbed.
      Which indexes answered and which were degraded (from search's `indexes`
      block), per research/CONNECTIONS.md. Any field whose search returned zero
      rows after a re-query. -->

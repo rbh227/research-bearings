@@ -10,6 +10,8 @@ stays resident.
   snowball.py search "query" [--limit N] [--index all|s2|openalex|arxiv]
   snowball.py batch <id> [<id> ...]            S2 metadata for many ids
   snowball.py verify [--title T]... [--id I]... [--limit N]
+  snowball.py neighborhood "query" [--seeds 30] [--budget 400] [--block w,w] [--surveys-only]
+                          [--write research/landscape/sections/<slug>.md --question Q --field F --mode M]
   snowball.py openalex search "q" | work <W|doi> | refs <W> | cited-by <W>
   snowball.py crossref doi <doi> | search "title"
   snowball.py arxiv search ["q"] [--cat cs.CV] [--from YYYY-MM-DD] [--to YYYY-MM-DD]
@@ -106,6 +108,13 @@ OA_FIELDS = (
     "primary_location,locations,authorships,type,open_access,"
     "abstract_inverted_index,best_oa_location"
 )
+# Edge fields ride in the same flat fields= list on the hop endpoints and land
+# at row level beside citedPaper / citingPaper (confirmed live 2026-09-13).
+S2_EDGE_FIELDS = "isInfluential,intents,contextsWithIntent"
+S2_HOP_FIELDS = S2_FIELDS + "," + S2_EDGE_FIELDS
+S2_NESTED = {"references": "citedPaper", "citations": "citingPaper"}
+HOP_MAX = 100
+
 CR_FIELDS = (
     "DOI,title,issued,created,is-referenced-by-count,container-title,author,"
     "published-online,published-print,abstract"
@@ -724,8 +733,8 @@ def s2_get(path: str, params: dict[str, Any] | None = None, body: Any = None,
                       use_cache=use_cache, attempts=attempts)
 
 
-def s2_search(query: str, limit: int = 20) -> dict[str, Any]:
-    payload = s2_get("/paper/search", {"query": query, "limit": limit, "fields": S2_FIELDS})
+def s2_search(query: str, limit: int = 20, extra: dict[str, Any] | None = None) -> dict[str, Any]:
+    payload = s2_get("/paper/search", {"query": query, "limit": limit, "fields": S2_FIELDS, **(extra or {})})
     if isinstance(payload, dict) and "error" in payload:
         return payload
     if isinstance(payload, dict) and "data" not in payload and payload.get("total") == 0:
@@ -784,6 +793,63 @@ def batch_papers(ids: list[str]) -> dict[str, Any]:
     }
 
 
+def edge_of(row: dict[str, Any], origin: str, hop: str) -> dict[str, Any]:
+    """The citing author's own characterization of the cited work, tagged.
+
+    The two hops point their sentences in opposite directions: on
+    `references` the seed cites this row, so the sentences are the seed's
+    prose about this paper; on `citations` this row cites the seed, so they
+    are this paper's prose about the seed. `describes` carries that.
+    """
+    contexts = []
+    for item in row.get("contextsWithIntent") or []:
+        if isinstance(item, dict) and (item.get("context") or "").strip():
+            contexts.append({"sentence": item["context"].strip(), "intents": item.get("intents") or []})
+    return {
+        "origin": origin, "hop": hop,
+        "describes": "this_paper" if hop == "references" else "origin_paper",
+        "isInfluential": bool(row.get("isInfluential")),
+        "intents": row.get("intents") or [], "contexts": contexts,
+    }
+
+
+def s2_hop(kind: str, paper_id: str, limit: int = HOP_MAX) -> dict[str, Any]:
+    """One hop on Semantic Scholar: `references` (backward) or `citations`
+    (forward). Rows with no paperId are real cited works with no S2 record,
+    mostly grey literature; they come back under `unresolvable` with title,
+    venue and year only, so nothing can hop from them by construction."""
+    paper_id = (paper_id or "").strip()
+    if kind not in S2_NESTED or not paper_id:
+        return err("s2_hop needs references|citations and a paper id")
+    limit = max(1, min(int(limit or HOP_MAX), HOP_MAX))
+    payload = s2_get(f"/paper/{urllib.parse.quote(paper_id, safe='')}/{kind}",
+                     {"limit": limit, "fields": S2_HOP_FIELDS})
+    if isinstance(payload, dict) and "error" in payload:
+        return payload
+    if not isinstance(payload, dict) or "data" not in payload:
+        return err(f"unexpected response shape from s2 {kind}: no data array", 1, 200)
+    nested = S2_NESTED[kind]
+    papers, unresolvable, malformed = [], [], 0
+    for row in payload.get("data") or []:
+        paper = row.get(nested) if isinstance(row, dict) else None
+        if not isinstance(paper, dict):
+            malformed += 1
+            continue
+        if not paper.get("paperId"):
+            unresolvable.append({"title": paper.get("title"), "venue": paper.get("venue") or None,
+                                 "year": paper.get("year")})
+            continue
+        rec = s2_record(paper)
+        rec["edges"] = [edge_of(row, paper_id, kind)]
+        papers.append(rec)
+    nxt = payload.get("next")
+    return {
+        "seed": paper_id, "hop": kind, "limit": limit, "papers": papers, "unresolvable": unresolvable,
+        "resolved_count": len(papers), "unresolvable_count": len(unresolvable), "malformed_count": malformed,
+        "rows_returned": len(payload.get("data") or []), "next": nxt, "truncated": nxt is not None,
+    }
+
+
 # --------------------------------------------------------------------------
 # resolver: OpenAlex
 
@@ -817,12 +883,12 @@ def oa_list(payload: Any, what: str) -> dict[str, Any]:
     }
 
 
-def oa_search(query: str, limit: int = 20) -> dict[str, Any]:
+def oa_search(query: str, limit: int = 20, extra: dict[str, Any] | None = None) -> dict[str, Any]:
     query = (query or "").strip()
     if not query:
         return err("query is required")
     limit = max(1, min(int(limit or 20), SEARCH_MAX))
-    out = oa_list(oa_get("/works", {"search": query, "per-page": limit, "select": OA_FIELDS}), "search")
+    out = oa_list(oa_get("/works", {"search": query, "per-page": limit, "select": OA_FIELDS, **(extra or {})}), "search")
     if "error" not in out:
         out.update({"query": query, "limit": limit, "truncated": (out.get("total") or 0) > limit})
     return out
@@ -869,20 +935,42 @@ def oa_by_ids(wids: list[str]) -> dict[str, Any]:
     return {"papers": papers, "resolved_count": len(papers), "asked": len(wids)}
 
 
-def oa_referenced(ident: str) -> dict[str, Any]:
-    """The works a work cites: one hop backward on OpenAlex."""
+def oa_by_dois(dois: list[str]) -> dict[str, Any]:
+    """Records for many DOIs, OA_FILTER_MAX per request. Used to learn which
+    papers S2 found are also in OpenAlex, and what OpenAlex counts for them."""
+    papers: list[dict[str, Any]] = []
+    for i in range(0, len(dois), OA_FILTER_MAX):
+        chunk = dois[i:i + OA_FILTER_MAX]
+        out = oa_list(oa_get("/works", {
+            "filter": "doi:" + "|".join(chunk), "per-page": len(chunk), "select": OA_FIELDS,
+        }), "by dois")
+        if "error" in out:
+            return out
+        papers.extend(out["papers"])
+    return {"papers": papers, "resolved_count": len(papers), "asked": len(dois)}
+
+
+def oa_referenced(ident: str, limit: int = HOP_MAX) -> dict[str, Any]:
+    """The works a work cites: one hop backward on OpenAlex, at most `limit`.
+
+    Capped since 2026-09-15: a review with 543 references walked as seed 2 of
+    a survey run and spent the whole 400-paper budget by itself, leaving 28
+    seeds unwalked and every centrality at 1. OpenAlex's list is unordered, so
+    the cap is a sample, and `truncated` says so."""
     work = oa_work(ident)
     if "error" in work:
         return work
+    limit = max(1, int(limit or HOP_MAX))
     wids = work["referenced_works"]
+    seed = work["paper"]["externalIds"].get("OpenAlex")
     if not wids:
-        return {"seed": work["paper"]["externalIds"].get("OpenAlex"), "papers": [], "resolved_count": 0,
-                "asked": 0, "records_written": 0}
-    out = oa_by_ids(wids)
+        return {"seed": seed, "papers": [], "resolved_count": 0, "asked": 0, "rows_returned": 0,
+                "truncated": False, "records_written": 0}
+    out = oa_by_ids(wids[:limit])
     if "error" in out:
         return out
-    out["seed"] = work["paper"]["externalIds"].get("OpenAlex")
-    out["records_written"] = save_all(out["papers"])
+    out.update({"seed": seed, "rows_returned": out["resolved_count"], "total": len(wids),
+                "truncated": len(wids) > limit, "records_written": save_all(out["papers"])})
     return out
 
 
@@ -1216,6 +1304,365 @@ def verify(titles: list[str], ids: list[str], limit: int = 10) -> dict[str, Any]
 
 
 # --------------------------------------------------------------------------
+# verb: neighborhood
+
+SURVEY_TITLE = re.compile(r"\b(survey|review|overview)\b", re.I)
+SURVEY_CITES = 100      # a paper citing this many neighborhood papers is a survey
+SATURATION = 0.05       # a hop round adding fewer new papers than this fraction stops the walk
+FOUNDATIONAL_AGE = 5    # years; older than this and not a survey is foundational
+ENRICH_MAX = 200        # papers checked against the other index, most central first
+
+
+def blocked_words(query: str, block: list[str]) -> list[str]:
+    """The blocked vocabulary a query uses, whole words, case folded."""
+    q = normalised_title(query)
+    hits = []
+    for w in block:
+        w = normalised_title(w)
+        if w and re.search(rf"\b{re.escape(w)}\b", q):
+            hits.append(w)
+    return hits
+
+
+def cites_per_year(rec: dict[str, Any], year_now: int) -> float:
+    c = rec.get("citationCount")
+    y = rec.get("year")
+    if c is None:
+        return 0.0
+    span = max(1, year_now - int(y) + 1) if isinstance(y, int) else 1
+    return round(c / span, 2)
+
+
+def is_survey(rec: dict[str, Any], seed_refs: dict[str, set[str]], members: set[str]) -> bool:
+    if SURVEY_TITLE.search(rec.get("title") or ""):
+        return True
+    refs = seed_refs.get(rec["key"]) or set()
+    return len(refs & members) >= SURVEY_CITES
+
+
+def paper_line(rec: dict[str, Any]) -> str:
+    """One paper, one line, in the form the searcher pastes: every field the
+    ranking used, the id the index returned, and `verified` because it did."""
+    ids = _ids_of(rec)
+    label = (f"S2 `{ids['S2']}`" if ids.get("S2") else f"OpenAlex `{ids['OpenAlex']}`" if ids.get("OpenAlex")
+             else f"arXiv `{ids['ArXiv']}`" if ids.get("ArXiv") else f"DOI `{ids['DOI']}`" if ids.get("DOI") else "")
+    return (f"- {rec.get('title') or '_no title_'} · {rec.get('year') or '_no year_'} · "
+            f"{rec.get('venue') or '_no venue_'} · centrality {rec['centrality']} · "
+            f"influential {rec.get('influentialCitationCount') if rec.get('influentialCitationCount') is not None else '_n/a_'} · "
+            f"{rec['citesPerYear']} cites/yr · {'both indexes' if rec['inBoth'] else rec['source']} · {label} · verified")
+
+
+HOP_ROWS = 25  # rows per direction per seed; 30 seeds both ways is 1,500 rows before dedupe
+
+
+def neighborhood(query: str, seeds: int = 30, budget: int = 400, block: list[str] | None = None,
+                 surveys_only: bool = False, top: int = 20, hop_limit: int = HOP_ROWS) -> dict[str, Any]:
+    """Seed-and-snowball around one question, ranked inside the neighborhood.
+
+    Seeds: the top `seeds` by relevance across S2 and OpenAlex, interleaved
+    and deduplicated. One hop backward and one forward from every seed, on S2
+    where the seed has an S2 id and on OpenAlex otherwise. Dedupe by DOI, then
+    arXiv id, then folded title. Rank by field centrality (how many
+    neighborhood papers cite it, over the edges this walk saw), then
+    influentialCitationCount, then citations per year, then presence in both
+    indexes. Stop when a hop round adds under 5 percent new papers or the
+    budget is hit, and say which. Every line carries the id the index returned.
+    """
+    query = (query or "").strip()
+    if not query:
+        return err("query is required")
+    block = [b for b in (block or []) if b and b.strip()]
+    hits = blocked_words(query, block)
+    if hits:
+        return err(f"query uses blocked vocabulary: {', '.join(hits)}. Search the analog field in its own words.")
+    seeds_n = max(1, min(int(seeds or 30), SEARCH_MAX))
+    budget = max(seeds_n, int(budget or 400))
+    year_now = _dt.date.today().year
+    log: list[str] = []
+    nothing: list[str] = []
+    degraded: set[str] = set()
+    calls = {"s2": 0, "openalex": 0}
+
+    # 1. seeds
+    s2_extra = {"publicationTypes": "Review"} if surveys_only else None
+    oa_extra = {"filter": "type:review"} if surveys_only else None
+    s2 = s2_search(query, seeds_n, s2_extra)
+    calls["s2"] += 1
+    oa = oa_search(query, seeds_n, oa_extra)
+    calls["openalex"] += 1
+    index_lines = []
+    lists = []
+    for name, got in (("s2", s2), ("openalex", oa)):
+        if "error" in got:
+            degraded.add(name)
+            index_lines.append(f"{name}: error ({got.get('status')}) {got['error'][:80]}")
+        else:
+            index_lines.append(f"{name}: {got['rows_returned']} rows of {got.get('total')}")
+            if got["rows_returned"] == 0:
+                nothing.append(f"seed search on {name}: `{query}` → 0 rows")
+            lists.append(got["papers"])
+    interleaved: list[dict[str, Any]] = []
+    for i in range(seeds_n):
+        for rows in lists:
+            if i < len(rows):
+                interleaved.append(rows[i])
+    seed_recs = merge_lists(interleaved)[:seeds_n]
+    if not seed_recs:
+        return {"query": query, "seeds": [], "groups": {"foundational": [], "current": [], "surveys": []},
+                "stop_reason": "no seeds", "degraded": sorted(degraded), "what_was_searched":
+                [f"- Query: `{query}`" + (f"; blocked: {', '.join(block)}" if block else ""),
+                 f"- Seed search ({today()}): " + "; ".join(index_lines), "- Seeds: 0", "- Stop: no seeds"],
+                "returned_nothing": nothing or [f"`{query}` → 0 rows on every index"],
+                "counts": {"neighborhood": 0}, "records_written": 0,
+                "error": "no seeds: every index returned zero rows or failed"}
+    log.append(f"- Query: `{query}`" + (f"; blocked: {', '.join(block)}" if block else "")
+               + ("; surveys only (S2 publicationTypes=Review, OpenAlex type:review)" if surveys_only else ""))
+    log.append(f"- Seed search ({today()}): " + "; ".join(index_lines))
+    log.append(f"- Seeds: {len(seed_recs)} (top {seeds_n} by relevance, interleaved across indexes; "
+               f"{sum(1 for r in seed_recs if len(r.get('sources') or []) > 1)} in both)")
+
+    # 2. hops
+    hood: dict[str, dict[str, Any]] = {}
+    order: list[str] = []
+    centrality: dict[str, int] = {}
+    seed_refs: dict[str, set[str]] = {}
+    unresolvable = 0
+
+    def add(rec: dict[str, Any], role: str) -> str:
+        k = dedupe_key(rec)
+        if k in hood:
+            hood[k] = merge_records(hood[k], rec)
+            edges = {(e["origin"], e["hop"]) for e in hood[k].get("edges") or []}
+            for e in rec.get("edges") or []:
+                if (e["origin"], e["hop"]) not in edges:
+                    hood[k].setdefault("edges", []).append(e)
+            hood[k]["roles"] = sorted(set(hood[k].get("roles") or []) | {role})
+        else:
+            hood[k] = {**rec, "roles": [role], "edges": list(rec.get("edges") or [])}
+            order.append(k)
+            centrality.setdefault(k, 0)
+        return k
+
+    seed_keys = [add(r, "seed") for r in seed_recs]
+    stop_reason = "complete: one hop backward and one forward from every seed"
+    truncated_hops = 0
+    hop_calls = {"references": 0, "citations": 0}
+    hop_rows = {"references": 0, "citations": 0}
+    hop_new = {"references": 0, "citations": 0}
+    blocks: list[str] = []
+
+    failures = {"s2": 0, "openalex": 0}
+    DEGRADE_AFTER = 3  # consecutive failed hop calls before an index is skipped for the rest of the walk
+
+    def hop_seed(sk: str, kind: str) -> tuple[int, bool]:
+        """One direction from one seed. Returns (new papers, budget_hit)."""
+        nonlocal unresolvable, truncated_hops
+        seed = hood[sk]
+        sid = seed.get("paperId")
+        oaid = (seed.get("externalIds") or {}).get("OpenAlex")
+        src = ""
+        got: dict[str, Any] = {}
+        if sid and "s2" not in degraded:
+            got, src = s2_hop(kind, sid, hop_limit), "s2"
+            calls["s2"] += 1
+            if "error" in got and oaid:
+                got, src = (oa_referenced(oaid, hop_limit) if kind == "references" else oa_cited_by(oaid, hop_limit)), "openalex"
+                calls["openalex"] += 1
+        elif oaid:
+            got, src = (oa_referenced(oaid, hop_limit) if kind == "references" else oa_cited_by(oaid, hop_limit)), "openalex"
+            calls["openalex"] += 1
+        else:
+            return 0, False
+        hop_calls[kind] += 1
+        if "error" in got:
+            # One failed hop is a skipped hop. Three in a row is an index that
+            # is down for this walk: measured 2026-09-15, sixteen concurrent
+            # walks had S2 marked degraded by a single 429 and lost every
+            # later S2 hop, seeds without an OpenAlex id included.
+            failures[src] += 1
+            if failures[src] >= DEGRADE_AFTER:
+                degraded.add(src)
+            nothing.append(f"{kind} of {(seed.get('title') or sk)[:60]} on {src}: error {got.get('status')}")
+            return 0, False
+        failures[src] = 0
+        hop_rows[kind] += got.get("rows_returned", got.get("resolved_count", 0))
+        unresolvable += got.get("unresolvable_count", 0)
+        if got.get("truncated"):
+            truncated_hops += 1
+        if not got["papers"]:
+            nothing.append(f"{kind} of {(seed.get('title') or sk)[:60]} on {src}: 0 rows")
+        new = 0
+        for rec in got["papers"]:
+            if dedupe_key(rec) not in hood and len(hood) >= budget:
+                return new, True
+            if src == "openalex":
+                rec = {**rec, "edges": [{"origin": oaid, "hop": kind, "isInfluential": False, "intents": [],
+                                         "contexts": [], "describes": "this_paper" if kind == "references" else "origin_paper"}]}
+            before = len(hood)
+            k = add(rec, "backward" if kind == "references" else "forward")
+            new += len(hood) - before
+            if kind == "references":
+                centrality[k] += 1
+                seed_refs.setdefault(sk, set()).add(k)
+            else:
+                centrality[sk] += 1
+                seed_refs.setdefault(k, set()).add(sk)
+        return new, False
+
+    # Each seed is walked both ways before the next seed: walking every seed
+    # backward first spent the whole budget on references and never reached
+    # a citing paper (measured 2026-09-15, budget 80: 74 references, 0 citers).
+    # Saturation is judged per block of seeds, since one seed's hop is noise.
+    BLOCK = 5
+    walked = 0
+    budget_hit = False
+    for i in range(0, len(seed_keys), BLOCK):
+        before = len(hood)
+        block_new = 0
+        for sk in seed_keys[i:i + BLOCK]:
+            for kind in ("references", "citations"):
+                n, budget_hit = hop_seed(sk, kind)
+                block_new += n
+                hop_new[kind] += n
+                if budget_hit:
+                    break
+            if budget_hit:
+                break
+            walked += 1
+        blocks.append(f"seeds {i + 1}-{min(i + BLOCK, len(seed_keys))}: +{block_new}")
+        if budget_hit:
+            stop_reason = f"budget: {budget} papers reached while walking seed {walked + 1} of {len(seed_keys)}"
+            break
+        if before and block_new < SATURATION * before and i + BLOCK < len(seed_keys):
+            stop_reason = (f"saturation: seeds {i + 1}-{i + BLOCK} added {block_new} papers, under 5 percent of "
+                           f"{before}; {len(seed_keys) - walked} seeds not walked")
+            break
+    log.append(f"- Hops ({today()}): {walked} of {len(seed_keys)} seeds walked both ways, {hop_limit} rows per direction; "
+               f"backward {hop_calls['references']} calls, {hop_rows['references']} rows, {hop_new['references']} new; "
+               f"forward {hop_calls['citations']} calls, {hop_rows['citations']} rows, {hop_new['citations']} new")
+    log.append(f"- Saturation checks per block of {BLOCK} seeds: " + "; ".join(blocks))
+
+    # 3. enrichment: is each S2-only paper also in OpenAlex, and vice versa?
+    members = set(hood)
+    for k in hood:
+        hood[k]["centrality"] = centrality.get(k, 0)
+    provisional = sorted(hood, key=lambda k: (hood[k]["centrality"], hood[k].get("citationCount") or 0), reverse=True)[:ENRICH_MAX]
+    want_oa = [hood[k]["externalIds"]["DOI"] for k in provisional
+               if "openalex" not in hood[k]["sources"] and hood[k]["externalIds"].get("DOI")]
+    if want_oa and "openalex" not in degraded:
+        got = oa_by_dois(want_oa)
+        calls["openalex"] += (len(want_oa) + OA_FILTER_MAX - 1) // OA_FILTER_MAX
+        if "error" in got:
+            degraded.add("openalex")
+        else:
+            for rec in got["papers"]:
+                k = dedupe_key(rec)
+                if k in hood:
+                    edges = hood[k].get("edges")
+                    hood[k] = {**merge_records(hood[k], rec), "edges": edges, "roles": hood[k]["roles"],
+                               "centrality": hood[k]["centrality"]}
+    want_s2 = [f"DOI:{hood[k]['externalIds']['DOI']}" for k in provisional
+               if "s2" not in hood[k]["sources"] and hood[k]["externalIds"].get("DOI")][:BATCH_MAX]
+    if want_s2 and "s2" not in degraded:
+        got = batch_papers(want_s2)
+        calls["s2"] += 1
+        if "error" in got:
+            degraded.add("s2")
+        else:
+            for rec in got["papers"]:
+                k = dedupe_key(rec)
+                if k in hood:
+                    edges = hood[k].get("edges")
+                    hood[k] = {**merge_records(hood[k], rec), "edges": edges, "roles": hood[k]["roles"],
+                               "centrality": hood[k]["centrality"]}
+
+    # 4. rank and group
+    for k, rec in hood.items():
+        rec["citesPerYear"] = cites_per_year(rec, year_now)
+        rec["inBoth"] = len(rec.get("sources") or []) > 1
+        rec["rank_key"] = (rec["centrality"], rec.get("influentialCitationCount") or 0, rec["citesPerYear"], int(rec["inBoth"]))
+    ranked = sorted(hood.values(), key=lambda r: r["rank_key"], reverse=True)
+    groups: dict[str, list[dict[str, Any]]] = {"foundational": [], "current": [], "surveys": []}
+    no_year = 0
+    for rec in ranked:
+        if is_survey(rec, seed_refs, members):
+            g = "surveys"
+        elif not isinstance(rec.get("year"), int):
+            no_year += 1
+            continue
+        elif rec["year"] <= year_now - FOUNDATIONAL_AGE:
+            g = "foundational"
+        else:
+            g = "current"
+        groups[g].append(rec)
+    if surveys_only:
+        groups = {"foundational": [], "current": [], "surveys": groups["surveys"]}
+    counts = {g: len(v) for g, v in groups.items()}
+
+    def shape(rec: dict[str, Any]) -> dict[str, Any]:
+        return {"key": rec["key"], "title": rec.get("title"), "year": rec.get("year"), "venue": rec.get("venue"),
+                "ids": _ids_of(rec), "sources": rec.get("sources"), "roles": rec.get("roles"),
+                "centrality": rec["centrality"], "influentialCitationCount": rec.get("influentialCitationCount"),
+                "citationCount": rec.get("citationCount"), "citationCounts": rec.get("citationCounts"),
+                "citesPerYear": rec["citesPerYear"], "inBoth": rec["inBoth"], "line": paper_line(rec),
+                "verified": True}
+
+    log.append(f"- Neighborhood: {len(hood)} papers after dedupe by DOI, arXiv id, then folded title; "
+               f"{unresolvable} rows had no record in any index and were not added; "
+               f"{truncated_hops} hop lists were longer than {hop_limit} and sampled; {no_year} papers carry no year and are grouped nowhere")
+    log.append(f"- Ranked on centrality (citations from neighborhood papers over the edges this walk saw), then "
+               f"influentialCitationCount, then citations per year, then presence in both indexes")
+    log.append(f"- Groups: foundational {counts['foundational']} (older than {FOUNDATIONAL_AGE} years), "
+               f"current {counts['current']}, surveys {counts['surveys']} (title says survey/review/overview, "
+               f"or cites {SURVEY_CITES}+ neighborhood papers); top {top} of each listed")
+    log.append(f"- Stop: {stop_reason}")
+    log.append(f"- Degraded: {', '.join(sorted(degraded)) if degraded else 'none'}; calls s2 {calls['s2']}, openalex {calls['openalex']}")
+    log.append("- Verification: every line carries the id the index returned for it; the script added nothing from memory")
+
+    for rec in hood.values():
+        rec.pop("rank_key", None)
+    written = save_all(list(hood.values()))
+    return {
+        "query": query, "date": today(), "seeds": [shape(hood[k]) for k in seed_keys],
+        "groups": {g: [shape(r) for r in v[:top]] for g, v in groups.items()},
+        "counts": {**counts, "neighborhood": len(hood), "seeds": len(seed_keys), "unresolvable": unresolvable},
+        "stop_reason": stop_reason, "degraded": sorted(degraded), "calls": calls,
+        "what_was_searched": log, "returned_nothing": nothing, "records_written": written,
+    }
+
+
+def render_section(nb: dict[str, Any], question: str, field: str, mode: str, block: list[str]) -> str:
+    """The six-heading section, from a neighborhood result. What a searcher
+    used to paste by hand; the script writes it so the agent's only work is
+    judgement (re-query, the web fallback, a remembered paper through verify)."""
+    lines = [f"# {question}", "", "## Question", "",
+             f"{question}. Field: {field}. Mode: {mode}.", "",
+             f"Query: `{nb.get('query', '')}` (blocked: {', '.join(block) if block else 'none'})", ""]
+    for heading, key in (("Foundational", "foundational"), ("Current", "current"), ("Surveys", "surveys")):
+        lines += [f"## {heading}", ""]
+        lines += [p["line"] for p in (nb.get("groups") or {}).get(key, [])]
+        lines.append("")
+    lines += ["## What was searched", ""] + list(nb.get("what_was_searched") or []) + [""]
+    lines += ["## What returned nothing", ""]
+    lines += list(nb.get("returned_nothing") or []) or ["every query and hop returned rows"]
+    lines.append("")
+    return "\n".join(lines)
+
+
+def write_section(path: str, text: str) -> str | None:
+    """Confined to <project>/research/ like the records: the same rule the
+    guard applies to an agent's Write, applied to the script's."""
+    root = os.path.realpath(os.path.join(project_dir(), "research"))
+    target = os.path.realpath(path)
+    if not target.startswith(root + os.sep):
+        return f"--write must point under {root}/"
+    os.makedirs(os.path.dirname(target), exist_ok=True)
+    with open(target, "w", encoding="utf-8") as fh:
+        fh.write(text)
+    return None
+
+
+# --------------------------------------------------------------------------
 # verbs: health, status
 
 
@@ -1377,11 +1824,24 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--id", action="append", default=[], dest="ids", help="repeatable")
     p.add_argument("--limit", type=int, default=10, help="rows to consider per title per index; the near match that makes a candidate is often below the top five")
 
+    p = sub.add_parser("neighborhood", help="seed-and-snowball around one question; three ranked groups")
+    p.add_argument("query")
+    p.add_argument("--seeds", type=int, default=30, help="top N by relevance across S2 and OpenAlex")
+    p.add_argument("--budget", type=int, default=400, help="papers; the walk stops here")
+    p.add_argument("--block", default="", help="comma-separated vocabulary the query may not use")
+    p.add_argument("--surveys-only", action="store_true", help="seed on reviews only; output the surveys group")
+    p.add_argument("--top", type=int, default=20, help="papers listed per group")
+    p.add_argument("--hop-limit", type=int, default=HOP_ROWS, help="rows per direction per seed")
+    p.add_argument("--write", default="", help="also write the six-heading section to this path under research/")
+    p.add_argument("--question", default="", help="the question, for the section's title and ## Question")
+    p.add_argument("--field", default="", help="the field, for ## Question")
+    p.add_argument("--mode", default="landscape", help="landscape | survey | analog, for ## Question")
+
     p = sub.add_parser("openalex", help="OpenAlex resolver")
     oa = p.add_subparsers(dest="sub")
     q = oa.add_parser("search"); q.add_argument("query"); q.add_argument("--limit", type=int, default=20)
     q = oa.add_parser("work"); q.add_argument("ident", help="W id or DOI")
-    q = oa.add_parser("refs"); q.add_argument("ident", help="W id or DOI")
+    q = oa.add_parser("refs"); q.add_argument("ident", help="W id or DOI"); q.add_argument("--limit", type=int, default=HOP_MAX)
     q = oa.add_parser("cited-by"); q.add_argument("ident"); q.add_argument("--limit", type=int, default=50)
 
     p = sub.add_parser("crossref", help="Crossref resolver")
@@ -1418,9 +1878,17 @@ def main(argv: list[str] | None = None) -> int:
         out = verify(args.title, args.ids, args.limit)
     elif args.cmd == "batch":
         out = batch_papers(args.ids)
+    elif args.cmd == "neighborhood":
+        block = [b.strip() for b in args.block.split(",") if b.strip()]
+        out = neighborhood(args.query, args.seeds, args.budget, block, args.surveys_only, args.top, args.hop_limit)
+        if args.write and "error" not in out:
+            problem = write_section(args.write, render_section(out, args.question or args.query, args.field or "_not given_", args.mode, block))
+            out["section_written"] = None if problem else args.write
+            if problem:
+                out["section_error"] = problem
     elif args.cmd == "openalex":
         out = {"search": lambda: oa_search(args.query, args.limit), "work": lambda: oa_work(args.ident),
-               "refs": lambda: oa_referenced(args.ident), "cited-by": lambda: oa_cited_by(args.ident, args.limit),
+               "refs": lambda: oa_referenced(args.ident, args.limit), "cited-by": lambda: oa_cited_by(args.ident, args.limit),
                }.get(args.sub or "", lambda: err("openalex needs search, work, refs or cited-by"))()
     elif args.cmd == "crossref":
         out = {"doi": lambda: cr_doi(args.doi), "search": lambda: cr_search(args.title, args.limit),
@@ -1749,6 +2217,104 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
     check("34 a DOI in two spellings and an arXiv id with and without a version dedupe to one paper each",
           len(merged) == 2 and merged[0]["sources"] == ["openalex", "s2"] and merged[1]["sources"] == ["arxiv", "s2"],
           f"got {[ (m['title'], m['sources']) for m in merged]}")
+
+    # 35-40. neighborhood, on a stubbed graph:
+    #   seeds: A (both indexes), B (OpenAlex only). A cites R1, R2; B cites R1.
+    #   C1 cites A. So R1 has centrality 2, A has 1, R2 has 1, C1 and B have 0.
+    A = {"paperId": "A", "title": "Seed A Method", "year": 2015, "authors": [], "externalIds": {"DOI": "10.1/a"},
+         "citationCount": 100, "influentialCitationCount": 10}
+    oaA = {"id": "https://openalex.org/W11", "doi": "https://doi.org/10.1/a", "title": "Seed A Method",
+           "publication_year": 2015, "cited_by_count": 90, "authorships": [], "referenced_works": []}
+    oaB = {"id": "https://openalex.org/W22", "doi": "https://doi.org/10.1/b", "title": "Seed B Recent",
+           "publication_year": 2025, "cited_by_count": 5, "authorships": [],
+           "referenced_works": ["https://openalex.org/W33"]}
+    R1 = {"paperId": "R1", "title": "Root One", "year": 2005, "authors": [], "externalIds": {"DOI": "10.1/r1"},
+          "citationCount": 1000, "influentialCitationCount": 100}
+    R2 = {"paperId": "R2", "title": "A Survey of Roots", "year": 2010, "authors": [], "externalIds": {"DOI": "10.1/r2"},
+          "citationCount": 50}
+    C1 = {"paperId": "C1", "title": "Citer One", "year": 2024, "authors": [], "externalIds": {"DOI": "10.1/c1"},
+          "citationCount": 4}
+    oaR1 = {"id": "https://openalex.org/W33", "doi": "https://doi.org/10.1/r1", "title": "Root One",
+            "publication_year": 2005, "cited_by_count": 900, "authorships": [], "referenced_works": []}
+
+    def graph(method, url, body, headers):
+        u = urllib.parse.unquote(url)
+        if "semanticscholar" in u:
+            if "/paper/search" in u:
+                return 200, s2_payload(A)
+            if "/paper/A/references" in u:
+                return 200, json.dumps({"data": [{"citedPaper": R1, "isInfluential": True,
+                                                  "contextsWithIntent": [{"context": "We build on Root One.", "intents": ["methodology"]}]},
+                                                 {"citedPaper": R2}, {"citedPaper": {"paperId": None, "title": "Grey report"}}]}).encode()
+            if "/paper/A/citations" in u:
+                return 200, json.dumps({"data": [{"citingPaper": C1, "isInfluential": False}]}).encode()
+            if "/paper/batch" in u:
+                return 200, json.dumps([None]).encode()
+            return 200, b'{"total": 0, "offset": 0}'
+        if "openalex" in u:
+            if "search=" in u:
+                return 200, oa_payload(oaA, oaB)
+            if "/works/W22" in u:
+                return 200, json.dumps(oaB).encode()
+            if "filter=openalex:W33" in u:
+                return 200, oa_payload(oaR1)
+            if "filter=cites:W22" in u:
+                return 200, oa_payload()
+            if "filter=doi:" in u:
+                return 200, oa_payload(oaR1)
+            return 200, oa_payload()
+        return 0, b"unrouted"
+
+    with _environ(RESEARCH_CACHE_DIR=tempfile.mkdtemp(prefix="snowball-cache-")):
+        with _fetch(graph):
+            nb = neighborhood("seed method", seeds=5, budget=400, top=10)
+    by_title = {p["title"]: p for g in nb["groups"].values() for p in g}
+    check("35 neighborhood seeds from both indexes, hops on S2 where it can and OpenAlex where it must, dedupes across them",
+          "error" not in nb and nb["counts"]["seeds"] == 2 and nb["counts"]["neighborhood"] == 5
+          and nb["counts"]["unresolvable"] == 1 and by_title["Root One"]["sources"] == ["openalex", "s2"],
+          f"got {json.dumps({k: nb.get(k) for k in ('error', 'counts', 'what_was_searched')})[:600]}")
+    check("36 centrality counts citations from neighborhood papers and ranks first",
+          by_title["Root One"]["centrality"] == 2 and by_title["Seed A Method"]["centrality"] == 1
+          and by_title["Citer One"]["centrality"] == 0
+          and [p["title"] for p in nb["groups"]["foundational"]][:2] == ["Root One", "Seed A Method"],
+          f"got {[(p['title'], p['centrality']) for g in nb['groups'].values() for p in g]}")
+    check("37 groups: a review title is a survey, old is foundational, recent is current, and every line says verified",
+          [p["title"] for p in nb["groups"]["surveys"]] == ["A Survey of Roots"]
+          and {p["title"] for p in nb["groups"]["current"]} == {"Seed B Recent", "Citer One"}
+          and all(p["line"].endswith("· verified") and "centrality" in p["line"] for g in nb["groups"].values() for p in g),
+          f"got {[(g, [p['title'] for p in v]) for g, v in nb['groups'].items()]}")
+    check("38 the What was searched block names query, indexes, seeds, both hops, dedupe, stop reason and degradation",
+          all(any(line.startswith(f"- {k}") for line in nb["what_was_searched"])
+              for k in ("Query", "Seed search", "Seeds", "Hops", "Saturation", "Neighborhood", "Stop", "Degraded", "Verification"))
+          and nb["stop_reason"].startswith("complete"),
+          "\n".join(nb["what_was_searched"]))
+    with _environ(RESEARCH_CACHE_DIR=tempfile.mkdtemp(prefix="snowball-cache-")):
+        with _fetch(graph):
+            small = neighborhood("seed method", seeds=2, budget=3, top=10)
+            blocked = neighborhood("seed method for damage", seeds=5, block=["damage", "satellite"])
+            surveys = neighborhood("seed method", seeds=5, surveys_only=True, top=10)
+    check("39 the budget stops the walk and the stop reason says so",
+          small["counts"]["neighborhood"] <= 3 and small["stop_reason"].startswith("budget"),
+          f"got {small['counts']} {small['stop_reason']}")
+    check("40 a query in blocked vocabulary is refused before any request, naming the words",
+          "error" in blocked and "damage" in blocked["error"] and "satellite" not in blocked["error"], f"got {blocked}")
+    check("41 surveys-only outputs the surveys group alone and says how it seeded",
+          surveys["groups"]["foundational"] == [] and surveys["groups"]["current"] == []
+          and "surveys only" in surveys["what_was_searched"][0], f"got {surveys['what_was_searched'][0]}")
+
+    # 42-43. The rendered section has the six headings and every line; --write stays under research/.
+    text = render_section(nb, "Seeds and roots", "test field", "landscape", ["damage"])
+    check("42 the rendered section carries the six headings, the query with its blocked words, and every line",
+          all(f"## {h}" in text for h in ("Question", "Foundational", "Current", "Surveys", "What was searched", "What returned nothing"))
+          and "(blocked: damage)" in text and text.count("· verified") == 5
+          and "citations of Seed B Recent on openalex: 0 rows" in text,
+          text[:300])
+    with tempfile.TemporaryDirectory() as tmp:
+        with _environ(RESEARCH_PROJECT_DIR=tmp):
+            inside = write_section(os.path.join(tmp, "research", "landscape", "sections", "x.md"), text)
+            outside = write_section(os.path.join(tmp, "elsewhere.md"), text)
+    check("43 --write lands under research/ and refuses anywhere else",
+          inside is None and outside is not None, f"inside={inside} outside={outside}")
 
     PACE.update(saved_pace)
     print()

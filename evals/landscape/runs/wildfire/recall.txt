@@ -1,0 +1,58 @@
+run: evals/landscape/runs/wildfire
+found titles: 657
+
+## Papers — damage assessment from aerial and satellite imagery: 1/14
+  MISS   Gupta — xBD / xView2, a dataset for assessing building damage from satellite imagery — 2019
+  MISS   Weber & Kané — building disaster damage assessment, multi-temporal fusion (xView2 baseline) — 2020
+  MISS   Zheng — ChangeOS, object-based semantic change detection for building damage — 2021
+  MISS   Galanis — DamageMap, a post-wildfire damaged-buildings classifier — 2021?
+  MISS   Gupta & Shah — RescueNet, joint building segmentation and damage assessment — 2020? (name collides with Rahnemoonfar's UAV RescueNet; different work)
+  MISS   Xu — building damage detection in satellite imagery using CNNs (generalization across disasters) — 2019
+  MISS   Fujita — damage detection from aerial images via convolutional neural networks (washed-away buildings) — 2017
+  MISS   Cooner — detection of urban damage using remote sensing and machine learning, 2010 Haiti earthquake — 2016
+  MISS   Rudner — Multi3Net, rapid segmentation of flooded buildings by fusing multiresolution/multisensor/multitemporal imagery — 2019
+  MISS   Rahnemoonfar — FloodNet, UAV imagery for post-flood scene understanding — 2021
+  MISS   Rahnemoonfar — RescueNet, UAV post-Hurricane-Michael pixel-level damage — 2023?
+  MISS   Kalluri? — post-wildfire building damage from very-high-resolution imagery — 2021? [unsure]
+  MISS   Bai — Sentinel-1/2 building damage detection with deep learning — 2020? [unsure]
+
+## Papers — structure loss and the wildland-urban interface: 2/13
+  MISS   Cohen — preventing disaster: home ignitability in the wildland-urban interface — 2000
+  MISS   Radeloff — rapid growth of the US wildland-urban interface raised wildfire risk — 2018
+  MISS   Syphard — housing arrangement and location determine the likelihood of housing loss due to wildfire — 2012
+  MISS   Syphard & Keeley — factors associated with structure loss in the 2013–2018 California wildfires — 2019
+  MISS   Alexandre — factors related to building loss due to wildfires in the conterminous United States — 2016
+  MISS   Kramer — high wildfire damage in interface communities in California — 2019
+  MISS   Kramer — where wildfires destroy buildings in the US relative to the WUI — 2018?
+  MISS   Knapp — housing arrangement and vegetation factors in single-family home survival, 2018 Camp Fire — 2021
+  MISS   Moritz — learning to coexist with wildfire — 2014
+  MISS   Higuera — shifting social-ecological fire regimes explain increasing structure loss in the western US — 2023?
+  MISS   Mell — the wildland-urban interface fire problem, current approaches and research needs — 2010
+
+## Papers — wildfire detection, mapping and burned area: 21/26
+  MISS   Govil — preliminary results from a wildfire detection system using deep learning on remote camera images — 2020
+  MISS   Key & Benson — landscape assessment: NBR and the Composite Burn Index (FIREMON) — 2006
+  MISS   Roy — prototyping a global algorithm for systematic fire-affected area mapping (bidirectional reflectance) — 2005?
+  MISS   Shamsoshoara — aerial imagery pile-burn detection using deep learning (FLAME) — 2021
+  MISS   Yebra — a global review of remote sensing of live fuel moisture content — 2013
+
+## Papers — fire-spread prediction and modelling: 18/26
+  MISS   Mandel — coupled atmosphere-wildland fire modeling with WRF 3.3 and SFIRE 2011 — 2011
+  MISS   Coen — WRF-Fire, coupled weather-wildland fire modeling with WRF — 2013
+  MISS   Bakhshaii & Johnson — a review of a new generation of wildfire-atmosphere modeling — 2019
+  MISS   Hantson — the status and challenge of global fire modelling (FireMIP) — 2016
+  MISS   Burge — convolutional LSTM neural networks for modeling wildland fire dynamics — 2020?
+  MISS   Prapas — TeleViT, teleconnection-driven transformers for long-term wildfire forecasting — 2023
+  MISS   Ganapathi Subramanian & Crowley — using spatial reinforcement learning to build forest wildfire dynamics models from satellite images — 2018
+  MISS   Julian & Kochenderfer — distributed wildfire surveillance with autonomous aircraft using deep reinforcement learning — 2019
+
+## Papers — fire regimes, drivers and climate: 7/11
+  MISS   Westerling — warming and earlier spring increase western US forest wildfire activity — 2006
+  MISS   Bowman — vegetation fires in the Anthropocene — 2020
+  MISS   Keeley & Syphard — twenty-first century California, USA, wildfires: fuel-dominated vs wind-dominated fires — 2019
+  MISS   Hessburg — managing forests and fire in changing climates / wildfire paradox — 2015? [unsure]
+
+## Papers — smoke, emissions and health: 7/8
+  MISS   Aguilera — wildfire smoke impacts respiratory health more than fine particles from other sources — 2021
+
+recall over the headings scored: 56/98 = 0.57

@@ -1,9 +1,9 @@
 {
-  "description": "research-bearings guard: agents shipped by this plugin may only write under research/, and only searcher may WebSearch; no agent may WebFetch.",
+  "description": "research-bearings guard: agents shipped by this plugin may only write under research/, may only run the retrieval script, and only searcher may WebSearch; no agent may WebFetch.",
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Write|Edit|WebSearch|WebFetch",
+        "matcher": "Write|Edit|Bash|WebSearch|WebFetch",
         "hooks": [
           {
             "type": "command",

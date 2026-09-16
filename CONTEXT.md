@@ -41,3 +41,18 @@ to four resolvers and seven probes. `docs/APIS.md` is the reference.
 - **candidate**: What `verify` calls a prefix or substring title match. Reported with the id it nearly matched, and **never certified**: a candidate line stays unresolved until a human promotes it. Replaces the free-text "NOT the same paper" as the marker.
 - **CONNECTIONS.md**: `research/CONNECTIONS.md`, written by `/setup` from `status --md`. One dated line per source. Every searching skill reads it first and adapts.
 - **web rule**: `WebSearch` and `WebFetch` are allowed in exactly two places, the `searcher` agent's last resort and `/scout` reading a page an index pointed at, and the guard denies both to every other agent this plugin ships.
+
+## Gathering terms
+
+Added with chunk 5 (2026-09-15), the gathering cycle: `/surveys`, `/landscape`, and `/scout` rewired onto one agent.
+
+- **neighborhood**: The script verb, and what it returns: the seeds for one query plus one hop backward and one forward from each, deduplicated and ranked inside itself. The depth tool, recovered from 249188a and rebuilt on two indexes.
+- **seed**: One of the top 30 papers by relevance for a query, interleaved across Semantic Scholar and OpenAlex. Every seed is walked both ways before the next seed.
+- **centrality**: How many neighborhood papers cite a paper, counted over the edges the walk actually saw. The primary rank; `influentialCitationCount`, citations per year and presence in both indexes break ties, in that order.
+- **foundational** / **current** / **surveys**: The three groups every section carries. Older than five years; the last five years; title says survey, review or overview or the paper cites 100+ neighborhood papers.
+- **section**: One searcher's file: `## Question`, the three groups, `## What was searched`, `## What returned nothing`. Under `research/landscape/sections/` or `research/analogs/sections/`. The only thing the merger reads.
+- **searcher**: The one retrieval agent. One question, one field, one query, one section. Runs `neighborhood`; pastes lines; may WebSearch once, as a last resort, labelled. Replaces the deleted `paper-scout`.
+- **merger**: The contract-bound agent that lays sections side by side into `matrix.md` and `timeslice.md`. Copies lines, names the query behind every empty cell, marks disagreements as contradictions, cannot add a claim.
+- **cell probe**: One `search` per formulation × data regime pair, run by `/landscape` after the sections return and written as `sections/cells.md`, so the merger can name the query behind an empty cell without running one.
+- **blocked**: The vocabulary a searcher's query may not use. In `/scout` it is the home vocabulary; the script refuses the query, so the home field cannot leak in by accident.
+- **stop reason**: Why a walk ended: `complete`, `saturation` (a block of five seeds added under 5 percent), or `budget` (400 papers). Always recorded in `## What was searched`.

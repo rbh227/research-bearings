@@ -4,16 +4,15 @@ Every skill and agent from `research_plugin_build_plan.md`, joined to what justi
 
 **Two tests, not one.** A row earns its place if it implements an entry in `academic.md` **or** if it serves one of the four goals: parallel gathering, simple presentation, planning directions, simple to use. The sheet documents research methodology and says nothing about usability, so a row backed only by a goal is fully justified.
 
-Counts, 2026-09-14: **3 skills built** (`/setup`, `/frame`, `/scout`), 1 agent
-(`question-critic`), 4 scripts. Planned and unbuilt: 24 more skill rows, 5
-composites, 21 more agents.
+Counts, 2026-09-15: **5 skills built** (`/setup`, `/frame`, `/scout`,
+`/surveys`, `/landscape`), 4 agents (`question-critic`, `searcher`, `merger`,
+`survey-differ`), 5 scripts. Planned and unbuilt: 22 more skill rows, 5
+composites, 18 more agents.
 
 That planned number flatters itself and should be read with care. Much of Stage
-2 and 2b is librarian tooling layered on a landscape artifact that no longer
-exists, and two rows — `/landscape` and `/watch` — fan out `paper-scout`, which
-was deleted on 2026-09-14. The loop that actually matters is four skills:
-`/scout` finds a direction, `/read` reads what it turns up, `/rank` picks, and
-Stage 6 tries it. Three of those four are unbuilt.
+2b is librarian tooling. The loop that actually matters is four skills:
+`/scout` and `/landscape` find directions, `/read` reads what they turn up,
+`/rank` picks, and Stage 6 tries it. Two of those four are unbuilt.
 
 ---
 
@@ -34,14 +33,14 @@ Human gate: the question. Nothing downstream runs without `QUESTION.md`.
 |---|---|---|---|
 | `/scout` | — | `analogs/<slug>.md` | Swanson (ABC model), Uzzi (atypical combinations), narrow-exploration study (force seeds from adjacent fields). **Shipped in chunk 3** (`docs/design/chunk-03-analogs.md`). The breadth tool, and it absorbed what Stage 4 had called `/fingerprint`, `/analogs` and `/flip`: shape, fields, transfer, opportunity, verify, in one skill with no agents. |
 | `/snowball` | ~~`paper-scout`~~ | ~~`landscape/<slug>.md`~~ | Ré (snowball, asymptote 25–35, group by thesis), Wohlin (snowballing as sampling). Shipped in chunk 2, **deleted 2026-09-14** with its agent, its template and its nine-case eval tier. It was the depth tool — it walks the citation neighbourhood of a question — and the plugin turned out to want breadth. In git at 249188a, along with the hops, the budget ledger and the Bash fence that existed for its agent. |
-| `/surveys` | `survey-differ` | `landscape/surveys.md` | Petersen (mapping studies), vocabulary harvest. **Deferred 2026-09-14**: the landscape chain was chunk 3 until breadth took priority. |
-| `/landscape` | ~~`paper-scout` ×7~~, `merger` | `landscape/matrix.md`, `timeslice.md` | **Deferred 2026-09-14** with the rest of the landscape chain; it fanned out an agent that no longer exists. |
+| `/surveys` | `searcher` ×1, `survey-differ` | `landscape/surveys.md` | Petersen (mapping studies), vocabulary harvest. **Shipped in chunk 5** (`docs/design/chunk-05-gathering.md`). The searcher runs in survey mode; the differ reads abstracts from the records and says so. |
+| `/landscape` | `searcher` ×7, `merger` | `landscape/matrix.md`, `timeslice.md` | Ré, Wohlin, Kuhn (contradictions as seeds). **Shipped in chunk 5.** Seven questions, one gate, seven walks in parallel, a cell probe per axis pair, then the merger. |
 | `/datasets` | `dataset-scout` | `landscape/datasets.md` | Kapoor (leakage in standard splits) |
 | `/groups` | `author-tracker` | `landscape/groups.md` | goal: competitive landscape. Who is publishing, where they are heading. Hamming is a secondary source, not the reason. |
 | `/bits` | — | `BITS.md` | Ré (every cluster has a bit) |
 | `/watch` | — | matrix updates | **deferred to milestone 5.** No sheet source and no goal it uniquely serves, and the agent it named is gone. |
 
-~~`paper-scout` is the agent to get right first.~~ Deleted 2026-09-14 with `/snowball`. Its one durable lesson is in `/scout`: the only prose a retrieval step may author is why a paper is in the file, and every word of it has to be checkable against what the tool returned.
+~~`paper-scout` is the agent to get right first.~~ Deleted 2026-09-14 with `/snowball`; **replaced 2026-09-15 by `searcher`**, which authors no prose at all: it pastes the lines the script ranked, and the only thing it may add is a remembered paper that `verify` matched exactly. `/scout` now dispatches it too, one per analog field, with the home vocabulary blocked at the script.
 
 Built in chunk 2 (`docs/design/chunk-02-scout.md`), with two narrowings the spec argued for: cards carry no scout-written characterization of a paper, only metadata plus a citation-context sentence and one `Kept because` line; and absence is **mechanical only** — a scout states facts about its own search and never about the field. Interpreted absence becomes legitimate at the `merger`, which can see seven scouts' coverage at once.
 
@@ -172,9 +171,9 @@ Only two rows fail both tests: `/watch` (milestone 5 anyway) and `/handoff`.
 
 | Stage | Agents |
 |---|---|
-| Landscape and presentation | 5 (`survey-differ`, `merger`, `brief-writer`, `dataset-scout`, `author-tracker`) — `paper-scout` deleted with `/snowball` |
+| Landscape and presentation | 6 (`searcher`, `survey-differ`, `merger` built; `brief-writer`, `dataset-scout`, `author-tracker` planned) |
 | Reading | 6 (`predictor`, `reader`, `scorer`, `leakage-auditor`, `openreview-reader`, `critic`) |
 | Ideation | 2 (`persona-ideator`, `diversity-planner`) — was 7; `analog-scout`, `field-carder`, `transfer-checker`, `flip-generator` and `novelty-checker` collapsed into `/scout`, which has no agents |
 | Selection | 2 (`premortem-agent`, `tournament-judge`) |
 | Experiment | 7 (`baseline-reproducer`, `experiment-designer`, `ablation-planner`, `variance-checker`, `results-tabulator`, `results-critic`, `failure-mode-auditor`) |
-| **Total** | **22** |
+| **Total** | **23** (4 built) |

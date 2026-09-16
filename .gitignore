@@ -2,8 +2,8 @@
 evals/results/
 academic.md
 research_plugin_build_plan.md
-research/.papers/
+**/research/.papers/
 __pycache__/
 *.pyc
-research/.crawl/
+**/research/.crawl/
 .DS_Store
