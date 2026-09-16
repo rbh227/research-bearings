@@ -1,0 +1,219 @@
+DA-SegFormer: Domain-Adaptive Transformers for Building Damage
+Assessment from Very High Resolution Satellite Imagery
+
+Jane Q. Researcher        Alex B. Coauthor        Sam C. Lastauthor
+Department of Computer Science, Example University
+{jqr, abc, scl}@example.edu
+
+Abstract
+
+Rapid building damage assessment after a natural disaster depends on
+pairs of pre- and post-event satellite images that are rarely drawn from
+the same sensor, season, or geography as the data a model was trained
+on. We present DA-SegFormer, a domain-adaptive segmentation transformer
+that aligns pre- and post-event features through a shared attention
+bottleneck and an adversarial domain discriminator over event types. On
+the xBD benchmark DA-SegFormer reaches 0.79 harmonic mean F1 over the
+four damage classes, and on a held-out wildfire subset never seen in
+training it reaches 0.61, against 0.44 for the strongest published
+baseline. We show that most of the gain comes from the alignment term
+rather than the backbone, and we release code and trained weights.
+
+1. Introduction
+
+Building damage assessment is the task of labelling every building
+footprint in a post-event image with a damage grade, typically on the
+four-level scale introduced with the xBD dataset: no damage, minor
+damage, major damage, and destroyed. The task matters because the first
+72 hours after a disaster are when allocation decisions are made, and
+those decisions are currently made from windshield surveys and helicopter
+footage.
+
+The dominant formulation treats this as semantic segmentation over a
+stacked pre- and post-event image pair. A U-Net or a ResNet-FPN encoder
+consumes the six-channel stack and predicts a per-pixel damage grade,
+which is then pooled over the footprint polygon. This formulation is
+what the xView2 challenge established, and nearly every subsequent
+published system inherits it.
+
+We argue that the formulation hides the problem that actually limits
+deployment. Models trained on xBD generalize poorly to events whose
+disaster type is not represented in training, and wildfire is the
+clearest case: xBD contains six wildfire events out of nineteen, all in
+California, all from one sensor family. A model that has memorized what
+California chaparral looks like after a burn does not transfer to
+Australian eucalyptus.
+
+This paper makes three contributions. First, we characterize the
+transfer gap quantitatively across disaster types, showing a mean drop
+of 0.31 F1 when the event type is held out. Second, we propose
+DA-SegFormer, which adds a domain discriminator over event type and a
+shared attention bottleneck between the pre- and post-event streams.
+Third, we show through ablation that the alignment term, not the
+transformer backbone, is responsible for most of the improvement, which
+contradicts the prevailing assumption that architecture is the lever.
+
+2. Related Work
+
+Damage assessment from remote sensing has a long history predating deep
+learning, beginning with change-detection methods over multispectral
+imagery. The xBD dataset and the accompanying xView2 challenge moved the
+field onto a common benchmark and a common formulation.
+
+Domain adaptation in remote sensing has largely followed the general
+computer vision literature, with adversarial feature alignment and
+self-training as the two dominant families.
+
+3. Method
+
+DA-SegFormer builds on the SegFormer backbone, replacing the decoder
+with a two-stream design. The pre-event and post-event streams share
+weights in the first three stages and diverge thereafter.
+
+The domain discriminator is a three-layer MLP over the pooled bottleneck
+representation, trained with a gradient reversal layer at coefficient
+0.1, warmed up linearly over the first ten epochs.
+
+The discriminator is trained jointly with the segmentation head using a
+weighted sum of cross-entropy over damage grades and the reversed domain
+loss. We weight the four damage classes inversely to their frequency in
+the training split, because destroyed buildings are roughly one twentieth
+as common as undamaged ones and an unweighted loss collapses to the
+majority class within two epochs.
+
+Training uses AdamW with a cosine schedule, a base learning rate of 6e-5,
+a batch size of 16 image tiles of 512 by 512 pixels, and 120 epochs on
+eight A100 GPUs. Augmentation is limited to flips, ninety-degree
+rotations, and per-channel brightness jitter; we deliberately exclude
+elastic deformation and cutout, which in preliminary runs degraded the
+minor-damage class.
+
+3.1 Shared attention bottleneck
+
+The pre-event and post-event streams are encoded independently through
+the first three SegFormer stages. At stage four we concatenate the two
+token sequences and apply four transformer blocks with full attention
+across both, so that a token in the post-event image can attend to the
+corresponding region before the event. This is the mechanism by which
+the model sees change rather than appearance.
+
+We tried three alternatives before settling on this one: early fusion by
+channel stacking, which is what the U-Net baselines do; late fusion by
+feature differencing; and cross-attention with the pre-event stream as
+keys and values only. Full attention across both outperformed all three
+by between 0.02 and 0.05 harmonic mean F1.
+
+3.2 Domain discriminator
+
+The domain label is the disaster type: earthquake, flood, hurricane,
+tsunami, volcano, or wildfire. The discriminator predicts this label from
+the pooled bottleneck, and the gradient reversal layer means the encoder
+is trained to make the label unpredictable.
+
+We use disaster type rather than geography as the domain label because
+type is what the deployment gap is organized around: a model is
+typically asked about a disaster of a kind it has seen, in a place it has
+not, or the reverse. Geography as the label gave a smaller and less
+consistent gain in early runs.
+
+4. Experiments
+
+4.1 Data and splits
+
+xBD contains 22,068 images across nineteen events, with 850,736 building
+polygons annotated on the four-level damage scale. We use the standard
+train, hold, and test split released with the dataset for the in-domain
+numbers.
+
+For the transfer numbers we construct leave-one-type-out splits: all
+events of one disaster type are removed from training and used as the
+test set. This gives six transfer settings. We report the wildfire
+setting in the main text and the remaining five in the appendix.
+
+We note one property of the standard split that bears on every number
+published on this benchmark: the split is by image tile, not by event,
+and adjacent tiles from the same event appear in both train and test.
+Tiles overlap by 128 pixels in the released tiling. A model can therefore
+see part of a test building during training.
+
+4.2 Baselines
+
+We compare against the xView2 challenge winner, a ResNet-34 U-Net
+ensemble; against a single-model U-Net reimplementation; against
+SegFormer-B2 with channel stacking; and against a recent
+change-detection transformer adapted to the four-class output.
+
+We reproduced every baseline ourselves rather than quoting published
+numbers, because the published numbers use varying polygon-pooling rules
+and are not comparable as printed. Our reproductions land within 0.02 of
+the published figures in four cases out of five; the fifth is 0.06 below
+and we say so in the appendix rather than excluding it.
+
+4.3 Metrics
+
+We report the harmonic mean of per-class F1 over the four damage grades,
+which is the xView2 challenge metric, and we additionally report per-class
+F1 because the harmonic mean is dominated by the rarest class.
+
+All numbers are the mean of five seeds with the standard deviation in
+parentheses. We report seed variance because in our own early runs the
+difference between two seeds of the same configuration exceeded the
+difference between two configurations, and single-seed comparisons on
+this benchmark are therefore not informative.
+
+5. Results
+
+5.1 In-domain
+
+On the standard split DA-SegFormer reaches 0.79 (0.01) harmonic mean F1
+against 0.77 (0.01) for the strongest baseline. This difference is small
+and we do not claim it as the contribution.
+
+5.2 Transfer
+
+On the held-out wildfire split DA-SegFormer reaches 0.61 (0.03) against
+0.44 (0.05) for the strongest baseline. The gap is largest on the
+major-damage class, which is where the visual signature differs most
+between fire and the other disaster types.
+
+5.3 Ablation
+
+Removing the domain discriminator and keeping the backbone drops the
+transfer number from 0.61 to 0.48. Replacing the SegFormer backbone with
+a ResNet-FPN and keeping the discriminator gives 0.58. The alignment term
+is therefore responsible for most of the gain, and the backbone for
+little of it.
+
+This is the result we consider the paper's contribution, and it
+contradicts the prevailing assumption in this literature that the
+architecture is the lever worth pulling.
+
+6. Discussion
+
+The obvious limitation is that our transfer evaluation still trains and
+tests on xBD, which is one sensor family, one annotation protocol, and
+one vendor's imagery. A genuinely out-of-distribution test would use a
+different sensor, and we do not have labelled data for one.
+
+The second limitation is the tile-overlap property of the standard split
+described in section 4.1. It inflates every in-domain number in this
+literature including ours. Our transfer numbers are not affected, because
+the held-out type shares no event with training.
+
+7. Conclusion
+
+We characterized the disaster-type transfer gap on xBD, proposed a
+domain-adaptive segmentation transformer that narrows it, and showed by
+ablation that the alignment term rather than the backbone is what
+narrows it.
+
+References
+
+[1] R. Gupta et al. Creating xBD: A Dataset for Assessing Building Damage
+    from Satellite Imagery. CVPR Workshops, 2019.
+[2] E. Xie et al. SegFormer: Simple and Efficient Design for Semantic
+    Segmentation with Transformers. NeurIPS, 2021.
+[3] Y. Ganin and V. Lempitsky. Unsupervised Domain Adaptation by
+    Backpropagation. ICML, 2015.
+[4] S. Kapoor and A. Narayanan. Leakage and the Reproducibility Crisis in
+    Machine-Learning-Based Science. Patterns, 2023.
