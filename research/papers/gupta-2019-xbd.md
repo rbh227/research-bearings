@@ -183,7 +183,63 @@ number pulling down the average.
 
 ## Leakage
 
-_not run_
+- No held-out test set: not found — checked §6.1 Dataset Split, Table 2. The
+  paper describes distinct train/test/holdout splits, with test used for the
+  "open leaderboard phase" and holdout "purposefully not released during the
+  duration of the challenge" as a private evaluation set; nothing indicates
+  test or holdout data entering training.
+- Preprocessing on the union: PRESENT — "we sampled many random image tiles
+  from the post-disaster CatID and calculated the average pixelwise shift by
+  measuring the number of pixels between the edge of the polygon and the edge
+  of the corresponding building side... The corresponding UTM (Universal
+  Transverse Mercator) shift was then applied to all post-disaster images
+  within that disaster event uniformly" (§5.3.1 Image Shifting). The
+  registration correction is fit from a sample of a disaster event's own
+  imagery and then broadcast to every image of that event, without regard to
+  which split (train, test, or holdout) each image later falls into.
+- Duplicates across splits: not found — checked §6.1 Dataset Split, Table 2.
+  The per-split image counts (18,336 + 1,866 + 1,866) and polygon counts
+  (632,228 + 109,724 + 108,784) sum exactly to the paper's stated totals
+  ("22,068 images," "850,736 building annotations"), consistent with a strict
+  partition rather than shared or repeated examples; the paper does not
+  separately address near-duplicate imagery from overlapping AOI buffers.
+- Temporal leakage: not found — checked §3.1-3.5 Design Requirements, §6.1
+  Dataset Split. The task is per-building classification from a paired
+  pre/post image at the time of a given disaster, not a forecast forward in
+  time, and the split is not described as time-ordered.
+- Spatial leakage: could not determine — the paper states that "each AOI
+  purposefully included small amounts of buffer area (including the
+  surrounding regions) to ensure the availability of negative imagery"
+  (§5.2.1 Triage), but never gives a tile size, overlap policy, or whether
+  those buffer regions produce spatially adjacent or overlapping images that
+  land in different splits; checked §5.2.1 Triage, §5.3 Design Trade-Offs,
+  §6.1 Dataset Split.
+- Group leakage: could not determine — checked §6.1 Dataset Split, Table 2,
+  §6.2 Dataset Statistics, §3.3 Diversity of Disasters. Table 2 gives only
+  pooled image/polygon counts per split; the paper never states whether the
+  19 disaster events are held out whole to one split or pooled and mixed
+  across train/test/holdout, so whether the same disaster event appears on
+  both sides of the split cannot be settled from the text.
+- Illegitimate features: not found — checked §5.2.2 Imagery Matching and
+  Polygon Annotation, §5.2.4 Post-Imagery Polygons Damage Classification, §7
+  Baseline Model. The pre-disaster imagery used to source building-footprint
+  polygons is itself part of the task's defined input (paired pre/post
+  imagery), so it is available at inference time under the task as
+  specified; no other feature is described as unavailable at prediction time
+  or as a label proxy.
+- Test set not representative: could not determine — checked §3.3 Diversity
+  of Disasters, §6.1 Dataset Split, Table 1, Table 2. The stated goal is a
+  model "widely applicable across a large number of disasters" so that
+  agencies can use "one model with a known deployment cycle" (§3.3), which
+  implies deployment on future, unseen disaster events; but since it cannot
+  be determined whether test/holdout are drawn from disaster events distinct
+  from training (see Group leakage above), whether the test distribution
+  matches that deployment target is also undetermined.
+
+Checked 2026-09-16 against the card's Data and split section and the fetched
+full text (arxiv-1911.09296/full.txt). Dataset row: the datasets ledger
+(research/landscape/datasets.md) does not exist yet, so no ledger cross-check
+was possible. Counts: 1 PRESENT, 4 not found, 3 could not determine.
 
 ## References
 
