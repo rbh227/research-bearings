@@ -128,7 +128,10 @@ Live: §4 — dry runs by the implementing agent, not evals.
 ## 4. What the dry runs found, 2026-09-16
 
 Three papers carded from the damage matrix, all in
-`per-building damage classification × paired pre/post satellite`.
+`per-building damage classification × paired pre/post satellite`. The output
+is kept at `evals/read/runs/damage/`, beside the landscape runs — it is run
+evidence, and a plugin whose `research/` folder ships full of another
+project's cards confuses its first user. `evals/read/README.md` reads it back.
 
 **The protocol earned its cost on the first paper.** Reading xBD
 (arXiv 1911.09296), the predictor guessed an overall damage-classification F1
@@ -199,6 +202,16 @@ the cards say which of the three happened and when.
   in a row" and the runaway-agreement flag both need the critic to concede,
   and across four findings it conceded nothing. Both are in `agents/critic.md`
   with their conditions; neither is exercised live.
+- The reading side had five defects found by an adversarial review after the
+  chunk was first called done, all reproduced and all fixed with regression
+  cases: a name-search fallback that attached a namesake's publications to a
+  verified identity; identity resolution that stopped at the first index and
+  so missed a PDF the other one held; an OpenReview search failure recorded as
+  a permanent absence; an author response body dropped because it lives under
+  `comment`; and a PDF download that went round the shared transport and lost
+  the pacing `docs/APIS.md` promises. A sixth surfaced while fixing the
+  second: `oa_work` answers `paper`, singular, and both call sites asked for
+  `papers`, so the OpenAlex branch of `resolve` had never resolved anything.
 - `/bits` has been verified to reuse recorded groups and never dissolve one,
   including across a full rewrite of its bits. It has **not** been shown
   assigning a genuinely new card or starting a group marked new: there are

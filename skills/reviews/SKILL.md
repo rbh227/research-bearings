@@ -21,7 +21,13 @@ on one. With no cards, say so and stop.
 ## The loop
 
 **1. Pick the papers.** With arguments, the slugs given. With none, every card
-under `research/papers/` whose `## Reviews` section says `_not run_`.
+whose `## Reviews` section says `_not run_` **or records a state that a retry
+could change**: `search failed`, `login required`, `forum unreadable`. A card
+saying `No OpenReview record` is left alone — that is an answer, not a gap.
+
+This matters more than it looks. A card's Reviews section is how the next run
+decides what to do, so a transient failure written as a permanent answer
+removes the paper from every later sweep.
 
 **2. Ask OpenReview, per paper.** One call each, with the **exact title** from
 the card:
@@ -34,18 +40,24 @@ OpenReview search takes titles, not arXiv ids. An inexact title returns
 `no record` with what it saw instead, and that is correct: a near title is a
 different submission, and its reviews on this card would be worse than none.
 
-**3. Know what you can see.** Measured 2026-09-16: OpenReview answers
+**3. A failed search is not an absence.** The verb returns `search failed`
+with the error when the search itself did not answer, and `no record` only
+when a search succeeded and matched nothing. Measured 2026-09-16: before that
+split, a 503 became "No OpenReview record" on a card and the paper was never
+looked at again.
+
+**4. Know what you can see.** Measured 2026-09-16: OpenReview answers
 `/notes/search` anonymously but gates the forum behind a bot challenge. So
 without credentials you get the submission, its venue and its url, and not the
 reviews. The verb returns `login required` and names the two environment
 variables. **Report that and carry on** — it is a state, like every missing
 key in this plugin. Do not stop, do not ask the user to go and get an account.
 
-**4. Dispatch the reader once**, with every card path and its verb output:
+**5. Dispatch the reader once**, with every card path and its verb output:
 `research-bearings:openreview-reader`. One agent for the batch, not one per
 paper — it needs to see them together to find what recurs.
 
-**5. Report**: cards edited, records found, gated, and no record. Name the
+**6. Report**: cards edited, records found, gated, and no record. Name the
 login state once.
 
 ## Rules
@@ -67,6 +79,7 @@ paper's reviewers. A pattern needs a third point.
 | The shortcut | Why you don't |
 |---|---|
 | "No credentials, so this skill can't run." | It runs. Venue, decision and url come back anonymously, and the card records what could not be read. |
+| "The search failed; I'll mark it no record and move on." | Those are opposite facts, and `no record` takes the paper out of every later sweep. `search failed`, and it stays retryable. |
 | "The title on the card is close enough to the search hit." | Then it is `no record`. Reviews on the wrong card are worse than no reviews. |
 | "I'll dispatch one reader per paper, it parallelizes." | The recurring objection is the deliverable and it is only visible across papers. One agent, all the cards. |
 | "This paper was rejected, so it's weak." | Record the decision. Venues reject good papers constantly and the card is not a verdict. |

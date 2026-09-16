@@ -41,11 +41,19 @@ question. Two reviewers raising the same thing is worth saying so.
 |---|---|
 | `found` with reviews | The block above, filled. |
 | `no record` | One line: `- No OpenReview record. Searched "<query>" on <date>.` Nothing else. |
+| `search failed` | `- Reviews not read: the OpenReview search did not answer (<error>). Probed <date>. Retry.` **Never write "no record" for this**: the search failing and the paper being absent are the same empty list and opposite facts. |
 | `login required` | The venue, decision and url if they came back, then: `- Reviews not read: the forum needs credentials (OPENREVIEW_USERNAME, OPENREVIEW_PASSWORD). Probed <date>.` |
 | `forum unreadable` | Same shape, with the error the verb named. |
 
 A missing record is a fact about OpenReview, not about the paper: most venues
 are not on it at all. Never write that a paper was unreviewed.
+
+**Three of those five states are retryable** — `search failed`, `login
+required`, `forum unreadable` — and each line you write for them must say so,
+because a later run picks its papers by reading these sections. Measured
+2026-09-16: a 503 was recorded as "No OpenReview record", and because that is
+not `_not run_`, every later sweep skipped the paper. One outage hid its
+reviews for good.
 
 ## The field file's four headings
 
@@ -78,6 +86,7 @@ reviews file path if you wrote one.
 |---|---|
 | "The review is long; I'll summarize the weakness in my own words." | Quote the sharpest clause. A paraphrase of "within plausible seed variance" becomes "some concerns about variance", which is not the same finding. |
 | "No record found, so this paper probably wasn't peer reviewed." | Most venues are not on OpenReview. You learned about OpenReview, not the paper. |
+| "The search errored; close enough to no record." | Opposite facts. One means OpenReview has nothing, the other means nobody asked it successfully. Write `search failed` and leave it retryable. |
 | "The authors conceded, so the objection is resolved." | Record both. What a field concedes under pressure is the signal; whether it was enough is not yours to say. |
 | "The forum is gated; I'll leave the section as `_not run_`." | Write the state. `_not run_` means nobody looked, and somebody did. |
 

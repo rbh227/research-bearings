@@ -33,7 +33,9 @@ dated file per critiqued file per run. The critiqued file is never edited.
 2026-09-16. `agents/critic.md`, `skills/critique/SKILL.md`,
 `templates/research/critique.md`.
 
-Live on `research/BITS.md`, written earlier the same day in the main thread.
+Live on the bits file written earlier the same day in the main thread. The
+run output was moved to `evals/read/runs/damage/` after review; the critique
+is `evals/read/runs/damage/critiques/BITS-2026-09-16.md`.
 Four findings, each anchored to a quoted passage, ordered worst first. All
 four were correct.
 
@@ -46,7 +48,7 @@ two-part assumption whose second half rested on one card while the first
 rested on three, and an ellipsis that lost which paper concatenates and which
 subtracts.
 
-`BITS.md` was not touched by the critic or the skill; it was revised
+The bits file was not touched by the critic or the skill; it was revised
 afterwards, against the findings, as a separate step.
 
 **The ladder ran twice and both rebuttals scored 1.** Both were agreements

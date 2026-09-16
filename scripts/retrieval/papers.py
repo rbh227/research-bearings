@@ -46,6 +46,7 @@ from snowball import (  # noqa: E402
     ARXIV_ID,
     BACKOFF_BASE,
     RETRYABLE,
+    PACE,
     S2_FIELDS,
     TIMEOUT,
     TTL,
@@ -56,13 +57,13 @@ from snowball import (  # noqa: E402
     fetch as http_get,
     fetch_json,
     finish,
-    http_fetch,
     merge_records,
     norm_arxiv,
     norm_doi,
     normalised_title,
     oa_search,
     oa_work,
+    pace,
     s2_get,
     s2_search,
     title_match,
@@ -125,6 +126,34 @@ FALLBACK_CHARS = 9000  # a page of a two-column paper, twice, when there are no 
 
 PDF_HINT = ("install poppler for pdftotext (brew install poppler / apt install poppler-utils), "
             "or pip install pypdf")
+
+# A PDF download is a request to the same host the API calls go to, and the
+# rate limits are per client, not per endpoint. `docs/APIS.md` promises arXiv
+# one request every 3 seconds "enforced across processes"; going round the
+# shared transport for bytes lost that promise until this table put it back.
+# The gap is looked up by host so the PDF share the resolvers' timestamp files.
+PDF_HOST_PACE = (
+    ("arxiv.org", "arxiv"),
+    ("export.arxiv.org", "arxiv"),
+    ("openalex.org", "openalex"),
+    ("api.crossref.org", "crossref"),
+    ("semanticscholar.org", "s2"),
+)
+
+# GitHub search is 10 requests a minute unauthenticated and 30 with a token,
+# so the gap depends on the key and cannot live in the shared PACE table,
+# which `fetch` reads without knowing about credentials.
+GITHUB_GAP_KEYED = 2.0
+GITHUB_GAP_ANON = 6.0
+
+
+def pace_for_url(url: str) -> None:
+    """Space a raw download the way the shared transport spaces an API call."""
+    host = urllib.parse.urlparse(url).netloc.lower()
+    for needle, resolver in PDF_HOST_PACE:
+        if host == needle or host.endswith("." + needle):
+            pace(resolver, PACE.get(resolver, 0.0))
+            return
 
 
 # --------------------------------------------------------------------------
@@ -209,8 +238,11 @@ def resolve(value: str) -> dict[str, Any]:
     if kind in ("doi", "openalex"):
         got = oa_work(ident)
         checked.append("openalex")
-        if isinstance(got, dict) and "error" not in got and got.get("papers"):
-            return {"record": stamp(got["papers"][0], kind, ident),
+        # `oa_work` answers {"paper": <record>}, singular — not {"papers": [...]}
+        # like the search verbs. Asking for the plural here silently resolved
+        # nothing for every DOI Semantic Scholar could not answer.
+        if isinstance(got, dict) and "error" not in got and got.get("paper"):
+            return {"record": stamp(got["paper"], kind, ident),
                     "checked": checked, "errors": errors, "matched": kind}
         if isinstance(got, dict) and "error" in got:
             errors["openalex"] = got["error"]
@@ -248,10 +280,18 @@ def resolve(value: str) -> dict[str, Any]:
 
 
 def pdf_locations(record: dict[str, Any]) -> list[dict[str, str]]:
-    """Every open-access location the indexes gave us, in the order worth
-    trying: what S2 and OpenAlex already handed back, then arXiv's own PDF,
-    then Unpaywall if an email is set. Unpaywall is last because it is a
-    second network call for a location the first two usually already have."""
+    """Every open-access location, from every index that might hold one.
+
+    Resolving an identity and finding a PDF are two different jobs, and this
+    is the second. `resolve` stops at the first index that answers, which is
+    right for identity and wrong here: measured 2026-09-16, a DOI that
+    Semantic Scholar resolved without an `openAccessPdf` reported `no text`
+    while OpenAlex held a perfectly good PDF that was never asked for, and
+    `/read` downgraded a readable paper to an abstract skim.
+
+    Order: what the resolving index already handed back, then arXiv's own PDF,
+    then the other index, then Unpaywall. The last two cost a network call
+    each and are only made when the cheap ones came up empty."""
     out: list[dict[str, str]] = []
     seen: set[str] = set()
 
@@ -265,7 +305,14 @@ def pdf_locations(record: dict[str, Any]) -> list[dict[str, str]]:
     arxiv = ext.get("ArXiv")
     if arxiv:
         add(f"https://arxiv.org/pdf/{arxiv}", "arxiv")
+
     doi = norm_doi(ext.get("DOI"))
+    # The index that did not resolve this record may still know a location.
+    if not out and (doi or ext.get("OpenAlex")) and "openalex" not in (record.get("sources") or []):
+        other = oa_work(ext.get("OpenAlex") or doi)
+        if isinstance(other, dict) and "error" not in other and other.get("paper"):
+            add((other["paper"] or {}).get("pdfUrl"), "openalex")
+
     email = _env("UNPAYWALL_EMAIL")
     if doi and email:
         got = fetch_json("unpaywall", "GET", f"{UNPAYWALL_BASE}/{urllib.parse.quote(doi)}",
@@ -410,6 +457,7 @@ def _read_body(url: str) -> tuple[int, bytes, str | None]:
     request = urllib.request.Request(
         url, method="GET",
         headers={"User-Agent": user_agent(), "Accept": "application/pdf"})
+    pace_for_url(url)
     got = bytearray()
     try:
         with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
@@ -438,10 +486,13 @@ def _read_body(url: str) -> tuple[int, bytes, str | None]:
 
 
 def download(url: str, attempts: int = 2) -> tuple[bytes, str | None]:
-    """A PDF is bytes, not JSON, so this goes round `fetch_json` to the one
-    attempt underneath and keeps the retry shape by hand. Measured 2026-09-16:
-    an arXiv PDF that curl pulls in two seconds timed out once at sixty, so a
-    single slow moment must not cost us the only location we have."""
+    """Retry `_read_body`, which reads the bytes and paces the host.
+
+    A PDF is bytes, not JSON, so this cannot use the shared `fetch` — that one
+    caches the body as text and discards a partial read, both wrong here. It
+    keeps the shared retry shape by hand instead: the same retryable statuses
+    and the same backoff. A body that came back 200 and is not a PDF is not
+    retried, because a login page will not improve on a second look."""
     problem = ""
     for attempt in range(max(attempts, 1)):
         status, raw, truncated = _read_body(url)
@@ -495,7 +546,8 @@ def fetch_paper(value: str, refresh: bool = False) -> dict[str, Any]:
     locations = pdf_locations(record)
     if not locations:
         return {"asked": value, "title": record.get("title"), "state": "no text",
-                "checked": ["index pdf", "arxiv", "unpaywall" if _env("UNPAYWALL_EMAIL") else "unpaywall (no email)"],
+                "checked": ["index pdf", "arxiv", "openalex",
+                            "unpaywall" if _env("UNPAYWALL_EMAIL") else "unpaywall (no email)"],
                 "paths": None, "date": today()}
 
     tried: list[dict[str, str]] = []
@@ -574,12 +626,20 @@ def openreview_token() -> tuple[str, str]:
     return "", "login failed"
 
 
-def openreview_search(query: str, limit: int = 10) -> list[dict[str, Any]]:
+def openreview_search(query: str, limit: int = 10) -> tuple[list[dict[str, Any]], str | None]:
+    """(notes, error). The error is returned rather than swallowed, because a
+    search that failed and a search that found nothing are the same empty list
+    and opposite facts. Measured 2026-09-16: a 503 became `no record`, the
+    reader wrote "No OpenReview record" onto the card, and every later sweep
+    skipped that paper because its section no longer said `_not run_`. One
+    outage hid a paper's reviews permanently."""
     got = fetch_json("openreview", "GET", f"{OPENREVIEW_BASE}/notes/search",
                      params={"term": query, "limit": limit})
-    if not isinstance(got, dict) or "error" in got:
-        return []
-    return got.get("notes") or []
+    if not isinstance(got, dict):
+        return [], "openreview returned a non-object response"
+    if "error" in got:
+        return [], str(got["error"])
+    return got.get("notes") or [], None
 
 
 def _value(content: dict[str, Any], key: str) -> Any:
@@ -594,9 +654,13 @@ REVIEW_RATING_KEYS = ("rating", "recommendation", "confidence", "soundness",
                       "presentation", "contribution", "correctness",
                       "technical_novelty_and_significance",
                       "empirical_novelty_and_significance")
+# `comment` is where an author response's body lives, and it was missing here
+# until 2026-09-16: a rebuttal that conceded a point was counted as a response
+# and returned with empty text, which is the one thing /reviews exists to read.
 REVIEW_TEXT_KEYS = ("review", "summary", "strengths", "weaknesses",
                     "summary_of_the_review", "strength_and_weaknesses",
-                    "questions", "limitations", "main_review")
+                    "questions", "limitations", "main_review", "comment",
+                    "rebuttal", "response")
 
 
 def _is_review(invitations: list[str]) -> bool:
@@ -613,7 +677,12 @@ def reviews(paper: str, limit: int = 10) -> dict[str, Any]:
     if not asked:
         return err("reviews needs a title or an arXiv id")
 
-    notes = openreview_search(asked, limit)
+    notes, search_error = openreview_search(asked, limit)
+    if search_error:
+        return {"asked": asked, "state": "search failed", "query": asked,
+                "error": search_error, "date": today(),
+                "note": "the search did not answer, so nothing is known about this paper. "
+                        "Retry; do not record it as having no OpenReview record."}
     best = None
     for note in notes:
         title = _value(note.get("content") or {}, "title") or ""
@@ -795,7 +864,7 @@ def authors(name: str, since: int | None = None, limit: int = 50,
     checked: list[str] = []
     errors: dict[str, str] = {}
     affiliations: list[str] = []
-    resolved_by = None
+    resolved_by: str | None = None
 
     ident = asked if asked.isdigit() else None
     if ident is None and paper:
@@ -817,6 +886,7 @@ def authors(name: str, since: int | None = None, limit: int = 50,
 
     papers: list[dict[str, Any]] = []
     complete = True
+    s2_answered = False
     if ident:
         # The author-papers endpoint pages at 100 and does not promise an
         # ordering. Measured 2026-09-16: taking one page and filtering by year
@@ -832,6 +902,7 @@ def authors(name: str, since: int | None = None, limit: int = 50,
                     errors["s2"] = got["error"]
                 complete = False
                 break
+            s2_answered = True
             rows = got.get("data") or []
             for row in rows:
                 if (row.get("year") or 0) >= floor:
@@ -848,12 +919,25 @@ def authors(name: str, since: int | None = None, limit: int = 50,
         else:
             complete = False  # the cap stopped us, not the record
 
-    if not papers:
+    # Fall back ONLY when the first index never answered. An index that
+    # answered and returned nothing has told us something true — this person
+    # has published nothing since the floor — and replacing that with a name
+    # search attaches a stranger's publications to a verified identity.
+    # Measured 2026-09-16: with the paper-resolved author returning an empty
+    # recent history, this path returned a namesake's paper under the original
+    # authorId, with `resolved_by: paper`, `complete: true` and no error.
+    ambiguous = False
+    if not papers and not s2_answered:
         got = fetch_json("openalex", "GET", f"{OA_AUTHORS}",
                          params={"search": asked, "per-page": 1})
         checked.append("openalex")
         if isinstance(got, dict) and "error" not in got and got.get("results"):
             author = got["results"][0]
+            # Resolved by name, not through the paper. Say so, loudly: the
+            # name may belong to several people and nothing here can tell.
+            ident = (author.get("id") or "").rsplit("/", 1)[-1] or ident
+            resolved_by = "openalex name search"
+            ambiguous = True
             affiliations = affiliations or [
                 (author.get("last_known_institution") or {}).get("display_name")
             ] if author.get("last_known_institution") else affiliations
@@ -885,14 +969,16 @@ def authors(name: str, since: int | None = None, limit: int = 50,
     papers.sort(key=lambda p: (p.get("year") or 0), reverse=True)
     return {
         "asked": asked, "authorId": ident, "since": floor, "date": today(),
-        "resolved_by": resolved_by,
+        "resolved_by": resolved_by, "ambiguous": ambiguous,
         "affiliations": [a for a in affiliations if a],
         "papers": papers[:limit], "paper_count": len(papers),
         "frequent_coauthors": [{"name": n, "papers": c} for n, c in frequent],
         "checked": checked, "errors": errors, "complete": complete,
         "state": "found" if papers else "nothing since the floor",
-        "note": None if complete else
-                f"stopped at {AUTHOR_PAGES * 100} papers; this author may have more since {floor}",
+        "note": ("resolved by name, not through a paper: this list may belong to "
+                 "someone else of the same name, and nothing here can tell" if ambiguous else
+                 None if complete else
+                 f"stopped at {AUTHOR_PAGES * 100} papers; this author may have more since {floor}"),
     }
 
 
@@ -1150,6 +1236,12 @@ def selftest() -> int:
               out["reviews"][0]["ratings"].get("rating") == 6
               and "omits the strongest prior adapter" in json.dumps(out["reviews"][0]["text"]),
               f"got {json.dumps(out['reviews'][0])[:200]}")
+        # 10c. The regression. An author response's body lives in `comment`,
+        # and the fixture now carries nothing else. Counting the response while
+        # dropping its text removes the concession /reviews exists to read.
+        check("10c an author response whose only body field is `comment` keeps its text",
+              out["responses"][0]["text"].get("comment", "").startswith("We concede"),
+              f"got {json.dumps(out['responses'][0])[:200]}")
         # An inexact title is not this paper. OpenReview search is fuzzy; the
         # exact-match rule is what stops a neighbouring submission's reviews
         # from landing on the wrong card.
@@ -1208,6 +1300,7 @@ def selftest() -> int:
     # --- authors -----------------------------------------------------------
 
     saved_s2_get = globals()["s2_get"]
+    saved_pace = globals()["pace"]
 
     def s2_author_stub(path, params=None, **kw):
         if "/author/search" in path:
@@ -1301,6 +1394,96 @@ def selftest() -> int:
     finally:
         globals()["s2_get"] = saved_s2_get
         globals()["fetch_json"] = saved_fetch_json
+
+    print()
+    # --- regressions, all four reproduced from the 2026-09-16 adversarial
+    # --- review, plus the pacing gap and the plural that hid behind it.
+
+    # 17. A failed search is not an absence. Before this, a 503 came back as
+    # `no record`, the reader wrote "No OpenReview record" onto the card, and
+    # every later sweep skipped that paper because its section no longer said
+    # `_not run_`. One outage hid a paper's reviews for good.
+    globals()["fetch_json"] = lambda *a, **k: err("openreview request failed: 503", 5, 503)
+    try:
+        out = reviews("Any Paper At All")
+        check("17  an OpenReview search that failed is `search failed`, not `no record`",
+              out["state"] == "search failed" and out.get("error") and "Retry" in (out.get("note") or ""),
+              f"got {json.dumps(out)[:200]}")
+    finally:
+        globals()["fetch_json"] = saved_fetch_json
+
+    # 18. A successful empty history is an answer. Before this, the fallback
+    # fired on it and attached a namesake's publications to the verified
+    # identity, keeping the paper-resolved authorId and `resolved_by: paper`.
+    def s2_empty(path, params=None, **kw):
+        if "/authors" in path and "/paper/" in path:
+            return {"data": [{"authorId": "REAL", "name": "Jane Smith", "affiliations": ["Real U"]}]}
+        if "/papers" in path:
+            return {"data": []}
+        return err("unrouted")
+    def oa_namesake(resolver, method, url, **kw):
+        if "/authors" in url:
+            return {"results": [{"id": "https://openalex.org/A-OTHER"}]}
+        return {"results": [{"id": "https://openalex.org/W9", "title": "A NAMESAKE'S PAPER",
+                             "publication_year": 2025, "authorships": []}]}
+    globals()["s2_get"], globals()["fetch_json"] = s2_empty, oa_namesake
+    try:
+        out = authors("Jane Smith", since=2023, paper="arXiv:1234.5678")
+        check("18  an index that answered with nothing is believed; no name search runs",
+              out["papers"] == [] and out["state"] == "nothing since the floor"
+              and out["authorId"] == "REAL" and out["ambiguous"] is False,
+              f"got {json.dumps(out)[:220]}")
+        # 18b. When the index genuinely failed, the fallback may run — and must
+        # say that the list was resolved by a name, which can belong to anyone.
+        globals()["s2_get"] = lambda *a, **k: err("s2 request failed", 5, 503)
+        out = authors("Jane Smith", since=2023, paper="arXiv:1234.5678")
+        check("18b a name-resolved fallback is flagged ambiguous, with the reason",
+              out["ambiguous"] is True and out["resolved_by"] == "openalex name search"
+              and "same name" in (out.get("note") or ""),
+              f"got {json.dumps(out)[:220]}")
+    finally:
+        globals()["s2_get"], globals()["fetch_json"] = saved_s2_get, saved_fetch_json
+
+    # 19. Resolving an identity is not finding a PDF. Before this, `resolve`
+    # returned at the first index that answered and `pdf_locations` looked no
+    # further, so a DOI that S2 resolved without an openAccessPdf reported
+    # `no text` while OpenAlex held a readable one.
+    import snowball as _sn
+    saved_sn_fetch = _sn.fetch_json
+    globals()["s2_get"] = lambda path, params=None, **kw: {
+        "paperId": "p1", "title": "A Paper", "year": 2022,
+        "externalIds": {"DOI": "10.1000/x"}, "authors": []}
+    _sn.fetch_json = lambda resolver, method, url, **kw: {
+        "id": "https://openalex.org/W1", "display_name": "A Paper", "publication_year": 2022,
+        "primary_location": {"pdf_url": "https://oa.example/p.pdf"}, "locations": [], "authorships": []}
+    try:
+        rec = resolve("10.1000/x")["record"]
+        locs = pdf_locations(rec)
+        check("19  a PDF the resolving index did not know is found on the other one",
+              any(loc["source"] == "openalex" for loc in locs), f"got {locs}")
+        # 19b. The plural that hid it: `oa_work` answers {"paper": ...}, and
+        # both call sites asked for {"papers": [...]}, so the OpenAlex branch of
+        # `resolve` had never resolved anything since it was written.
+        got = resolve("W1")
+        check("19b resolve reads `oa_work`'s singular `paper` key",
+              got.get("record") is not None and got.get("matched") == "openalex",
+              f"got {json.dumps({k: v for k, v in got.items() if k != 'record'})[:160]}")
+    finally:
+        globals()["s2_get"] = saved_s2_get
+        _sn.fetch_json = saved_sn_fetch
+
+    # 20. The PDF path goes round the shared transport for bytes, and took the
+    # pacing with it. docs/APIS.md promises arXiv one request every 3 seconds
+    # "enforced across processes"; this is what keeps that true.
+    paced = []
+    globals()["pace"] = lambda resolver, gap: paced.append((resolver, gap))
+    try:
+        pace_for_url("https://arxiv.org/pdf/2105.15203")
+        pace_for_url("https://example.org/some.pdf")
+        check("20  an arXiv PDF download is paced like an arXiv API call",
+              paced == [("arxiv", PACE["arxiv"])], f"got {paced}")
+    finally:
+        globals()["pace"] = saved_pace
 
     print()
     print(f"{'FAILED' if failures else 'all green'}: {len(failures)} failing")
