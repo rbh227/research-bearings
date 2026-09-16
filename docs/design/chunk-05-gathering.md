@@ -105,6 +105,8 @@ misses, and what the run says about the design. In one line each:
   before the other ten walks, none of which do). A third change came from cost: fourteen
   concurrent agents exhausted the account, so `neighborhood --write` now
   renders the section and the searcher pastes nothing.
+- Read 2026-09-16; no rerun, no tuning. The user keeps the high-citation
+  papers in the ranking on purpose.
 - Findings left for the reader: centrality rewards ubiquitous methods papers;
   seed centrality is capped by the hop sample; surveys-only mode surfaces the
   references of reviews rather than the reviews; long queries get nothing

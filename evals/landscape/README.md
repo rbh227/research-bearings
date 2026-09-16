@@ -137,7 +137,8 @@ Recorded here for the reader; none of it was acted on before this was written.
    LSTM and Faster R-CNN reach centrality 2–4 in every home-field section,
    because many neighborhood papers cite them. The rank is doing what it was
    defined to do; the definition counts citations to the field's tools as
-   field centrality.
+   field centrality. **Kept by decision, 2026-09-16:** the user wants the
+   high-citation papers in the ranking. Not a defect; do not dampen it.
 2. **A seed's centrality is its forward-hop sample size.** Seeds with 25 or
    more citers all tie at 25 (the per-direction cap) and sort by influential
    count from there. The `sampled` count in the block says how often this
