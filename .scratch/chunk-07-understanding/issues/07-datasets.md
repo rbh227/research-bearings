@@ -1,7 +1,7 @@
 # 07: `/datasets` and `dataset-scout`
 
 Type: task
-Status: ready-for-agent
+Status: done
 Blocked by: 03
 
 ## What to build
@@ -28,7 +28,30 @@ text; runs the verb per name; dispatches the scout once.
 
 ## Acceptance
 
-- [ ] Offline cases: a Hugging Face hit and a GitHub hit; both empty. Shape and state names only.
-- [ ] Plugin validation green; heading parity green for the datasets template.
-- [ ] On the existing cards, the ledger has one row per dataset named, with the license and link from a host or a `could not determine` line naming the hosts checked, and "who uses it" listing card slugs.
-- [ ] The guard denies `dataset-scout` a `gh` command and allows the retrieval script (case added in ticket 12; verified here by hand).
+- [x] Offline cases: a Hugging Face hit and a GitHub hit; both empty. Shape and state names only.
+- [x] Plugin validation green; heading parity green for the datasets template.
+- [x] On the existing cards, the ledger has one row per dataset named, with the license and link from a host or a `could not determine` line naming the hosts checked, and "who uses it" listing card slugs.
+- [x] The guard denies `dataset-scout` a `gh` command and allows the retrieval script (case added in ticket 12; verified here by hand).
+
+## Resolution
+
+2026-09-16. The `datasets` verb, `agents/dataset-scout.md`,
+`skills/datasets/SKILL.md`, `templates/research/datasets.md`.
+
+Live on the three cards. One dataset named (xBD), rows from both hosts, and
+the licence and authoritative host recorded as `could not determine` because
+both hosts returned only mirrors and downstream code, which the scout declined
+to present as the dataset's own record.
+
+**The run justified the "quote the split" rule outright.** The three cards
+report three different protocols for the same nominal standard xBD split: the
+release's own 80/10/10 train/test/holdout; BDANet's train/test with the
+holdout unmentioned and counts matching the release exactly; and RescueNet's
+Tier1/Tier3 train with about 10 per cent carved out for validation, built
+because the official test annotations were not public at the time. All three
+are quoted separately rather than collapsed into "the standard split".
+
+`--context` was added after a bare "xBD" returned an Xbox diagnostic tool
+above the xView2 solution on GitHub; it is appended to the GitHub query only.
+GitHub is reached over REST and the guard's selftest carries the case denying
+`dataset-scout` the `gh` command.

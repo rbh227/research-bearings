@@ -202,7 +202,7 @@ entanglement it predicted is not what the paper's own ablations show.
 
 ## Reviews
 
-_not run_
+- No OpenReview record. Searched "BDANet: Multiscale Convolutional Neural Network With Cross-Directional Attention for Building Damage Assessment From Satellite Images" on 2026-09-16.
 
 ## Leakage
 

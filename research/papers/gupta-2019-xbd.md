@@ -179,7 +179,7 @@ number pulling down the average.
 
 ## Reviews
 
-_not run_
+- No OpenReview record. Searched "xBD: A Dataset for Assessing Building Damage from Satellite Imagery" on 2026-09-16.
 
 ## Leakage
 
