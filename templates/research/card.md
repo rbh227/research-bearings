@@ -107,10 +107,14 @@
      - Method: <1-5> — <what the prediction got wrong, in one clause>
      - Main result: <1-5> — <same>
      - Weakest point: <1-5> — <same>
-     - Pass stopped at: 1 | full
 
      `_not run_` for a skim, which commits no predictions. Scores are the
-     scorer's judgment, the way the concession ladder scores a rebuttal. -->
+     scorer's judgment, the way the concession ladder scores a rebuttal.
+
+     The pass is NOT repeated here. It lives on the `- Read:` line under
+     ## Identity and nowhere else. Measured 2026-09-16: with the pass in two
+     places, the first card written said `pass full` in one and
+     `Pass stopped at: 1` in the other, and both looked authoritative. -->
 
 ## What was non-obvious
 
@@ -148,5 +152,6 @@
 
 ## Status
 
-<!-- Date, the run that wrote it, and what has not been run:
-     Read <date> by /read (pass full). Reviews: not run. Leakage: not run. -->
+<!-- Date, the run that wrote it, and what has not been run. The pass is on
+     the `- Read:` line under ## Identity; do not restate it here.
+     Read <date> by /read. Reviews: not run. Leakage: not run. -->

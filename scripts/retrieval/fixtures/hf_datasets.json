@@ -1,0 +1,12 @@
+[
+ {"_id": "66de617eccc54bedcc1729b8", "id": "ziruihan/xbd_test", "author": "ziruihan",
+  "gated": false, "lastModified": "2024-09-09T03:05:53.000Z", "likes": 0, "downloads": 21,
+  "tags": ["size_categories:1K<n<10K", "format:imagefolder", "modality:image", "region:us"],
+  "cardData": {}},
+ {"_id": "67abd85aaaca97a386678933", "id": "DrNerd/xBD-Training-Data", "author": "DrNerd",
+  "gated": false, "lastModified": "2025-02-11T14:02:02.000Z", "likes": 2, "downloads": 65,
+  "tags": ["license:apache-2.0", "modality:image"],
+  "cardData": {"license": "apache-2.0",
+               "dataset_info": {"splits": [{"name": "train", "num_examples": 18336},
+                                           {"name": "test", "num_examples": 1866}]}}}
+]

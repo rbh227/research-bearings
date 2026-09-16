@@ -1,7 +1,7 @@
 # 03: `/read`, the full three-agent protocol
 
 Type: task
-Status: ready-for-agent
+Status: done
 Blocked by: 01, 02
 
 ## What to build
@@ -35,8 +35,40 @@ not fetched, unplaced. Reads `CONNECTIONS.md` first like every searching skill.
 
 ## Acceptance
 
-- [ ] Plugin validation green for the skill and the three agents; heading parity green for card, prediction and reading templates.
-- [ ] A dry run by the implementing agent on one real paper with a matrix present produces a card that passes `check_cards`, a prediction note and a reading note beside it, a delta sentence, a prediction score and `pass: full`.
-- [ ] The transcript shows the proposal and the approval before any fetch, and predictor and reader dispatched in one turn with the scorer after both.
-- [ ] The predictor's dispatch names the intro path only; the reader's names the full path only.
-- [ ] Every reference line on the card carries a tag.
+- [x] Plugin validation green for the skill and the three agents; heading parity green for card, prediction and reading templates.
+- [x] A dry run by the implementing agent on one real paper with a matrix present produces a card that passes `check_cards`, a prediction note and a reading note beside it, a delta sentence, a prediction score and `pass: full`.
+- [x] The transcript shows the proposal and the approval before any fetch, and predictor and reader dispatched in one turn with the scorer after both.
+- [x] The predictor's dispatch names the intro path only; the reader's names the full path only.
+- [x] Every reference line on the card carries a tag.
+
+## Resolution
+
+2026-09-16. `agents/predictor.md`, `agents/reader.md`, `agents/scorer.md`,
+`skills/read/SKILL.md`. Heading parity green; plugin validation green.
+
+Dry run on xBD (arXiv 1911.09296), in the damage matrix's
+`per-building damage classification × paired pre/post satellite` cell.
+Predictor and reader dispatched in one message, scorer after both. The card
+passes `check_cards`; both notes sit beside it.
+
+**The protocol earned its cost.** The predictor guessed an overall
+classification F1 of 0.60-0.75 held back by class imbalance. The paper reports
+0.2654, with the major-damage class collapsing to 0.0094, and reports
+localization as IoU rather than F1 at all. Scores: method 4, main result 2,
+weakest point 5. The non-obvious line came from the 2, and it is a fact about
+the paper that a careful skim of the abstract would have got wrong.
+
+Three things the run changed:
+
+- **`pdftotext` runs in reading order, not `-layout`.** With `-layout`, both
+  columns of a two-column paper land on one line, so "2. Related Work" is
+  never at the end of its line and every two-column paper silently fell back
+  to a page cut. Measured on xBD, which went from a page cut at 11,872
+  characters to a heading cut at 3,745.
+- **IEEE small caps are normalised before matching.** `pdftotext` renders a
+  small-caps heading as "II. R ELATED W ORK". Measured on BDANet, which page-cut
+  until a capital-space-capitals rule was applied per line.
+- **The pass appears in exactly one place.** The first card written said
+  `pass full` under `## Identity` and `Pass stopped at: 1` under
+  `## Prediction score`, both looking authoritative. The card template no
+  longer repeats it, and the scorer is told the dispatcher owns that value.

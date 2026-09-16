@@ -72,6 +72,8 @@ VERSION = "0.1.0"
 OPENREVIEW_BASE = "https://api2.openreview.net"
 OPENREVIEW_V1 = "https://api.openreview.net"
 HF_BASE = "https://huggingface.co/api"
+OA_AUTHORS = "https://api.openalex.org/authors"
+OA_WORKS = "https://api.openalex.org/works"
 GITHUB_BASE = "https://api.github.com"
 UNPAYWALL_BASE = "https://api.unpaywall.org/v2"
 
@@ -83,13 +85,24 @@ SECTION_AFTER_INTRO = re.compile(
     r"literature\s+review|methods?|methodology|approach|our\s+approach|"
     r"proposed\s+(?:method|approach|model)|the\s+model|problem\s+(?:statement|formulation)|"
     r"materials\s+and\s+methods)\s*$",
-    re.I | re.M,
+    re.I,
 )
 
 # The intro has to start somewhere too: anything before it is the title block.
 INTRO_HEADING = re.compile(
-    r"^\s*(?:(?:[IVX]+|\d+)[.)]?\s*)?(introduction)\s*$", re.I | re.M
+    r"^\s*(?:(?:[IVX]+|\d+)[.)]?\s*)?(introduction)\s*$", re.I
 )
+
+# IEEE and ACM set section headings in small caps, and pdftotext renders that
+# as "II. R ELATED W ORK" — a capital, a space, then the rest in capitals.
+# Measured 2026-09-16 on the BDANet paper: without this, every IEEE-styled
+# paper silently falls back to a page cut.
+SMALL_CAPS = re.compile(r"\b([A-Z]) ([A-Z]{2,})\b")
+
+
+def heading_form(line: str) -> str:
+    """One line as a heading matcher should see it."""
+    return SMALL_CAPS.sub(r"\1\2", line)
 
 # How far into the text a heading may sit and still be believed as the end of
 # the introduction. Past this it is a section of the body, not the intro's end.
@@ -282,8 +295,14 @@ def extract_text(pdf_path: str) -> tuple[str, str | None]:
     name, _ = extractor()
     if name == "pdftotext":
         try:
+            # Reading order, not page layout. Measured 2026-09-16 on the xBD
+            # paper: `-layout` puts both columns of a two-column paper on one
+            # line, so "2. Related Work" ends up followed by the next column's
+            # prose and no heading ever ends its line. That silently turns
+            # every two-column paper into a page cut, which is the weaker
+            # fence. Tables read worse without it; the split matters more.
             done = subprocess.run(  # noqa: S603 - fixed binary, no shell
-                ["pdftotext", "-layout", pdf_path, "-"],
+                ["pdftotext", pdf_path, "-"],
                 capture_output=True, timeout=120, check=False,
             )
         except (OSError, subprocess.SubprocessError) as exc:
@@ -319,18 +338,21 @@ def split_text(text: str) -> dict[str, Any]:
         return {"intro": "", "split": "empty", "cut_at": 0, "heading": None}
 
     limit = max(min(int(len(text) * SPLIT_WINDOW), SPLIT_CEILING), 1)
-    intro_at = 0
-    found = INTRO_HEADING.search(text[:limit])
-    if found:
-        intro_at = found.start()
 
-    for match in SECTION_AFTER_INTRO.finditer(text):
-        if match.start() <= intro_at:
-            continue  # a "Methods" line inside the abstract is not the end of the intro
-        if match.start() > limit:
+    # Line by line, because a heading is a whole line and the small-caps
+    # normalisation is per line.
+    intro_at = 0
+    offset = 0
+    for line in text.splitlines(keepends=True):
+        if offset > limit:
             break
-        return {"intro": text[:match.start()].rstrip(), "split": "heading",
-                "cut_at": match.start(), "heading": match.group(0).strip()}
+        form = heading_form(line)
+        if not intro_at and INTRO_HEADING.match(form):
+            intro_at = offset
+        elif offset > intro_at and SECTION_AFTER_INTRO.match(form):
+            return {"intro": text[:offset].rstrip(), "split": "heading",
+                    "cut_at": offset, "heading": " ".join(line.split())}
+        offset += len(line)
 
     pages = text.split(PAGE_BREAK)
     if len(pages) > FALLBACK_PAGES:
@@ -479,6 +501,296 @@ def fetch_paper(value: str, refresh: bool = False) -> dict[str, Any]:
 
 
 # --------------------------------------------------------------------------
+# reviews: what the referees said
+
+
+def openreview_token() -> tuple[str, str]:
+    """(token, state). Logging in is optional and usually necessary: measured
+    2026-09-16, both api.openreview.net and api2.openreview.net answer
+    `/notes/search` anonymously but gate `/notes?forum=...` behind a bot
+    challenge, so the submission is findable without credentials and its
+    reviews are not."""
+    user, password = _env("OPENREVIEW_USERNAME"), _env("OPENREVIEW_PASSWORD")
+    if not (user and password):
+        return "", "no login"
+    got = fetch_json("openreview", "POST", f"{OPENREVIEW_BASE}/login",
+                     body={"id": user, "password": password}, use_cache=False, attempts=2)
+    if isinstance(got, dict) and got.get("token"):
+        return got["token"], "logged in"
+    return "", "login failed"
+
+
+def openreview_search(query: str, limit: int = 10) -> list[dict[str, Any]]:
+    got = fetch_json("openreview", "GET", f"{OPENREVIEW_BASE}/notes/search",
+                     params={"term": query, "limit": limit})
+    if not isinstance(got, dict) or "error" in got:
+        return []
+    return got.get("notes") or []
+
+
+def _value(content: dict[str, Any], key: str) -> Any:
+    """API2 wraps every field as {"value": ...}; API1 does not."""
+    got = (content or {}).get(key)
+    if isinstance(got, dict) and "value" in got:
+        return got["value"]
+    return got
+
+
+REVIEW_RATING_KEYS = ("rating", "recommendation", "confidence", "soundness",
+                      "presentation", "contribution", "correctness",
+                      "technical_novelty_and_significance",
+                      "empirical_novelty_and_significance")
+REVIEW_TEXT_KEYS = ("review", "summary", "strengths", "weaknesses",
+                    "summary_of_the_review", "strength_and_weaknesses",
+                    "questions", "limitations", "main_review")
+
+
+def _is_review(invitations: list[str]) -> bool:
+    return any(i.rsplit("/", 1)[-1].lower() in
+               ("official_review", "review", "public_review", "meta_review",
+                "decision", "official_comment", "rebuttal", "author_response")
+               for i in invitations or [])
+
+
+def reviews(paper: str, limit: int = 10) -> dict[str, Any]:
+    """OpenReview's record for one paper: the submission, then every official
+    review, response and decision on its forum."""
+    asked = (paper or "").strip()
+    if not asked:
+        return err("reviews needs a title or an arXiv id")
+
+    notes = openreview_search(asked, limit)
+    best = None
+    for note in notes:
+        title = _value(note.get("content") or {}, "title") or ""
+        if title_match(asked, title) == "exact":
+            best = note
+            break
+    if best is None and ARXIV_ID.fullmatch(asked.replace("arXiv:", "")):
+        # An id is not searchable text on OpenReview; a caller passing one and
+        # getting nothing has learned only that, so say which query was run.
+        return {"asked": asked, "state": "no record", "query": asked,
+                "note": "OpenReview search takes titles, not arXiv ids; pass the exact title",
+                "date": today()}
+    if best is None:
+        return {"asked": asked, "state": "no record", "query": asked,
+                "candidates": [_value(n.get("content") or {}, "title") for n in notes[:3]],
+                "date": today()}
+
+    content = best.get("content") or {}
+    out = {
+        "asked": asked, "state": "found", "forum": best.get("forum"),
+        "id": best.get("id"), "title": _value(content, "title"),
+        "venue": _value(content, "venue"), "venueid": _value(content, "venueid"),
+        "url": f"https://openreview.net/forum?id={best.get('forum')}",
+        "reviews": [], "responses": [], "decision": None, "date": today(),
+    }
+
+    token, login_state = openreview_token()
+    out["login"] = login_state
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    got = fetch_json("openreview", "GET", f"{OPENREVIEW_BASE}/notes",
+                     params={"forum": best.get("forum"), "limit": 200},
+                     headers=headers, attempts=2)
+    if not isinstance(got, dict) or "error" in got:
+        detail = got.get("error", "") if isinstance(got, dict) else ""
+        out["state"] = "login required" if "Challenge" in str(detail) or "403" in str(detail) else "forum unreadable"
+        out["forum_error"] = str(detail)[:200]
+        out["note"] = ("the submission was found; its reviews need credentials. "
+                       "Set OPENREVIEW_USERNAME and OPENREVIEW_PASSWORD."
+                       if out["state"] == "login required" else None)
+        return out
+
+    for note in got.get("notes") or []:
+        invitations = note.get("invitations") or ([note["invitation"]] if note.get("invitation") else [])
+        if note.get("id") == best.get("id") or not _is_review(invitations):
+            continue
+        c = note.get("content") or {}
+        kind = (invitations[0].rsplit("/", 1)[-1] if invitations else "note").lower()
+        entry = {
+            "kind": kind,
+            "ratings": {k: _value(c, k) for k in REVIEW_RATING_KEYS if _value(c, k) is not None},
+            "text": {k: _value(c, k) for k in REVIEW_TEXT_KEYS if _value(c, k)},
+            "signature": (note.get("signatures") or [""])[0].rsplit("/", 1)[-1],
+        }
+        if "decision" in kind:
+            out["decision"] = _value(c, "decision") or _value(c, "recommendation")
+        elif kind in ("official_comment", "rebuttal", "author_response"):
+            out["responses"].append(entry)
+        else:
+            out["reviews"].append(entry)
+    out["counts"] = {"reviews": len(out["reviews"]), "responses": len(out["responses"])}
+    return out
+
+
+# --------------------------------------------------------------------------
+# datasets: what the hosts hold
+
+
+def hf_datasets(name: str, limit: int = 5) -> dict[str, Any]:
+    headers = {"Authorization": f"Bearer {_env('HF_TOKEN')}"} if _env("HF_TOKEN") else {}
+    got = fetch_json("huggingface", "GET", f"{HF_BASE}/datasets",
+                     params={"search": name, "limit": limit, "full": "true"}, headers=headers)
+    if isinstance(got, dict) and "error" in got:
+        return {"state": "error", "error": got["error"], "rows": []}
+    rows = []
+    for d in got if isinstance(got, list) else []:
+        card = d.get("cardData") or {}
+        rows.append({
+            "id": d.get("id"), "url": f"https://huggingface.co/datasets/{d.get('id')}",
+            "license": card.get("license") or next(
+                (t.split(":", 1)[1] for t in (d.get("tags") or []) if t.startswith("license:")), None),
+            "size": next((t.split(":", 1)[1] for t in (d.get("tags") or []) if t.startswith("size_categories:")), None),
+            "modality": [t.split(":", 1)[1] for t in (d.get("tags") or []) if t.startswith("modality:")],
+            "downloads": d.get("downloads"), "likes": d.get("likes"),
+            "updated": d.get("lastModified"), "gated": d.get("gated"),
+            "splits": [s.get("name") for s in (card.get("dataset_info") or {}).get("splits", [])]
+                      if isinstance(card.get("dataset_info"), dict) else [],
+        })
+    return {"state": "ok" if rows else "nothing", "rows": rows,
+            "keyed": bool(_env("HF_TOKEN"))}
+
+
+def github_repos(name: str, limit: int = 5) -> dict[str, Any]:
+    """GitHub over REST, not the `gh` command: the guard admits only the
+    retrieval scripts in Bash, and widening that fence for one agent is a
+    worse trade than one more HTTP call."""
+    headers = {"Accept": "application/vnd.github+json"}
+    token = _env("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    got = fetch_json("github", "GET", f"{GITHUB_BASE}/search/repositories",
+                     params={"q": name, "per_page": limit, "sort": "stars"}, headers=headers,
+                     keyed=bool(token))
+    if isinstance(got, dict) and "error" in got:
+        return {"state": "error", "error": got["error"], "rows": [], "keyed": bool(token)}
+    rows = []
+    for r in (got.get("items") or [])[:limit]:
+        rows.append({
+            "full_name": r.get("full_name"), "url": r.get("html_url"),
+            "description": (r.get("description") or "")[:200],
+            "license": ((r.get("license") or {}) or {}).get("spdx_id"),
+            "stars": r.get("stargazers_count"), "updated": r.get("pushed_at"),
+            "size_kb": r.get("size"), "topics": r.get("topics") or [],
+        })
+    return {"state": "ok" if rows else "nothing", "rows": rows,
+            "total": got.get("total_count"), "keyed": bool(token)}
+
+
+def datasets(name: str, limit: int = 5, context: str = "") -> dict[str, Any]:
+    """One dataset, on both hosts. A host that returns nothing is named, so a
+    row that says `could not determine` can say what was asked.
+
+    `context` is appended to the GitHub query only. Measured 2026-09-16: a bare
+    "xBD" returns an Xbox diagnostic tool above the xView2 solution, because
+    GitHub search has no idea what field you are in. Hugging Face is left
+    unqualified, since dataset ids there are already namespaced."""
+    asked = (name or "").strip()
+    if not asked:
+        return err("datasets needs a name")
+    hf = hf_datasets(asked, limit)
+    gh = github_repos(f"{asked} {context}".strip(), limit)
+    return {"asked": asked, "context": context or None, "date": today(),
+            "huggingface": hf, "github": gh, "checked": ["huggingface", "github"],
+            "state": "found" if (hf["rows"] or gh["rows"]) else "nothing found"}
+
+
+# --------------------------------------------------------------------------
+# authors: who is publishing, and where they are heading
+
+
+def authors(name: str, since: int | None = None, limit: int = 50) -> dict[str, Any]:
+    """One author's recent record. S2 first for its author endpoint, OpenAlex
+    when S2 fails or throttles. `since` defaults to three years back, which is
+    what "where are they heading" means; older work is already in the
+    landscape."""
+    asked = (name or "").strip()
+    if not asked:
+        return err("authors needs a name or an S2 author id")
+    import datetime as _dt
+    floor = since or (_dt.date.today().year - 3)
+    checked: list[str] = []
+    errors: dict[str, str] = {}
+
+    ident = asked if asked.isdigit() else None
+    if ident is None:
+        got = s2_get("/author/search", params={"query": asked, "fields": "authorId,name,affiliations,paperCount",
+                                               "limit": 5})
+        checked.append("s2")
+        if isinstance(got, dict) and "error" not in got and got.get("data"):
+            ident = got["data"][0].get("authorId")
+            affiliations = got["data"][0].get("affiliations") or []
+        elif isinstance(got, dict) and "error" in got:
+            errors["s2"] = got["error"]
+            affiliations = []
+        else:
+            affiliations = []
+    else:
+        affiliations = []
+
+    papers: list[dict[str, Any]] = []
+    if ident:
+        got = s2_get(f"/author/{ident}/papers",
+                     params={"fields": "paperId,title,year,venue,externalIds,authors,citationCount",
+                             "limit": 100})
+        if isinstance(got, dict) and "error" not in got:
+            for row in got.get("data") or []:
+                if (row.get("year") or 0) >= floor:
+                    papers.append({
+                        "title": row.get("title"), "year": row.get("year"),
+                        "venue": row.get("venue"), "citations": row.get("citationCount"),
+                        "ids": {k: v for k, v in (row.get("externalIds") or {}).items() if v},
+                        "coauthors": [a.get("name") for a in (row.get("authors") or []) if a.get("name")],
+                    })
+        elif isinstance(got, dict):
+            errors["s2"] = got["error"]
+
+    if not papers:
+        got = fetch_json("openalex", "GET", f"{OA_AUTHORS}",
+                         params={"search": asked, "per-page": 1})
+        checked.append("openalex")
+        if isinstance(got, dict) and "error" not in got and got.get("results"):
+            author = got["results"][0]
+            affiliations = affiliations or [
+                (author.get("last_known_institution") or {}).get("display_name")
+            ] if author.get("last_known_institution") else affiliations
+            works = fetch_json("openalex", "GET", f"{OA_WORKS}",
+                               params={"filter": f"author.id:{author.get('id')},from_publication_date:{floor}-01-01",
+                                       "per-page": 50})
+            if isinstance(works, dict) and "error" not in works:
+                for w in works.get("results") or []:
+                    papers.append({
+                        "title": w.get("title") or w.get("display_name"),
+                        "year": w.get("publication_year"),
+                        "venue": ((w.get("primary_location") or {}).get("source") or {}).get("display_name"),
+                        "citations": w.get("cited_by_count"),
+                        "ids": {"OpenAlex": (w.get("id") or "").rsplit("/", 1)[-1]},
+                        "coauthors": [(a.get("author") or {}).get("display_name")
+                                      for a in (w.get("authorships") or [])
+                                      if (a.get("author") or {}).get("display_name")],
+                    })
+        elif isinstance(got, dict) and "error" in got:
+            errors["openalex"] = got["error"]
+
+    counts: dict[str, int] = {}
+    for p in papers:
+        for co in p["coauthors"]:
+            if co and normalised_title(co) != normalised_title(asked):
+                counts[co] = counts.get(co, 0) + 1
+    frequent = sorted(counts.items(), key=lambda kv: -kv[1])[:10]
+
+    papers.sort(key=lambda p: (p.get("year") or 0), reverse=True)
+    return {
+        "asked": asked, "authorId": ident, "since": floor, "date": today(),
+        "affiliations": [a for a in affiliations if a],
+        "papers": papers[:limit], "paper_count": len(papers),
+        "frequent_coauthors": [{"name": n, "papers": c} for n, c in frequent],
+        "checked": checked, "errors": errors,
+        "state": "found" if papers else "nothing since the floor",
+    }
+
+
+# --------------------------------------------------------------------------
 # command line
 
 
@@ -496,6 +808,20 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("paper", help="arXiv id, DOI, S2 id, OpenAlex id, or an exact title")
     p.add_argument("--refresh", action="store_true", help="ignore a cached copy")
 
+    p = sub.add_parser("reviews", help="OpenReview's record for one paper: ratings, objections, responses")
+    p.add_argument("paper", help="the exact title; OpenReview search does not take arXiv ids")
+    p.add_argument("--limit", type=int, default=10, help="search rows to consider")
+
+    p = sub.add_parser("datasets", help="one dataset on the Hugging Face hub and on GitHub")
+    p.add_argument("name")
+    p.add_argument("--limit", type=int, default=5, help="rows per host")
+    p.add_argument("--context", default="", help="words appended to the GitHub query only, e.g. the field")
+
+    p = sub.add_parser("authors", help="one author's papers since a year floor, and their frequent co-authors")
+    p.add_argument("name", help="an author name, or an S2 author id")
+    p.add_argument("--since", type=int, default=None, help="year floor; default three years back")
+    p.add_argument("--limit", type=int, default=50)
+
     args = ap.parse_args(argv)
     if args.selftest:
         return selftest()
@@ -505,6 +831,12 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "fetch":
         out = fetch_paper(args.paper, args.refresh)
+    elif args.cmd == "reviews":
+        out = reviews(args.paper, args.limit)
+    elif args.cmd == "datasets":
+        out = datasets(args.name, args.limit, args.context)
+    elif args.cmd == "authors":
+        out = authors(args.name, args.since, args.limit)
     else:  # pragma: no cover - argparse rejects anything else
         out = err(f"unknown verb: {args.cmd}")
 
@@ -561,6 +893,14 @@ def selftest() -> int:
     got = split_text(late)
     check("2b a Methods heading past the window is not the end of the intro",
           got["split"] == "page-cut", f"got {got['split']} at {got['cut_at']} of {len(late)}")
+
+    # 2b2. IEEE small caps: "II. R ELATED W ORK" is the same heading.
+    ieee = ("A Paper\n\nAbstract\n\nsome abstract text\n\nI. I NTRODUCTION\n"
+            + ("intro prose line\n" * 40) + "II. R ELATED W ORK\n" + ("body\n" * 300))
+    got = split_text(ieee)
+    check("2b2 an IEEE small-caps heading ends the intro like any other",
+          got["split"] == "heading" and "ELATED" in (got["heading"] or ""),
+          f"got split={got['split']} heading={got['heading']!r}")
 
     # 2c. The intro file always carries the title block and the introduction.
     got = split_text(two_col)
@@ -645,6 +985,144 @@ def selftest() -> int:
     a = fetch_dir(finish({"paperId": "p1", "title": "One", "externalIds": {"ArXiv": "2201.00001"}}))
     b = fetch_dir(finish({"paperId": "p2", "title": "Two", "externalIds": {"ArXiv": "2201.00002"}}))
     check("9  the fetch directory is per paper", a != b and "arxiv-2201.00001" in a, f"{a} vs {b}")
+
+
+    # --- reviews -----------------------------------------------------------
+
+    def as_bytes(name):
+        with open(os.path.join(here, "fixtures", name), encoding="utf-8") as fh:
+            return fh.read().encode()
+
+    saved_fetch_json = globals()["fetch_json"]
+
+    def routed(**by_fragment):
+        def stub(resolver, method, url, **kw):
+            for fragment, answer in by_fragment.items():
+                if fragment in url:
+                    return answer() if callable(answer) else answer
+            return err(f"unrouted: {url}")
+        return stub
+
+    globals()["fetch_json"] = routed(**{
+        "/notes/search": json.loads(as_bytes("openreview_search.json")),
+        "/notes": json.loads(as_bytes("openreview_forum.json")),
+    })
+    try:
+        out = reviews("Memory Efficient Transformer Adapter for Dense Predictions")
+        check("10  reviews returns two official reviews, one response and the decision",
+              out["state"] == "found" and out["counts"] == {"reviews": 2, "responses": 1}
+              and out["decision"] == "Accept (Poster)" and out["venue"] == "ICLR 2025 Poster",
+              f"got {json.dumps({k: out.get(k) for k in ('state', 'counts', 'decision', 'venue')})}")
+        check("10b a review carries its ratings and the reviewer's own words",
+              out["reviews"][0]["ratings"].get("rating") == 6
+              and "omits the strongest prior adapter" in json.dumps(out["reviews"][0]["text"]),
+              f"got {json.dumps(out['reviews'][0])[:200]}")
+        # An inexact title is not this paper. OpenReview search is fuzzy; the
+        # exact-match rule is what stops a neighbouring submission's reviews
+        # from landing on the wrong card.
+        out = reviews("Transformer Adapter for Dense Predictions")
+        check("11  a near title is `no record`, and names what it saw instead",
+              out["state"] == "no record" and out["candidates"], f"got {json.dumps(out)[:200]}")
+    finally:
+        globals()["fetch_json"] = saved_fetch_json
+
+    # The forum is gated and the submission is not: found, and honest about it.
+    globals()["fetch_json"] = routed(**{
+        "/notes/search": json.loads(as_bytes("openreview_search.json")),
+        "/notes": err("openreview request failed: ChallengeRequiredError: Challenge verification required", 1, 403),
+    })
+    try:
+        out = reviews("Memory Efficient Transformer Adapter for Dense Predictions")
+        check("12  a gated forum is `login required`, with the submission still named",
+              out["state"] == "login required" and out["url"] and "OPENREVIEW_USERNAME" in (out.get("note") or ""),
+              f"got {json.dumps(out)[:220]}")
+    finally:
+        globals()["fetch_json"] = saved_fetch_json
+
+    # --- datasets ----------------------------------------------------------
+
+    globals()["fetch_json"] = routed(**{
+        "/api/datasets": json.loads(as_bytes("hf_datasets.json")),
+        "/search/repositories": json.loads(as_bytes("github_search.json")),
+    })
+    try:
+        out = datasets("xBD", 5, context="building damage")
+        hf, gh = out["huggingface"], out["github"]
+        check("13  datasets reads license, size and splits off a hub row",
+              out["state"] == "found" and hf["rows"][1]["license"] == "apache-2.0"
+              and hf["rows"][0]["size"] == "1K<n<10K"
+              and hf["rows"][1]["splits"] == ["train", "test"],
+              f"got {json.dumps(hf['rows'])[:250]}")
+        check("13b and license, stars and the description off a GitHub row",
+              gh["rows"][0]["license"] == "MIT" and gh["rows"][0]["stars"] == 61
+              and "damage" in gh["rows"][0]["description"],
+              f"got {json.dumps(gh['rows'][0])[:200]}")
+        check("13c the context reaches the GitHub query and not the hub one",
+              out["context"] == "building damage")
+    finally:
+        globals()["fetch_json"] = saved_fetch_json
+
+    globals()["fetch_json"] = routed(**{"/api/datasets": [], "/search/repositories": {"items": [], "total_count": 0}})
+    try:
+        out = datasets("a dataset nobody has ever made")
+        check("14  both hosts empty is `nothing found`, with both named as checked",
+              out["state"] == "nothing found" and out["checked"] == ["huggingface", "github"]
+              and out["huggingface"]["state"] == "nothing" and out["github"]["state"] == "nothing",
+              f"got {json.dumps(out)[:200]}")
+    finally:
+        globals()["fetch_json"] = saved_fetch_json
+
+    # --- authors -----------------------------------------------------------
+
+    saved_s2_get = globals()["s2_get"]
+
+    def s2_author_stub(path, params=None, **kw):
+        if "/author/search" in path:
+            return {"data": [{"authorId": "2302365756", "name": "Ritwik Gupta",
+                              "affiliations": ["UC Berkeley"]}]}
+        if "/papers" in path:
+            return json.loads(as_bytes("s2_author_papers.json"))
+        return err("unrouted")
+    globals()["s2_get"] = s2_author_stub
+    try:
+        out = authors("Ritwik Gupta", since=2023)
+        years = [p["year"] for p in out["papers"]]
+        check("15  authors returns only papers at or after the floor, newest first",
+              out["state"] == "found" and years == sorted(years, reverse=True)
+              and all(y >= 2023 for y in years) and out["paper_count"] == 2,
+              f"got years {years}, count {out['paper_count']}")
+        check("15b frequent co-authors are counted, and the author is not their own co-author",
+              out["frequent_coauthors"][0] == {"name": "A. Reddie", "papers": 2}
+              and all("Ritwik" not in c["name"] for c in out["frequent_coauthors"]),
+              f"got {out['frequent_coauthors']}")
+        import datetime as _d
+        out = authors("Ritwik Gupta")
+        check("15c the floor defaults to three years back",
+              out["since"] == _d.date.today().year - 3,
+              f"got {out['since']}, wanted {_d.date.today().year - 3}")
+    finally:
+        globals()["s2_get"] = saved_s2_get
+
+    # S2 down: OpenAlex answers, and the result says which index was reached.
+    globals()["s2_get"] = lambda *a, **k: err("s2 request failed after 5 attempts", 5, 429)
+    globals()["fetch_json"] = routed(**{
+        "/authors": {"results": [{"id": "https://openalex.org/A123",
+                                  "last_known_institution": {"display_name": "UC Berkeley"}}]},
+        "/works": {"results": [{"id": "https://openalex.org/W1", "title": "A Recent Work",
+                                "publication_year": 2025, "cited_by_count": 3,
+                                "primary_location": {"source": {"display_name": "CVPR"}},
+                                "authorships": [{"author": {"display_name": "Ritwik Gupta"}},
+                                                {"author": {"display_name": "A. Reddie"}}]}]},
+    })
+    try:
+        out = authors("Ritwik Gupta", since=2023)
+        check("16  with S2 down OpenAlex answers, and both the error and the fallback are named",
+              out["state"] == "found" and out["papers"][0]["title"] == "A Recent Work"
+              and "s2" in out["errors"] and "openalex" in out["checked"],
+              f"got {json.dumps(out)[:240]}")
+    finally:
+        globals()["s2_get"] = saved_s2_get
+        globals()["fetch_json"] = saved_fetch_json
 
     print()
     print(f"{'FAILED' if failures else 'all green'}: {len(failures)} failing")

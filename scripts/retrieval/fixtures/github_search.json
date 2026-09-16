@@ -1,0 +1,9 @@
+{"total_count": 35, "incomplete_results": false, "items": [
+ {"id": 235405660, "full_name": "michal2409/xView2", "html_url": "https://github.com/michal2409/xView2",
+  "description": "Building damage assessment on the xBD dataset, xView2 challenge solution",
+  "license": {"spdx_id": "MIT"}, "stargazers_count": 61, "pushed_at": "2021-03-02T10:11:12Z",
+  "size": 7178, "topics": ["xview2", "damage-assessment"]},
+ {"id": 999, "full_name": "Darkone83/XbDiag", "html_url": "https://github.com/Darkone83/XbDiag",
+  "description": "Original Xbox diagnostic tool", "license": {"spdx_id": "MIT"},
+  "stargazers_count": 40, "pushed_at": "2025-08-01T00:00:00Z", "size": 20221, "topics": []}
+]}
