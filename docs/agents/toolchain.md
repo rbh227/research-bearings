@@ -2,7 +2,7 @@
 
 The four verbs skills use instead of hardcoded stack commands. A verb whose value is `none` is skipped, never guessed.
 
-This repo is a Claude Code plugin. There is no compiler and no package manager, but there are real checks: manifest validation, a heading-parity check between templates and the skills that write them, a selftest on the write-scope guard, a selftest on the retrieval script, and a structural check on what /scout writes.
+This repo is a Claude Code plugin. There is no compiler and no package manager, but there are real checks: manifest validation, a heading-parity check between templates and the skills that write them, a selftest on the guard (write scope and the web fence), a selftest on the retrieval script (all four resolvers, offline), and a structural check on what /scout writes.
 
 | Verb | Command |
 | --- | --- |
@@ -16,6 +16,7 @@ Consumers: `/implement`, `/tdd`, `/codex-review`, `/run-tickets`. Run **static c
 Notes:
 
 - **Static checks and one test file are free and fast.** Run them freely.
-- **`check_analogs.py` is the whole automated done-check for chunk 3.** There is no judge tier for `/scout`: every rule it has — a checkable id on every paper line, counts that agree, no home-field names, five fields, no absence claims — can be decided by looking, so nothing there needs a model. Point it at a written file (`python3 scripts/check_analogs.py research/analogs/<slug>.md`) or run `--selftest` for its seven fixtures.
+- **The retrieval selftest is offline and needs no key.** It clears every credential from the environment and points the key file at nothing, so it measures the unkeyed paths. The live checks — `snowball.py status`, a keyless `search`, `verify` returning `candidate` — are run by hand when the resolvers change and recorded in the chunk's design note, not in a verb.
+- **`check_analogs.py` is the whole automated done-check for chunk 3.** There is no judge tier for `/scout`: every rule it has — a checkable id on every paper line, counts that agree, no home-field names, five fields, no absence claims — can be decided by looking, so nothing there needs a model. Point it at a written file (`python3 scripts/check_analogs.py research/analogs/<slug>.md`) or run `--selftest` for its nine fixtures.
 - **`validate ./` alone is weaker than it looks.** Pointed at this repo it validates the *marketplace* manifest and stops, because `marketplace.json` is what it finds first. Skill and agent frontmatter is only checked when you point it at `skills/` and `agents/` directly — hence three calls. Pointing it at a single `.md` file does not work: it tries to parse the file as a JSON manifest.
 - **`validate .claude-plugin/plugin.json --strict` fails on this repo by design.** It walks components and warns that a root `CLAUDE.md` is not loaded as plugin context. That warning is correct and permanent: this repo is both the plugin and a project, and the `CLAUDE.md` is the project's. Not part of the verb.

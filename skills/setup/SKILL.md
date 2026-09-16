@@ -32,15 +32,37 @@ the results. Do this in one batch; it takes seconds.
 | Python and env | `python3 --version`, `uv --version`, `pip list` if a venv is obvious |
 | Repo state | `git remote -v`, `git status --short`, `git log --oneline -5` |
 | What is already here | `ls` the project root; look for data, notebooks, papers, a README |
-| Retrieval | `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" health` — reports key presence without spending a request. Nothing to connect to: retrieval is one script, run on demand. `/research-bearings:snowball` probes the API itself at the start of every crawl. |
+| Retrieval | `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" health` — keys and paths, no network. The live probe is step 1b. Nothing to connect to: retrieval is one script, run on demand. |
+
+**1b. Connections.** Run
+
+```
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" status --md
+```
+
+It probes every source in `docs/APIS.md` live, seven at once, in a few seconds,
+and prints one line per source: `connected`, `connected-no-key`, or
+`not connected`, each with today's date. Copy the template
+`${CLAUDE_PLUGIN_ROOT}/templates/research/CONNECTIONS.md` to
+`research/CONNECTIONS.md` and paste the lines under `## Sources` and the
+`Keys that would help most` block under `## Keys that would help most`,
+verbatim. Then **stop**: say in one sentence which three keys would help and
+where they come from, and move on to step 2.
+
+A missing key is a state, never an error. Do not ask the user to go and get
+one, do not wait for one, and do not treat `connected-no-key` as a problem to
+solve now. Every searching skill reads this file first and adapts to whatever
+it says. `not connected` on every line means the machine is offline or behind
+a proxy; write that under `## Sources` and carry on — the rest of setup needs
+no network.
 
 **2. Read anything that answers a question for you.** A README, a proposal, a
 grant blurb, an existing notes file. Do not ask what a file already says.
 
 **3. Copy the template.** `${CLAUDE_PLUGIN_ROOT}/templates/research/CONTEXT.md`
 to `research/CONTEXT.md`, creating `research/` if needed. If the project has a
-`.gitignore`, add `research/.papers/` and `research/.crawl/` to it — the paper cache is regenerable and
-runs to thousands of files. If the file already
+`.gitignore`, add `research/.papers/` to it — the paper records are regenerable
+and run to thousands of files. If the file already
 exists, read it and update in place — never clobber a section that has content
 without showing the user what you are replacing.
 
@@ -70,7 +92,11 @@ choices, so multiple choice is the wrong instrument here.
 | `## Constraints` | Hours per week actually available; teaching load; publication obligations or embargoes; hardware they cannot get | ask |
 | `## What counts as a win` | Which venue or artefact, by when, and who has to accept it | ask |
 | `## History` | What this project already tried, and why it stopped | ask |
-| `## Retrieval` | Whether the retrieval script runs, whether a Semantic Scholar key is present, the date probed | checked |
+| `## Retrieval` | Whether the retrieval script runs, and a pointer to `research/CONNECTIONS.md`, which holds the per-source states and the date probed | checked |
+
+`research/CONNECTIONS.md` is the second file, written in step 1b. Two fixed
+headings: `## Sources` and `## Keys that would help most`. Both are pasted from
+`status --md`, never composed.
 
 Mark every checked number `(checked YYYY-MM-DD)` and every reported number
 `(reported YYYY-MM-DD)`. The distinction is the point.
@@ -79,6 +105,8 @@ Mark every checked number `(checked YYYY-MM-DD)` and every reported number
 
 All ten headings present. Each has content or an explicit `_unknown_`. Every
 number carries a date and says whether it was checked or reported.
+`research/CONNECTIONS.md` exists with its two headings and a dated line per
+source.
 
 Then tell the user what to run next: `/research-bearings:frame`.
 
@@ -106,4 +134,6 @@ you can modify, so its absence is the single most useful thing in the file.
 | "New project, so no History section." | Ask anyway. New projects usually inherit something, and what was abandoned is worth knowing. |
 | "I'll fill the thin sections with reasonable defaults." | There are no default labs, deadlines or allocations. `_unknown_`. |
 | "I'll ask all thirty questions at once so it's efficient." | Ten sections, one at a time, writing as you go. Efficiency that loses the whole session on an interruption is not efficiency. |
-| "I'll ask whether they set up a Semantic Scholar key." | Call `health`. It answers without a network request, and the user's memory of what they configured is worse than the script's. |
+| "I'll ask whether they set up a Semantic Scholar key." | Run `status`. It probes the wire, and the user's memory of what they configured is worse than the script's. |
+| "Three sources have no key — I should get those sorted before going on." | No. Name the three, say where they come from, stop. A missing key is a state the searching skills adapt to, not a blocker for setup. |
+| "Everything is connected-no-key, so retrieval is broken." | It is not. Unkeyed is the default and every verb works unkeyed; `status` says `not connected` when something is actually broken. |

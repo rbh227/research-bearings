@@ -17,6 +17,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 # template -> the files that must name every one of its headings
 CONTRACTS = {
     "templates/research/CONTEXT.md": ["skills/setup/SKILL.md"],
+    "templates/research/CONNECTIONS.md": ["skills/setup/SKILL.md"],
     "templates/research/QUESTION.md": ["skills/frame/SKILL.md"],
     "templates/research/framing-log.md": ["skills/frame/SKILL.md"],
     "templates/research/analogs.md": ["skills/scout/SKILL.md"],

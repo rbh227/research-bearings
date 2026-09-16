@@ -7,8 +7,10 @@ nothing here needs a model.
 
 What it enforces, and why each one is here:
 
-  every paper line is checkable   an id, or the marker saying it would not
-                                  resolve. A bare title is a claim nobody can
+  every paper line is checkable   an id (S2, OpenAlex, arXiv or DOI), or the
+                                  marker saying it would not resolve, or the
+                                  candidate marker saying what it nearly
+                                  matched. A bare title is a claim nobody can
                                   check, which is the failure mode the verify
                                   step exists to close.
   the counts agree                ## Verification is a summary of ## Fields; if
@@ -37,7 +39,10 @@ UNRESOLVED = "_unresolved: not found by title_"
 BANNED = ("unexplored", "gap", "novel", "nobody")
 # "- <title> · <year> · ..." — the shape of a paper line under ## Fields.
 PAPER_LINE = re.compile(r"^\s*-\s+.+\s·\s")
-ID_ON_LINE = re.compile(r"S2 `[^`]+`|arXiv `[^`]+`|DOI `[^`]+`")
+ID_ON_LINE = re.compile(r"S2 `[^`]+`|arXiv `[^`]+`|DOI `[^`]+`|OpenAlex `[^`]+`")
+# verify's near match: reported, never certified. A line carrying it is
+# checked, and stays in the file as a candidate rather than a citation.
+CANDIDATE = "_candidate:"
 
 
 def sections(text):
@@ -99,7 +104,8 @@ def check(text, vocab=None):
                 )
 
     papers = [ln for ln in secs["Fields"].splitlines() if PAPER_LINE.match(ln)]
-    unchecked = [ln.strip() for ln in papers if not ID_ON_LINE.search(ln) and UNRESOLVED not in ln]
+    unchecked = [ln.strip() for ln in papers
+                 if not ID_ON_LINE.search(ln) and UNRESOLVED not in ln and CANDIDATE not in ln]
     for ln in unchecked:
         problems.append(f"paper line carries no id and no unresolved marker: {ln[:70]}")
 
@@ -108,7 +114,9 @@ def check(text, vocab=None):
     if not stated:
         problems.append("## Verification does not state 'resolved N ... unresolved M'")
     else:
-        want_unresolved = sum(1 for ln in papers if UNRESOLVED in ln)
+        # A candidate line is unresolved: it names what verify nearly matched,
+        # and a near match is the dangerous case, not the safe one.
+        want_unresolved = sum(1 for ln in papers if UNRESOLVED in ln or CANDIDATE in ln)
         want_resolved = len(papers) - want_unresolved - len(unchecked)
         got_resolved, got_unresolved = int(stated.group(1)), int(stated.group(2))
         if (got_resolved, got_unresolved) != (want_resolved, want_unresolved):
@@ -288,6 +296,25 @@ def selftest():
         f"got {problems}",
     )
 
+    cand = PASSING.replace(
+        "  - Field-Scale Change Detection in Orchards · 2019 · _unresolved: not found by title_",
+        "  - Field-Scale Change Detection in Orchards · 2019 · _candidate: prefix match only, Field-Scale Change Detection (OpenAlex `W1`)_",
+    )
+    problems = check(cand)
+    case(
+        "8  a candidate line is checked, and counts as unresolved",
+        problems == [],
+        f"got {problems}",
+    )
+
+    oaid = PASSING.replace("S2 `ccc333`", "OpenAlex `W2967473420`")
+    problems = check(oaid)
+    case(
+        "9  an OpenAlex id is an id",
+        problems == [],
+        f"got {problems}",
+    )
+
     miscount = PASSING.replace("resolved 5, unresolved 1, checked 6", "resolved 9, unresolved 0, checked 9")
     problems = check(miscount)
     case(
@@ -298,9 +325,9 @@ def selftest():
 
     print()
     if failures:
-        print(f"{len(failures)} of 7 cases failed: {', '.join(failures)}")
+        print(f"{len(failures)} of 9 cases failed: {', '.join(failures)}")
         return 1
-    print("7 of 7 cases passed")
+    print("9 of 9 cases passed")
     return 0
 
 

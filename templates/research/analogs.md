@@ -3,7 +3,7 @@
 <!-- Written by /research-bearings:scout. One run, one file, five headings.
      This is the breadth artifact: fields that share the problem's shape and
      not its citation graph. The depth artifact - the citation neighbourhood of
-     a question - is research/landscape/<slug>.md, written by /snowball. -->
+     a question - is research/landscape/, written by /landscape. -->
 
 ## Question
 
@@ -32,7 +32,8 @@
      - Shares: <which element of the shape>
      - Searched: `<query>` → <N> rows
      - Papers:
-       - <title> · <year> · S2 `<id>`
+       - <title> · <year> · S2 `<id>`            (or OpenAlex `W…`, arXiv `…`, DOI `…`)
+       - <title> · <year> · _candidate: prefix match only, <nearest title> (S2 `<id>`)_
        - <title> · <year> · _unresolved: not found by title_
      - Transfer: <one paragraph — why the method might move to this problem,
        and what is different about it. Grounded in what the rows say.>
@@ -51,9 +52,11 @@
      `snowball.py verify`, with the counts:
 
      - <title> — resolved, S2 `<id>`
+     - <title> — candidate, nearly: <title verify nearly matched> (<id>)
      - <title> — unresolved, closest: <what the search returned>
 
-     Then: resolved N, unresolved M, checked N+M.
+     Then: resolved N, unresolved M, checked N+M. A candidate counts as
+     unresolved: verify names what it nearly matched and certifies nothing.
 
      An unresolved paper stays in ## Fields, marked. It is not deleted: where
      the model's memory outran the record is information the reader wants. -->
@@ -65,4 +68,6 @@
      zero and reads as though nothing was retrieved. Framed or unframed. Key
      present or not — unkeyed runs rate-limit and may return fewer rows per
      field, which is a degradation and is stamped here, not silently absorbed.
-     Any field whose search returned zero rows after a re-query. -->
+     Which indexes answered and which were degraded (from search's `indexes`
+     block), per research/CONNECTIONS.md. Any field whose search returned zero
+     rows after a re-query. -->

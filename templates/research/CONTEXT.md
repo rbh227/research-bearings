@@ -52,7 +52,7 @@
 
 ## Retrieval
 
-<!-- Whether the retrieval script ran, whether a Semantic Scholar key is
-     present, and the date probed. Goes stale the moment the key changes, which
-     is why it carries a date. The authoritative check is the one
-     /research-bearings:snowball runs at the start of every crawl. -->
+<!-- Whether the retrieval script ran (`health` printed JSON), and the date.
+     The per-source states live in research/CONNECTIONS.md, written by the
+     same setup run from `snowball.py status`; point at it here rather than
+     copying it, so there is one place for a state to go stale. -->

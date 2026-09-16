@@ -5,7 +5,12 @@ A PreToolUse hook on Write|Edit. Agents shipped by this plugin may only write
 under <project>/research/. Everything else — the main thread, other plugins'
 agents, Claude Code's built-in agents — passes through untouched.
 
-  Write|Edit   file_path must resolve under <project>/research/.
+  Write|Edit          file_path must resolve under <project>/research/.
+  WebSearch|WebFetch  denied to every agent this plugin ships except
+                      `searcher`, which may WebSearch as a last resort when
+                      every index returned nothing (docs/APIS.md). The main
+                      thread is not an agent, so /scout's WebFetch of a page
+                      the indexes pointed at passes through.
 
 **It also fenced Bash until 2026-09-14**, to `python3 <plugin>/scripts/retrieval/<x>.py`
 with no shell operators, because `paper-scout` was handed a script instead of a
@@ -27,6 +32,8 @@ import sys
 
 PLUGIN_PREFIX = "research-bearings:"
 WRITE_ROOT = "research"
+# The one agent allowed on the open web, and the one tool it gets there.
+WEB_ALLOWED = {"research-bearings:searcher": ("WebSearch",)}
 
 
 def plugin_root():
@@ -83,7 +90,19 @@ def decide(payload, env):
     tool = payload.get("tool_name") or ""
     if tool in ("Write", "Edit"):
         return decide_write(payload, env)
+    if tool in ("WebSearch", "WebFetch"):
+        return decide_web(agent, tool)
     return None
+
+
+def decide_web(agent, tool):
+    if tool in WEB_ALLOWED.get(agent, ()):
+        return None
+    return (
+        "research-bearings agents read the indexes, not the open web. {} is "
+        "refused for {}. The two exceptions are in docs/APIS.md; anything else "
+        "is a contract change, not a tool change.".format(tool, agent)
+    )
 
 
 def run(stdin_text, env):
@@ -202,6 +221,24 @@ def selftest():
         check("our agent's Bash is not this guard's business",
               json.dumps({"tool_name": "Bash", "agent_type": scout, "cwd": project,
                           "tool_input": {"command": "ls -la"}}), env, False)
+
+        # 15-19. The web fence: searcher may WebSearch, nobody else may, and
+        # nobody at all may WebFetch; the main thread and other plugins pass.
+        def web(agent, tool):
+            return json.dumps({"tool_name": tool, "agent_type": agent, "cwd": project,
+                               "tool_input": {"query": "x", "url": "https://x"}})
+
+        check("searcher's WebSearch is allowed",
+              web("research-bearings:searcher", "WebSearch"), env, False)
+        check("searcher's WebFetch is DENIED",
+              web("research-bearings:searcher", "WebFetch"), env, True)
+        check("another of our agents' WebSearch is DENIED",
+              web("research-bearings:merger", "WebSearch"), env, True)
+        check("main-thread WebFetch is allowed (that is /scout reading a page)",
+              json.dumps({"tool_name": "WebFetch", "cwd": project,
+                          "tool_input": {"url": "https://x"}}), env, False)
+        check("another plugin's agent's WebSearch is allowed",
+              web("Explore", "WebSearch"), env, False)
 
     print()
     if failures:

@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/0iHiynPDyXESvSM6fi+atCrHEaY</id>
+  <title>arXiv Query: search_query=all:"building damage assessment" AND cat:cs.CV&amp;id_list=&amp;start=0&amp;max_results=3</title>
+  <updated>2026-09-16T02:35:02Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=all:%22building+damage+assessment%22+AND+cat:cs.CV&amp;start=0&amp;max_results=3&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>3</opensearch:itemsPerPage>
+  <opensearch:totalResults>50</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2105.07364v1</id>
+    <title>BDANet: Multiscale Convolutional Neural Network with Cross-directional Attention for Building Damage Assessment from Satellite Images</title>
+    <updated>2021-05-16T06:13:28Z</updated>
+    <link href="https://arxiv.org/abs/2105.07364v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2105.07364v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Fast and effective responses are required when a natural disaster (e.g., earthquake, hurricane, etc.) strikes. Building damage assessment from satellite imagery is critical before relief effort is deployed. With a pair of pre- and post-disaster satellite images, building damage assessment aims at predicting the extent of damage to buildings. With the powerful ability of feature representation, deep neural networks have been successfully applied to building damage assessment. Most existing works simply concatenate pre- and post-disaster images as input of a deep neural network without considering their correlations. In this paper, we propose a novel two-stage convolutional neural network for Building Damage Assessment, called BDANet. In the first stage, a U-Net is used to extract the locations of buildings. Then the network weights from the first stage are shared in the second stage for building damage assessment. In the second stage, a two-branch multi-scale U-Net is employed as backbone, where pre- and post-disaster images are fed into the network separately. A cross-directional attention module is proposed to explore the correlations between pre- and post-disaster images. Moreover, CutMix data augmentation is exploited to tackle the challenge of difficult classes. The proposed method achieves state-of-the-art performance on a large-scale dataset -- xBD. The code is available at https://github.com/ShaneShen/BDANet-Building-Damage-Assessment.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="eess.IV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2021-05-16T06:13:28Z</published>
+    <arxiv:comment>arXiv admin note: text overlap with arXiv:2010.14014</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Yu Shen</name>
+    </author>
+    <author>
+      <name>Sijie Zhu</name>
+    </author>
+    <author>
+      <name>Taojiannan Yang</name>
+    </author>
+    <author>
+      <name>Chen Chen</name>
+    </author>
+    <author>
+      <name>Delu Pan</name>
+    </author>
+    <author>
+      <name>Jianyu Chen</name>
+    </author>
+    <author>
+      <name>Liang Xiao</name>
+    </author>
+    <author>
+      <name>Qian Du</name>
+    </author>
+    <arxiv:doi>10.1109/TGRS.2021.3080580</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1109/TGRS.2021.3080580" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2010.14014v2</id>
+    <title>Cross-directional Feature Fusion Network for Building Damage Assessment from Satellite Imagery</title>
+    <updated>2020-11-18T19:07:27Z</updated>
+    <link href="https://arxiv.org/abs/2010.14014v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2010.14014v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Fast and effective responses are required when a natural disaster (e.g., earthquake, hurricane, etc.) strikes. Building damage assessment from satellite imagery is critical before an effective response is conducted. High-resolution satellite images provide rich information with pre- and post-disaster scenes for analysis. However, most existing works simply use pre- and post-disaster images as input without considering their correlations. In this paper, we propose a novel cross-directional fusion strategy to better explore the correlations between pre- and post-disaster images. Moreover, the data augmentation method CutMix is exploited to tackle the challenge of hard classes. The proposed method achieves state-of-the-art performance on a large-scale building damage assessment dataset -- xBD.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-10-27T02:49:52Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Yu Shen</name>
+    </author>
+    <author>
+      <name>Sijie Zhu</name>
+    </author>
+    <author>
+      <name>Taojiannan Yang</name>
+    </author>
+    <author>
+      <name>Chen Chen</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2608.28567v1</id>
+    <title>GeBDA: Building Damage Assessment as Text-Based Sequence Prediction</title>
+    <updated>2026-08-28T17:44:55Z</updated>
+    <link href="https://arxiv.org/abs/2608.28567v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2608.28567v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Conventionally, Building Damage Assessment (BDA) is tackled either with dedicated network architectures or by fine-tuning geospatial image foundation models. In this work, we ask whether a general-purpose Vision-Language Model (VLM) can localize buildings and grade their damage through autoregressive sequence generation alone. We cast BDA as predicting a variable-length set of bounding boxes, each specified by its coordinates and a damage label. Our preliminary implementation, based on the open Gemma model, achieves promising damage mapping results from only bi-temporal satellite images and a suitable text prompt.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-08-28T17:44:55Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Olivier Dietrich</name>
+    </author>
+    <author>
+      <name>Krishna Sapkota</name>
+    </author>
+    <author>
+      <name>Konrad Schindler</name>
+    </author>
+    <author>
+      <name>Genady Beryozkin</name>
+    </author>
+  </entry>
+</feed>

@@ -27,3 +27,17 @@ run.
 - **unresolved**: A paper `verify` could not match. It stays in the file, marked, with the closest thing the search did return. Never deleted: where recall outran the record is what a reader wants to see.
 - **framed** / **unframed**: Whether the run took its problem from `research/QUESTION.md`. Unframed runs are stamped as such, and are a normal way to use the skill.
 - **bound**: Searches times `--limit`, where the searches are the field list the user approves before any of them run. There is no budget and no ledger: a citation walk compounds and needs a ceiling enforced per request, and search does not.
+
+## Connection terms
+
+Added with chunk 4 (2026-09-15), when the retrieval script grew from one index
+to four resolvers and seven probes. `docs/APIS.md` is the reference.
+
+- **source**: One external API the script can talk to. Seven: Semantic Scholar, OpenAlex, Crossref, arXiv, Unpaywall, Hugging Face papers, Zotero.
+- **resolver**: The code in `snowball.py` that turns one source's answers into the unified record. Four exist: `s2`, `openalex`, `crossref`, `arxiv`. The other three sources are probed only.
+- **index**: A source `search` queries for papers by keyword. Two: Semantic Scholar and OpenAlex, merged. arXiv is searched only when asked for by name.
+- **connected** / **connected-no-key** / **not connected**: The three states `status` reports per source, defined in `docs/APIS.md`. Reachable is a state; throttled is not an outage; keyless is never an error.
+- **degraded**: An index that failed inside one `search` call while the other answered. Named in the result, stamped in the file, never silently absorbed.
+- **candidate**: What `verify` calls a prefix or substring title match. Reported with the id it nearly matched, and **never certified**: a candidate line stays unresolved until a human promotes it. Replaces the free-text "NOT the same paper" as the marker.
+- **CONNECTIONS.md**: `research/CONNECTIONS.md`, written by `/setup` from `status --md`. One dated line per source. Every searching skill reads it first and adapts.
+- **web rule**: `WebSearch` and `WebFetch` are allowed in exactly two places, the `searcher` agent's last resort and `/scout` reading a page an index pointed at, and the guard denies both to every other agent this plugin ships.
