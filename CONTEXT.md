@@ -33,7 +33,7 @@ run.
 Added with chunk 4 (2026-09-15), when the retrieval script grew from one index
 to four resolvers and seven probes. `docs/APIS.md` is the reference.
 
-- **source**: One external API the script can talk to. Seven: Semantic Scholar, OpenAlex, Crossref, arXiv, Unpaywall, Hugging Face papers, Zotero.
+- **source**: One external API the scripts can talk to. Nine since chunk 7: Semantic Scholar, OpenAlex, Crossref, arXiv, Unpaywall, Hugging Face, Zotero, GitHub, OpenReview. The first four are resolvers; the rest are read by one verb each or probed only.
 - **resolver**: The code in `snowball.py` that turns one source's answers into the unified record. Four exist: `s2`, `openalex`, `crossref`, `arxiv`. The other three sources are probed only.
 - **index**: A source `search` queries for papers by keyword. Two: Semantic Scholar and OpenAlex, merged. arXiv is searched only when asked for by name.
 - **connected** / **connected-no-key** / **not connected**: The three states `status` reports per source, defined in `docs/APIS.md`. Reachable is a state; throttled is not an outage; keyless is never an error.
@@ -60,7 +60,8 @@ Added with chunk 5 (2026-09-15), the gathering cycle: `/surveys`, `/landscape`, 
 ## Reading terms
 
 Added with chunk 7 (2026-09-16), the reading milestone: `/read` and the seven
-ledger and judgement skills built on the cards it writes.
+ledger and judgement skills built on the cards it writes — `/verify`,
+`/reviews`, `/datasets`, `/groups`, `/audit`, `/bits`, `/critique`.
 
 - **card**: One paper, understood, at `research/papers/<slug>.md`. Sixteen fixed headings. Written by the `scorer` at the end of a `/read` run and edited afterwards only by the skill that owns a section. The unit every skill after this one reads.
 - **pass**: Which of Keshav's three passes the read stopped at, recorded on every card. `full` is the three-agent protocol; `1` is a skim. A skim that does not say it is a skim is a full read to everything downstream, which is why `check_cards` requires the value.

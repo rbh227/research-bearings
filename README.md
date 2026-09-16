@@ -75,7 +75,8 @@ the design is in `docs/design/skills-and-agents.md` and nothing exists yet.
 
 An agent exists where a separate context is the mechanism: a judge that must not
 see how the thing was made, a worker that must see one question and not the
-others, or a writer whose tools are the contract. Each is under 80 lines.
+others, or a writer whose tools are the contract. Each is 75 to 135 lines,
+its heading contract and its refusals table included.
 
 ### Built
 
