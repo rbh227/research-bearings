@@ -114,7 +114,14 @@ and not slugs.
 | Flag | What it does |
 |---|---|
 | `--skim` | Pass one only: the reader alone, from the intro. Cheap, and honest about being cheap. |
-| `--place` | No agents at all. For every card marked `_unplaced_`, find its paper's line in the current matrix and fill the position. A card whose paper is in no cell stays unplaced and is listed. |
+| `--place` | No agents at all. For every card marked `_unplaced_`, find its paper's line in the current matrix **by id** and fill the position. A card whose paper is in no cell stays unplaced and is listed. |
+
+**What `--place` cannot do.** It fills the position and leaves
+`## Same-cell comparison` as `_no matrix_`, with a line saying the card was
+placed afterwards. Placing is a lookup in the matrix; comparing needs the
+paper open and the sibling cards read, which is an agent and a full text. If
+you want the comparison on a card that was written before the matrix existed,
+re-read the paper. Measured 2026-09-16 on the first placed card.
 
 ## Rules
 
@@ -133,6 +140,9 @@ prefix-matched "Attention Is All You Need".
 **Record which pass you stopped at.** — Keshav: most papers deserve pass one,
 and a skim that does not announce itself is a full read to everything
 downstream.
+
+**Place by id, not by title.** — landscape lines carry ids and titles drift;
+the id on the card is what joins it back to its line.
 
 **An unplaced card is better than an invented cell.** — the merger cannot add
 a claim, and neither can this: a card that invents its own matrix position

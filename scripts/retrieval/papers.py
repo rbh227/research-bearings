@@ -30,11 +30,14 @@ import json
 import os
 import re
 import shutil
+import http.client
 import subprocess
 import sys
 import tempfile
 import time
+import urllib.error
 import urllib.parse
+import urllib.request
 from typing import Any
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -44,6 +47,7 @@ from snowball import (  # noqa: E402
     BACKOFF_BASE,
     RETRYABLE,
     S2_FIELDS,
+    TIMEOUT,
     TTL,
     _env,
     cache_dir,
@@ -72,6 +76,7 @@ VERSION = "0.1.0"
 OPENREVIEW_BASE = "https://api2.openreview.net"
 OPENREVIEW_V1 = "https://api.openreview.net"
 HF_BASE = "https://huggingface.co/api"
+AUTHOR_PAGES = 5  # 500 papers; past that, say the list is partial rather than pretend
 OA_AUTHORS = "https://api.openalex.org/authors"
 OA_WORKS = "https://api.openalex.org/works"
 GITHUB_BASE = "https://api.github.com"
@@ -388,6 +393,50 @@ def _fresh(path: str) -> bool:
         return False
 
 
+def _read_body(url: str) -> tuple[int, bytes, str | None]:
+    """One GET, read in 256 KiB chunks, keeping whatever arrives.
+
+    Measured 2026-09-16 on arXiv 2004.07312 (RescueNet, 4,973,168 bytes): a
+    single `response.read()` raises IncompleteRead at exactly 4,194,304 bytes,
+    every time, on every attempt — and the same response read in chunks
+    delivers all 4,973,168. So the failure was the read-all, not the server,
+    and retrying it could never have worked.
+
+    The partial is still kept when IncompleteRead does happen, because half a
+    PDF still holds the pages that arrived. That is the opposite of the right
+    behaviour for JSON, which is why the shared transport discards it and this
+    path does not.
+    """
+    request = urllib.request.Request(
+        url, method="GET",
+        headers={"User-Agent": user_agent(), "Accept": "application/pdf"})
+    got = bytearray()
+    try:
+        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+            while True:
+                try:
+                    chunk = response.read(262144)
+                except http.client.IncompleteRead as exc:
+                    got.extend(exc.partial or b"")
+                    return response.status, bytes(got), f"truncated at {len(got)} bytes"
+                if not chunk:
+                    break
+                got.extend(chunk)
+            return response.status, bytes(got), None
+    except urllib.error.HTTPError as exc:
+        try:
+            return exc.code, exc.read(), None
+        except Exception:  # noqa: BLE001
+            return exc.code, b"", None
+    except http.client.IncompleteRead as exc:
+        got.extend(exc.partial or b"")
+        return 200, bytes(got), f"truncated at {len(got)} bytes"
+    except urllib.error.URLError as exc:
+        return 0, str(exc.reason).encode("utf-8"), None
+    except Exception as exc:  # noqa: BLE001
+        return 0, f"{type(exc).__name__}: {exc}".encode(), None
+
+
 def download(url: str, attempts: int = 2) -> tuple[bytes, str | None]:
     """A PDF is bytes, not JSON, so this goes round `fetch_json` to the one
     attempt underneath and keeps the retry shape by hand. Measured 2026-09-16:
@@ -395,10 +444,11 @@ def download(url: str, attempts: int = 2) -> tuple[bytes, str | None]:
     single slow moment must not cost us the only location we have."""
     problem = ""
     for attempt in range(max(attempts, 1)):
-        status, raw = http_fetch("GET", url, None,
-                                 {"User-Agent": user_agent(), "Accept": "application/pdf"})
+        status, raw, truncated = _read_body(url)
         if status == 200 and raw.startswith(b"%PDF"):
-            return raw, None
+            # A truncated PDF is offered to the extractor anyway: the pages
+            # that arrived are the pages that arrived, and the caller is told.
+            return raw, truncated
         if status == 200:
             head = raw[:200].decode("utf-8", "replace")
             return b"", f"not a PDF (starts {head[:60]!r})"  # a login page will not improve on a retry
@@ -451,11 +501,14 @@ def fetch_paper(value: str, refresh: bool = False) -> dict[str, Any]:
     tried: list[dict[str, str]] = []
     text = ""
     used: dict[str, str] | None = None
+    truncated: str | None = None
     for loc in locations:
         raw, problem = download(loc["url"])
-        if problem:
+        if problem and not raw:
             tried.append({**loc, "problem": problem})
             continue
+        if problem:
+            truncated = problem  # kept, extracted, and named on the record
         handle, tmp = tempfile.mkstemp(suffix=".pdf")
         try:
             with os.fdopen(handle, "wb") as fh:
@@ -483,6 +536,7 @@ def fetch_paper(value: str, refresh: bool = False) -> dict[str, Any]:
         "state": "fetched", "source_url": used["url"], "source": used["source"],
         "extractor": name, "extractor_detail": detail,
         "split": split["split"], "split_heading": split["heading"],
+        "truncated": truncated,
         "pages": text.count(PAGE_BREAK) + 1,
         "chars": len(text), "intro_chars": len(split["intro"]),
         "tried": tried, "paths": paths, "date": today(), "cached": False,
@@ -699,11 +753,40 @@ def datasets(name: str, limit: int = 5, context: str = "") -> dict[str, Any]:
 # authors: who is publishing, and where they are heading
 
 
-def authors(name: str, since: int | None = None, limit: int = 50) -> dict[str, Any]:
+def author_from_paper(name: str, paper: str) -> tuple[str | None, list[str]]:
+    """(authorId, affiliations) for the person of this name ON this paper.
+
+    Measured 2026-09-16: an author search for "Yu Shen" returns a profile with
+    fifty papers since the floor, because the name belongs to several people
+    and the index merges or mis-ranks them. Going through the paper removes the
+    ambiguity entirely — the card already knows which paper it is."""
+    got = s2_get(f"/paper/{urllib.parse.quote(paper, safe=':')}/authors",
+                 params={"fields": "authorId,name,affiliations"})
+    if not isinstance(got, dict) or "error" in got:
+        return None, []
+    wanted = normalised_title(name)
+    for row in got.get("data") or []:
+        candidate = normalised_title(row.get("name") or "")
+        # "Y. Shen" and "Yu Shen" are the same person on the same paper; match
+        # on surname plus a compatible first initial.
+        if candidate == wanted or (
+            candidate.split()[-1:] == wanted.split()[-1:]
+            and candidate[:1] == wanted[:1]
+        ):
+            return row.get("authorId"), row.get("affiliations") or []
+    return None, []
+
+
+def authors(name: str, since: int | None = None, limit: int = 50,
+            paper: str = "") -> dict[str, Any]:
     """One author's recent record. S2 first for its author endpoint, OpenAlex
     when S2 fails or throttles. `since` defaults to three years back, which is
     what "where are they heading" means; older work is already in the
-    landscape."""
+    landscape.
+
+    `paper` is an id the author is known to be on. Pass it: it resolves the
+    person rather than the name, and a common name resolved by search is a
+    different person's publication list."""
     asked = (name or "").strip()
     if not asked:
         return err("authors needs a name or an S2 author id")
@@ -711,30 +794,46 @@ def authors(name: str, since: int | None = None, limit: int = 50) -> dict[str, A
     floor = since or (_dt.date.today().year - 3)
     checked: list[str] = []
     errors: dict[str, str] = {}
+    affiliations: list[str] = []
+    resolved_by = None
 
     ident = asked if asked.isdigit() else None
+    if ident is None and paper:
+        ident, affiliations = author_from_paper(asked, paper)
+        checked.append("s2")
+        if ident:
+            resolved_by = f"paper {paper}"
     if ident is None:
         got = s2_get("/author/search", params={"query": asked, "fields": "authorId,name,affiliations,paperCount",
                                                "limit": 5})
-        checked.append("s2")
+        if "s2" not in checked:
+            checked.append("s2")
         if isinstance(got, dict) and "error" not in got and got.get("data"):
             ident = got["data"][0].get("authorId")
-            affiliations = got["data"][0].get("affiliations") or []
+            affiliations = affiliations or (got["data"][0].get("affiliations") or [])
+            resolved_by = "name search"
         elif isinstance(got, dict) and "error" in got:
             errors["s2"] = got["error"]
-            affiliations = []
-        else:
-            affiliations = []
-    else:
-        affiliations = []
 
     papers: list[dict[str, Any]] = []
+    complete = True
     if ident:
-        got = s2_get(f"/author/{ident}/papers",
-                     params={"fields": "paperId,title,year,venue,externalIds,authors,citationCount",
-                             "limit": 100})
-        if isinstance(got, dict) and "error" not in got:
-            for row in got.get("data") or []:
+        # The author-papers endpoint pages at 100 and does not promise an
+        # ordering. Measured 2026-09-16: taking one page and filtering by year
+        # under-reports a prolific author badly, so this walks up to
+        # AUTHOR_PAGES pages and says so when it stops early.
+        offset = 0
+        for page in range(AUTHOR_PAGES):
+            got = s2_get(f"/author/{ident}/papers",
+                         params={"fields": "paperId,title,year,venue,externalIds,authors,citationCount",
+                                 "limit": 100, "offset": offset})
+            if not isinstance(got, dict) or "error" in got:
+                if isinstance(got, dict):
+                    errors["s2"] = got["error"]
+                complete = False
+                break
+            rows = got.get("data") or []
+            for row in rows:
                 if (row.get("year") or 0) >= floor:
                     papers.append({
                         "title": row.get("title"), "year": row.get("year"),
@@ -742,8 +841,12 @@ def authors(name: str, since: int | None = None, limit: int = 50) -> dict[str, A
                         "ids": {k: v for k, v in (row.get("externalIds") or {}).items() if v},
                         "coauthors": [a.get("name") for a in (row.get("authors") or []) if a.get("name")],
                     })
-        elif isinstance(got, dict):
-            errors["s2"] = got["error"]
+            nxt = got.get("next")
+            if not nxt or not rows:
+                break
+            offset = nxt
+        else:
+            complete = False  # the cap stopped us, not the record
 
     if not papers:
         got = fetch_json("openalex", "GET", f"{OA_AUTHORS}",
@@ -782,11 +885,14 @@ def authors(name: str, since: int | None = None, limit: int = 50) -> dict[str, A
     papers.sort(key=lambda p: (p.get("year") or 0), reverse=True)
     return {
         "asked": asked, "authorId": ident, "since": floor, "date": today(),
+        "resolved_by": resolved_by,
         "affiliations": [a for a in affiliations if a],
         "papers": papers[:limit], "paper_count": len(papers),
         "frequent_coauthors": [{"name": n, "papers": c} for n, c in frequent],
-        "checked": checked, "errors": errors,
+        "checked": checked, "errors": errors, "complete": complete,
         "state": "found" if papers else "nothing since the floor",
+        "note": None if complete else
+                f"stopped at {AUTHOR_PAGES * 100} papers; this author may have more since {floor}",
     }
 
 
@@ -821,6 +927,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("name", help="an author name, or an S2 author id")
     p.add_argument("--since", type=int, default=None, help="year floor; default three years back")
     p.add_argument("--limit", type=int, default=50)
+    p.add_argument("--paper", default="", help="an id this author is on; resolves the person, not the name")
 
     args = ap.parse_args(argv)
     if args.selftest:
@@ -836,7 +943,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "datasets":
         out = datasets(args.name, args.limit, args.context)
     elif args.cmd == "authors":
-        out = authors(args.name, args.since, args.limit)
+        out = authors(args.name, args.since, args.limit, args.paper)
     else:  # pragma: no cover - argparse rejects anything else
         out = err(f"unknown verb: {args.cmd}")
 
@@ -972,14 +1079,40 @@ def selftest() -> int:
           f"got {locs}")
 
     # 8. A downloaded body that is not a PDF is a problem, not text.
-    saved_http = globals()["http_fetch"]
-    globals()["http_fetch"] = lambda *a, **k: (200, b"<html>login required</html>")
+    saved_read = globals()["_read_body"]
+    globals()["_read_body"] = lambda url: (200, b"<html>login required</html>", None)
     try:
         raw, problem = download("https://example.org/p.pdf")
         check("8  an HTML login page is not accepted as a PDF",
               raw == b"" and "not a PDF" in (problem or ""), f"got {problem!r}")
     finally:
-        globals()["http_fetch"] = saved_http
+        globals()["_read_body"] = saved_read
+
+    # 8b. A truncated PDF is kept and named, not discarded. Measured on arXiv
+    # 2004.07312: a single read() stops at 4 MiB where a chunked read does not,
+    # so the retry that "fixed" it could never have worked and the partial is
+    # the only thing that would have.
+    globals()["_read_body"] = lambda url: (200, b"%PDF-1.5 partial", "truncated at 16 bytes")
+    try:
+        raw, problem = download("https://example.org/big.pdf")
+        check("8b a truncated PDF is kept, with the truncation named",
+              raw.startswith(b"%PDF") and "truncated" in (problem or ""), f"got {problem!r}")
+    finally:
+        globals()["_read_body"] = saved_read
+
+    # 8c. A transport failure is retried; a non-PDF body is not.
+    calls = []
+
+    def flaky(url):
+        calls.append(url)
+        return (200, b"%PDF-ok", None) if len(calls) > 1 else (0, b"TimeoutError", None)
+    globals()["_read_body"] = flaky
+    try:
+        raw, problem = download("https://example.org/slow.pdf", attempts=2)
+        check("8c a transport failure is retried once and can succeed",
+              raw == b"%PDF-ok" and len(calls) == 2, f"got {len(calls)} calls, {problem!r}")
+    finally:
+        globals()["_read_body"] = saved_read
 
     # 9. Two papers never share a fetch directory.
     a = fetch_dir(finish({"paperId": "p1", "title": "One", "externalIds": {"ArXiv": "2201.00001"}}))
@@ -1100,6 +1233,51 @@ def selftest() -> int:
         check("15c the floor defaults to three years back",
               out["since"] == _d.date.today().year - 3,
               f"got {out['since']}, wanted {_d.date.today().year - 3}")
+    finally:
+        globals()["s2_get"] = saved_s2_get
+
+    # 15f. A prolific author is paged through, and a cap is declared, not hidden.
+    def paged(path, params=None, **kw):
+        if "/author/search" in path:
+            return {"data": [{"authorId": "a1", "name": "Prolific Person"}]}
+        if "/papers" in path:
+            offset = (params or {}).get("offset", 0)
+            return {"data": [{"paperId": f"p{offset}{i}", "title": "T", "year": 2025,
+                              "authors": [{"name": "Prolific Person"}]} for i in range(100)],
+                    "next": offset + 100}
+        return err("unrouted")
+    globals()["s2_get"] = paged
+    try:
+        out = authors("Prolific Person", since=2023, limit=1000)
+        check("15f a prolific author is paged, and the cap is declared rather than hidden",
+              out["paper_count"] == 500 and out["complete"] is False and "may have more" in (out["note"] or ""),
+              f"got count={out['paper_count']}, complete={out['complete']}")
+    finally:
+        globals()["s2_get"] = saved_s2_get
+
+    # 15d. --paper resolves the person, not the name. Two people share a name;
+    # the one on the card's paper is the one whose record we want.
+    def s2_paper_authors(path, params=None, **kw):
+        if "/authors" in path and "/paper/" in path:
+            return {"data": [{"authorId": "right-one", "name": "Yu Shen",
+                              "affiliations": ["UNC Charlotte"]},
+                             {"authorId": "other", "name": "Chen Chen"}]}
+        if "/author/search" in path:
+            return {"data": [{"authorId": "wrong-one", "name": "Yu Shen", "paperCount": 400}]}
+        if "/papers" in path:
+            return {"data": [{"paperId": "p", "title": "T", "year": 2025, "authors": []}]}
+        return err("unrouted")
+    globals()["s2_get"] = s2_paper_authors
+    try:
+        out = authors("Yu Shen", since=2023, paper="arXiv:2105.07364")
+        check("15d --paper resolves the author through the paper, not a name search",
+              out["authorId"] == "right-one" and out["resolved_by"].startswith("paper")
+              and out["affiliations"] == ["UNC Charlotte"],
+              f"got id={out['authorId']}, by={out.get('resolved_by')}")
+        out = authors("Yu Shen", since=2023)
+        check("15e without --paper it falls back to the name search, and says so",
+              out["authorId"] == "wrong-one" and out["resolved_by"] == "name search",
+              f"got id={out['authorId']}, by={out.get('resolved_by')}")
     finally:
         globals()["s2_get"] = saved_s2_get
 

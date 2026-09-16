@@ -6,9 +6,11 @@ variable that unlocks it, where to get that, and the one-line test that
 something the script can still use, and `status` says which state you are in.
 
 Written 2026-09-15, when the script grew from one index to four resolvers and
-seven probes. Rate limits are the operators' published figures on that date and
-are the kind of fact that goes stale; the script's own spacing is in
-`scripts/retrieval/snowball.py` next to each resolver.
+seven probes. Extended 2026-09-16 with GitHub and OpenReview, for the reading
+milestone's dataset ledger and review notes: nine sources now. Rate limits are
+the operators' published figures on those dates and are the kind of fact that
+goes stale; the script's own spacing is in `scripts/retrieval/snowball.py` next
+to each resolver, and the reading-side verbs are in `papers.py` beside it.
 
 ## The three states
 
@@ -74,7 +76,10 @@ are the kind of fact that goes stale; the script's own spacing is in
 ### Unpaywall (`unpaywall`)
 
 - **Used for:** the open-access location of a DOI, when a skill needs the PDF.
-  Probed by `status`; no verb uses it yet.
+  Read by `papers.py fetch`, after the index PDF and arXiv and before giving
+  up. Without the email, a paper whose only open copy is neither on arXiv nor
+  named by an index comes back `no text`, and `/read` skims it from the
+  abstract.
 - **Env:** `UNPAYWALL_EMAIL`. Required by the API on every call.
 - **Where:** <https://unpaywall.org/products/api> — an email is the whole signup.
 - **Rate:** 100,000 per day.
@@ -84,8 +89,9 @@ are the kind of fact that goes stale; the script's own spacing is in
 
 ### Hugging Face papers (`huggingface`)
 
-- **Used for:** the daily-papers index and which models and datasets cite an
-  arXiv id. Probed by `status`; no verb uses it yet.
+- **Used for:** the hub's dataset search, by `papers.py datasets`: licence,
+  size category, modality, splits, downloads. The daily-papers index is probed
+  and not used. Without the token the same endpoints answer at a lower rate.
 - **Env:** `HF_TOKEN`, sent as a bearer token.
 - **Where:** <https://huggingface.co/settings/tokens>. A read token.
 - **Without it:** the papers endpoints answer anonymously at a lower rate.
@@ -103,6 +109,42 @@ are the kind of fact that goes stale; the script's own spacing is in
 - **Test:** `GET https://api.zotero.org/users/$ZOTERO_USER_ID/items?limit=1`
   (with the header), or `GET https://api.zotero.org/` when there is no key.
 
+### GitHub (`github`)
+
+- **Used for:** the repository behind a dataset, by `papers.py datasets`:
+  licence, stars, last push, description. Reached over the REST API, **never
+  the `gh` command** — the guard admits only this plugin's retrieval scripts in
+  Bash, and widening that fence for one agent is a worse trade than one more
+  HTTP call.
+- **Env:** `GITHUB_TOKEN`, sent as a bearer token. Any classic token with no
+  scopes is enough; nothing here reads private data.
+- **Where:** <https://github.com/settings/tokens>
+- **Rate:** 10 searches a minute unauthenticated, 30 with a token.
+- **Without it:** works, at the lower rate.
+- **Note:** search has no idea what field you are in. Measured 2026-09-16, a
+  bare "xBD" returns an Xbox diagnostic tool above the xView2 solution, which
+  is why the verb takes `--context` and appends it to the GitHub query only.
+- **Test:** `GET https://api.github.com/rate_limit`
+
+### OpenReview (`openreview`)
+
+- **Used for:** a paper's reviews, ratings, author responses and decision, by
+  `papers.py reviews`.
+- **Env:** `OPENREVIEW_USERNAME` and `OPENREVIEW_PASSWORD`, exchanged for a
+  bearer token at `/login`.
+- **Where:** <https://openreview.net/signup> — a free account.
+- **Without it:** partly. **Measured 2026-09-16: `/notes/search` answers
+  anonymously and `/notes?forum=<id>` returns `ChallengeRequiredError`, a bot
+  challenge, on both `api.openreview.net` and `api2.openreview.net`.** So
+  without credentials the verb finds the submission and returns its venue,
+  decision field and url, and reports `login required` for the reviews
+  themselves. That is a state, and `/reviews` records it on the card rather
+  than leaving the section unrun.
+- **Note:** search takes titles, not arXiv ids, and only an exact title match
+  is accepted — a near title is a different submission, and its reviews on
+  this card would be worse than none.
+- **Test:** `GET https://api2.openreview.net/notes/search?term=xbd&limit=1`
+
 ## Which keys help most
 
 In this order, because each one changes what the script can do:
@@ -117,6 +159,10 @@ In this order, because each one changes what the script can do:
 `suggest`. `/setup` copies that into `research/CONNECTIONS.md` and stops. It
 never asks you to go and get one.
 
+`GITHUB_TOKEN` and the OpenReview login are probed and **never suggested**.
+Both sources work unkeyed for what this plugin asks of them, and a suggestion
+list that grows every chunk stops being read.
+
 ## Cache
 
 Every resolver's raw responses are cached under `~/.cache/research-bearings/<resolver>/`,
@@ -125,8 +171,8 @@ keyed by the query, for 30 days. Override the root with `RESEARCH_CACHE_DIR`.
 
 ## Where web search is allowed
 
-`WebSearch` and `WebFetch` are not sources. They are allowed in exactly two
-places: the `searcher` agent, as a last resort when every index above returns
+`WebSearch` and `WebFetch` are not sources. Nine sources are. They are
+allowed in exactly two places: the `searcher` agent, as a last resort when every index above returns
 nothing, with the results labelled web-only and unverified until `verify`
 resolves them; and `/scout`, to read a page one of the indexes pointed at.
 Nowhere else. The write-scope guard denies `WebSearch` and `WebFetch` to every

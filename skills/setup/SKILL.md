@@ -40,7 +40,7 @@ the results. Do this in one batch; it takes seconds.
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" status --md
 ```
 
-It probes every source in `docs/APIS.md` live, seven at once, in a few seconds,
+It probes every source in `docs/APIS.md` live, nine at once, in a few seconds,
 and prints one line per source: `connected`, `connected-no-key`, or
 `not connected`, each with today's date. Copy the template
 `${CLAUDE_PLUGIN_ROOT}/templates/research/CONNECTIONS.md` to
@@ -48,6 +48,14 @@ and prints one line per source: `connected`, `connected-no-key`, or
 `Keys that would help most` block under `## Keys that would help most`,
 verbatim. Then **stop**: say in one sentence which three keys would help and
 where they come from, and move on to step 2.
+
+**Two of the nine are worth a sentence when they are keyless**, because what
+they lose is specific rather than a rate limit. Without `UNPAYWALL_EMAIL`, a
+paper whose only open copy is neither on arXiv nor named by an index comes
+back `no text` and `/read` skims it from the abstract. Without an OpenReview
+login, `/reviews` gets a paper's venue and decision and not its reviews, since
+search answers anonymously and the forum does not. Say that in one line each
+if they are keyless, and still do not wait for either.
 
 A missing key is a state, never an error. Do not ask the user to go and get
 one, do not wait for one, and do not treat `connected-no-key` as a problem to

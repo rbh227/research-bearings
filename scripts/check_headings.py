@@ -28,11 +28,17 @@ CONTRACTS = {
     "templates/research/card.md": ["agents/scorer.md", "skills/read/SKILL.md"],
     "templates/research/prediction.md": ["agents/predictor.md"],
     "templates/research/reading.md": ["agents/reader.md"],
+    "templates/research/reviews.md": ["agents/openreview-reader.md", "skills/reviews/SKILL.md"],
+    "templates/research/datasets.md": ["agents/dataset-scout.md", "skills/datasets/SKILL.md"],
+    "templates/research/groups.md": ["agents/author-tracker.md", "skills/groups/SKILL.md"],
+    "templates/research/bits.md": ["skills/bits/SKILL.md"],
+    "templates/research/critique.md": ["agents/critic.md", "skills/critique/SKILL.md"],
 }
 
 # agent -> the output headings its contract must define
 AGENT_OUTPUTS = {
     "agents/question-critic.md": ["Findings", "Concessions", "Could not determine"],
+    "agents/critic.md": ["Findings", "Concessions", "Could not determine"],
 }
 
 

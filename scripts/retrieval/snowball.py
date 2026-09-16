@@ -95,6 +95,8 @@ ARXIV_BASE = "https://export.arxiv.org/api/query"
 UNPAYWALL_BASE = "https://api.unpaywall.org/v2"
 HF_BASE = "https://huggingface.co/api"
 ZOTERO_BASE = "https://api.zotero.org"
+GITHUB_BASE = "https://api.github.com"
+OPENREVIEW_BASE = "https://api2.openreview.net"
 
 # Fixed by contract, not caller-specified. A caller-chosen field list is a way
 # for one landscape section to become quietly incomparable with the one beside it.
@@ -171,6 +173,9 @@ def keys_present() -> dict[str, bool]:
         "HF_TOKEN": bool(_env("HF_TOKEN")),
         "ZOTERO_API_KEY": bool(_env("ZOTERO_API_KEY")),
         "ZOTERO_USER_ID": bool(_env("ZOTERO_USER_ID")),
+        "GITHUB_TOKEN": bool(_env("GITHUB_TOKEN")),
+        "OPENREVIEW_USERNAME": bool(_env("OPENREVIEW_USERNAME")),
+        "OPENREVIEW_PASSWORD": bool(_env("OPENREVIEW_PASSWORD")),
     }
 
 
@@ -1699,6 +1704,15 @@ PROBES = [
     {"name": "zotero", "resolver": "zotero", "needs": ["ZOTERO_API_KEY", "ZOTERO_USER_ID"],
      "where": "https://www.zotero.org/settings/keys (key and user id are both there)",
      "why": "which of the papers found are already in your library"},
+    # Chunk 7. Both are read by papers.py, both work unkeyed, and neither is
+    # ever suggested: the three keys worth asking for are still chunk 4's.
+    {"name": "github", "resolver": "github", "needs": ["GITHUB_TOKEN"], "suggest": False,
+     "where": "https://github.com/settings/tokens (a classic token with no scopes is enough)",
+     "why": "dataset repositories at 30 searches a minute instead of 10"},
+    {"name": "openreview", "resolver": "openreview",
+     "needs": ["OPENREVIEW_USERNAME", "OPENREVIEW_PASSWORD"], "suggest": False,
+     "where": "https://openreview.net/signup (a free account)",
+     "why": "the reviews themselves; unkeyed, search answers and the forum does not"},
 ]
 
 
@@ -1718,6 +1732,14 @@ def probe_request(name: str) -> tuple[str, dict[str, str]]:
         return (UNPAYWALL_BASE + "/10.1184/R1/8135576.V1?" + urllib.parse.urlencode(q), {})
     if name == "huggingface":
         return (HF_BASE + "/papers/search?q=xbd", {"Authorization": "Bearer " + _env("HF_TOKEN")} if k["HF_TOKEN"] else {})
+    if name == "github":
+        return (GITHUB_BASE + "/rate_limit",
+                {"Authorization": "Bearer " + _env("GITHUB_TOKEN")} if k["GITHUB_TOKEN"] else {})
+    if name == "openreview":
+        # Search, not a forum: measured 2026-09-16, search answers anonymously
+        # and `/notes?forum=` returns a bot challenge. Probing the forum would
+        # report "not connected" for a source that is reachable.
+        return (OPENREVIEW_BASE + "/notes/search?term=xbd&limit=1", {})
     if name == "zotero":
         if k["ZOTERO_API_KEY"] and k["ZOTERO_USER_ID"]:
             return (f"{ZOTERO_BASE}/users/{urllib.parse.quote(_env('ZOTERO_USER_ID'))}/items?limit=1",
@@ -1766,7 +1788,7 @@ def suggest(results: list[dict[str, Any]], n: int = 3) -> list[dict[str, Any]]:
     out = []
     by_name = {p["name"]: p for p in PROBES}
     for r in results:
-        if r["missing"]:
+        if r["missing"] and by_name[r["name"]].get("suggest", True):
             src = by_name[r["name"]]
             out.append({"env": r["missing"], "source": r["name"], "where": src["where"], "why": src["why"]})
         if len(out) == n:
@@ -1775,7 +1797,7 @@ def suggest(results: list[dict[str, Any]], n: int = 3) -> list[dict[str, Any]]:
 
 
 def status() -> dict[str, Any]:
-    """Live. Never reads the cache, one attempt per source, all seven at once.
+    """Live. Never reads the cache, one attempt per source, all nine at once.
     A missing key is a state, not an error: the exit code is 0 whatever comes back."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(PROBES)) as pool:
         results = list(pool.map(probe, PROBES))
@@ -1915,7 +1937,8 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
     os.environ["RESEARCH_CACHE_DIR"] = tempfile.mkdtemp(prefix="snowball-cache-")
     os.environ["RESEARCH_PROJECT_DIR"] = tempfile.mkdtemp(prefix="snowball-project-")
     for name in ("S2_API_KEY", "SEMANTIC_SCHOLAR_API_KEY", "OPENALEX_MAILTO", "OPENALEX_API_KEY",
-                 "CROSSREF_MAILTO", "UNPAYWALL_EMAIL", "HF_TOKEN", "ZOTERO_API_KEY", "ZOTERO_USER_ID"):
+                 "CROSSREF_MAILTO", "UNPAYWALL_EMAIL", "HF_TOKEN", "ZOTERO_API_KEY", "ZOTERO_USER_ID",
+                 "GITHUB_TOKEN", "OPENREVIEW_USERNAME", "OPENREVIEW_PASSWORD"):
         os.environ.pop(name, None)
     # the key file must not leak in either
     globals()["KEY_FILE"] = os.path.join(os.environ["RESEARCH_CACHE_DIR"], "no-such-key")
@@ -2195,8 +2218,8 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
 
     with _fetch(any_host):
         st = status()
-    check("32 status with no keys probes all seven, marks them connected-no-key or connected, and suggests three keys",
-          len(st["sources"]) == 7 and st["not_connected"] == [] and "arxiv" in st["connected"]
+    check("32 status with no keys probes all nine, marks them connected-no-key or connected, and suggests three keys",
+          len(st["sources"]) == 9 and st["not_connected"] == [] and "arxiv" in st["connected"]
           and [s["env"] for s in st["suggest"]] == [["S2_API_KEY"], ["OPENALEX_MAILTO"], ["CROSSREF_MAILTO"]]
           and all(line.startswith("- ") for line in st["lines"]),
           f"got {json.dumps(st)[:400]}")
@@ -2207,6 +2230,19 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
           st2["connected"][:3] == ["semantic-scholar", "openalex", "crossref"]
           and [s["env"] for s in st2["suggest"]] == [["UNPAYWALL_EMAIL"], ["HF_TOKEN"], ["ZOTERO_API_KEY", "ZOTERO_USER_ID"]],
           f"got {st2['suggest']}")
+
+    # 33b. The two chunk-7 sources are probed and never suggested: they are read
+    # by papers.py, both work unkeyed, and the three keys worth asking for are
+    # still chunk 4's. A suggestion list that grows every chunk stops being read.
+    with _environ(S2_API_KEY="k", OPENALEX_MAILTO="a@b", CROSSREF_MAILTO="a@b",
+                  UNPAYWALL_EMAIL="a@b", HF_TOKEN="t", ZOTERO_API_KEY="z", ZOTERO_USER_ID="1"):
+        with _fetch(any_host):
+            st3 = status()
+    names = [s["name"] for s in st3["sources"]]
+    check("33b github and openreview are probed, and never suggested",
+          "github" in names and "openreview" in names and st3["suggest"] == []
+          and st3["not_connected"] == [],
+          f"got suggest={st3['suggest']}, not_connected={st3['not_connected']}")
 
     # 34. Dedupe across sources: DOI form differences and arXiv versions do not make two papers.
     a = finish({"title": "X", "externalIds": {"DOI": "https://doi.org/10.1/ABC"}, "sources": ["s2"], "source": "s2"})

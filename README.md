@@ -32,8 +32,8 @@ ideas survive; nothing runs on compute until you say so.
 | **Gathering** | what exists on it, in your field and in the fields that share its shape | `/surveys` `/landscape` `/scout` |
 | **Processing** | cards, ideas, a ranked list, an experiment | `/read` `/ideas` `/rank` |
 
-Those are the eight commands people type. Five are built; `/read`, `/ideas`
-and `/rank` are designed and not built. Every skill is invoked as
+Those are the eight commands people type. Six are built; `/ideas` and `/rank`
+are designed and not built. Every skill is invoked as
 `/research-bearings:<name>`.
 
 ## Skills
@@ -51,17 +51,17 @@ the design is in `docs/design/skills-and-agents.md` and nothing exists yet.
 - `/surveys` — **built.** One searcher restricted to reviews, then a differ that extracts each survey's own taxonomy and open challenges and harvests vocabulary into `QUESTION.md`. Writes `research/landscape/surveys.md`.
 - `/landscape` — **built.** Seven questions from `QUESTION.md`, seven searchers in parallel, a probe per matrix cell, then a merger that lays the sections side by side. Writes `research/landscape/matrix.md` and `timeslice.md`.
 - `/scout` — **built.** Strips your field's nouns off the problem, names the fields that share its shape, sends one searcher per field with your vocabulary blocked, writes what might transfer. Writes `research/analogs/<slug>.md`.
-- `/datasets` — planned. Dataset rows with split protocol, licence and leakage assessment.
-- `/groups` — planned. Who is publishing on this and where they are heading.
+- `/datasets` — **built.** Dataset names from the cards and the papers' experiments sections, looked up on the Hugging Face hub and GitHub, one row each with split protocol, licence and who uses it. Every line names its source or says `could not determine, checked <hosts>`. Writes `research/landscape/datasets.md`.
+- `/groups` — **built.** The authors on your cards, their last three years, grouped into labs with one checkable sentence each about where they are heading. Writes `research/landscape/groups.md`.
 
 ### Processing
 
-- `/read` — planned. The three-agent read: predict from the abstract, read the full text, score what was non-obvious. Twenty papers at once, cards to `research/papers/`.
-- `/verify` — planned as a skill; the script verb exists. Resolves every reference in a file, exact match only.
-- `/audit` — planned. Leakage flags on cards.
-- `/reviews` — planned. What OpenReview referees pushed on.
-- `/critique` — planned. A fresh-context critic with the concession ladder.
-- `/bits` — planned. One assumption per cluster, from the matrix and the cards.
+- `/read` — **built.** The three-agent read: a predictor that is handed a file ending at the introduction, a reader that gets the whole paper and never the prediction, a scorer that sees both and writes what a careful first reading would have missed. Proposes five papers from the matrix and waits for your yes. `--skim` for a pass-one card. Writes `research/papers/<slug>.md`.
+- `/verify` — **built.** Tags every reference in one file — verified, candidate, or not found with the indexes checked — in place, and never deletes a line.
+- `/audit` — **built.** The eight Kapoor and Narayanan leakage types against one card, each with the passage that supports it or what was checked. One card per run, on request.
+- `/reviews` — **built.** What OpenReview's referees pushed on, onto the card, and the pattern across papers once three cards carry notes.
+- `/critique` — **built.** A fresh-context critic that quotes the passage behind every finding, then scores your rebuttals: evidence not persuasion, concede only at four, never twice in a row.
+- `/bits` — **built.** One assumption per group of cards that share a thesis, with the cards and cells behind it. Groups are recorded and reused, so the file `/ideas` will read does not reshuffle.
 - `/brainstorm` — planned. Persona agents ask their own questions; appends to `IDEAS.md`.
 - `/ideas` — planned. Generate from bits, analogs, contradictions and abandoned directions; every candidate put to the index with the row count it returned.
 - `/premortem` — planned. Why each idea fails, before it is tried.
@@ -84,11 +84,18 @@ others, or a writer whose tools are the contract. Each is under 80 lines.
 - `merger` — laid side by side, what do the sections say, and where do they disagree? Read and Write only, so it cannot add a claim.
 - `survey-differ` — how does each survey carve up the field, and where do the carvings differ? Reads abstracts from the records and says so.
 
+- `predictor` — from the first page alone, what is this paper going to do and where will it be weak? Handed an intro file that ends where the introduction ends, so it cannot read further.
+- `reader` — what does this paper actually do, and what does it change? Writes the delta sentence or says it cannot be written, and compares against the other cards in its matrix cell.
+- `scorer` — what did a careful first reading get wrong? The only agent that sees both notes, which is why the scoring is its job.
+- `openreview-reader` — what did the referees push on, and what did the authors concede? Quotes reviewers rather than paraphrasing them into praise.
+- `dataset-scout` — what is actually in the data this field trains on? Every fact from a host record or a quoted passage, or `could not determine`.
+- `author-tracker` — who is working on this and where are they heading? Every direction sentence checkable against the titles beside it.
+- `leakage-auditor` — could this number be higher than the method deserves? Eight types, every one written, each with a quote or what was checked.
+- `critic` — what is wrong with this file? Fresh context, quotes the passage behind every finding, and scores rebuttals on the ladder.
+
 ### Planned
 
-- `predictor` `reader` `scorer` — the read trio; three contexts so a guess is scored by someone who did not make it.
-- `leakage-auditor` — where does this split leak? `openreview-reader` — what did the referees push on? `critic` — the devil's advocate with a concession ladder.
-- `dataset-scout` `author-tracker` `brief-writer` — the ledgers and the one-pager.
+- `brief-writer` — the Heilmeier one-pager.
 - `persona-ideator` `diversity-planner` — voices from other fields; the agent that names what would make the idea set less self-similar.
 - `premortem-agent` `tournament-judge` — why it fails; which of two is better, with the judge isolated from the generator.
 - `baseline-reproducer` `experiment-designer` `ablation-planner` `variance-checker` `results-tabulator` `results-critic` `failure-mode-auditor` — the experiment stage; Bash and files, no web tools.
@@ -135,11 +142,20 @@ and any web tool except the searcher's last-resort search.
 
 ## Sources and keys
 
-Seven sources, four of them used for retrieval today: Semantic Scholar,
-OpenAlex, Crossref and arXiv. Unpaywall, Hugging Face papers and Zotero are
-probed and reserved for the skills that will need them. Every one works
-without a key, at the unkeyed rate, and the script says which index answered
-each call. Keys are read from the environment: `S2_API_KEY`, `OPENALEX_MAILTO`,
+Nine sources. Four carry retrieval: Semantic Scholar, OpenAlex, Crossref and
+arXiv. Unpaywall finds the open-access PDF a read needs; the Hugging Face hub
+and GitHub fill the dataset ledger; OpenReview carries the reviews; Zotero is
+probed and reserved. Every one works without a key, at the unkeyed rate, and
+the script says which index answered each call.
+
+Two of them degrade in a way worth knowing. Without `UNPAYWALL_EMAIL`, a paper
+whose only open-access copy is not on arXiv comes back `no text` and `/read`
+skims it from the abstract instead. And OpenReview answers search anonymously
+but gates the forum behind a bot challenge, so without a login `/reviews`
+gets the venue and the decision and not the reviews — it reports
+`login required` and carries on.
+
+Keys are read from the environment: `S2_API_KEY`, `OPENALEX_MAILTO`,
 `CROSSREF_MAILTO` and the rest are listed with where to get them and the
 one-line test for each in [`docs/APIS.md`](docs/APIS.md).
 
@@ -156,8 +172,12 @@ Three layers, all in the repo.
 ```bash
 # offline, seconds: the script, the guard, and the three structural checks
 python3 scripts/retrieval/snowball.py --selftest
+python3 scripts/retrieval/papers.py --selftest
 python3 hooks/guard.py --selftest
-python3 scripts/check_headings.py && python3 scripts/check_analogs.py --selftest && python3 scripts/check_landscape.py --selftest
+python3 scripts/check_headings.py \
+  && python3 scripts/check_analogs.py --selftest \
+  && python3 scripts/check_landscape.py --selftest \
+  && python3 scripts/check_cards.py --selftest
 
 # behavioural cases under evals/<case>/, run by Claude Code's eval harness
 claude plugin eval . --case 'frame-*'
@@ -173,10 +193,15 @@ what it says about the design are in [`evals/landscape/README.md`](evals/landsca
 ## Layout
 
 ```
-skills/            setup, frame, surveys, landscape, scout
-agents/            question-critic, searcher, merger, survey-differ
-scripts/retrieval/ snowball.py: status, search, verify, neighborhood, and the resolvers
-scripts/           check_headings.py, check_analogs.py, check_landscape.py
+skills/            setup, frame, surveys, landscape, scout,
+                   read, verify, reviews, datasets, groups, audit, bits, critique
+agents/            question-critic, searcher, merger, survey-differ,
+                   predictor, reader, scorer, openreview-reader,
+                   dataset-scout, author-tracker, leakage-auditor, critic
+scripts/retrieval/ snowball.py: status, search, verify, neighborhood, the resolvers
+                   papers.py:   fetch, reviews, datasets, authors
+scripts/           check_headings.py, check_analogs.py, check_landscape.py,
+                   check_cards.py
 hooks/             the guard: write scope, Bash fence, web fence
 templates/         the file formats; the source of truth for every heading
 docs/APIS.md       sources, keys, rates, one-line tests

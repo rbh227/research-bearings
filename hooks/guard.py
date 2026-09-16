@@ -366,6 +366,54 @@ def selftest():
         check("another plugin's agent's WebSearch is allowed",
               web("Explore", "WebSearch"), env, False)
 
+        # Chunk 7's eight agents. The guard needed no change for them — the
+        # prefix rule already covers every agent this plugin ships — and these
+        # cases are here to prove that rather than to assume it.
+        papers = os.path.join(os.path.dirname(script), "papers.py")
+        check("dataset-scout may run the second retrieval script",
+              bash("research-bearings:dataset-scout",
+                   'python3 "{}" datasets "xBD" --context "building damage"'.format(papers)),
+              env, False)
+        check("dataset-scout's `gh` is DENIED, which is why datasets goes over REST",
+              bash("research-bearings:dataset-scout", "gh search repos xBD"), env, True)
+        # The guard lets any of our agents run the retrieval scripts. What
+        # stops the predictor is its frontmatter, which grants no Bash — so
+        # that is what gets checked, in the file, rather than assumed.
+        import re as _re
+        agents_dir = os.path.join(plugin_root(), "agents")
+        for name, forbidden in (("predictor", ("Bash", "WebSearch", "WebFetch")),
+                                ("reader", ("Bash", "WebSearch", "WebFetch")),
+                                ("scorer", ("Bash", "WebSearch", "WebFetch")),
+                                ("openreview-reader", ("Bash", "WebSearch", "WebFetch")),
+                                ("author-tracker", ("Bash", "WebSearch", "WebFetch")),
+                                ("leakage-auditor", ("Bash", "WebSearch", "WebFetch")),
+                                ("critic", ("Bash", "WebSearch", "WebFetch")),
+                                ("dataset-scout", ("WebSearch", "WebFetch"))):
+            path = os.path.join(agents_dir, name + ".md")
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    head = fh.read(2000)
+            except OSError:
+                head = ""
+            granted = _re.search(r"^tools:\s*(.+)$", head, _re.M)
+            tools = [t.strip() for t in (granted.group(1) if granted else "").split(",")]
+            ok = bool(granted) and not any(f in tools for f in forbidden)
+            print("  {} {} grants none of {}".format("PASS" if ok else "FAIL", name, ", ".join(forbidden)))
+            if not ok:
+                failures.append("{} frontmatter grants {}".format(name, tools))
+        check("critic's Write outside research/ is DENIED",
+              payload("research-bearings:critic", "/tmp/critique.md"), env, True)
+        check("critic's Write into research/critiques/ is allowed",
+              payload("research-bearings:critic",
+                      os.path.join(project, "research", "critiques", "card-2026-09-16.md")),
+              env, False)
+        for agent in ("predictor", "reader", "scorer", "openreview-reader",
+                      "dataset-scout", "author-tracker", "leakage-auditor", "critic"):
+            check("{}'s WebSearch is DENIED".format(agent),
+                  web("research-bearings:" + agent, "WebSearch"), env, True)
+            check("{}'s WebFetch is DENIED".format(agent),
+                  web("research-bearings:" + agent, "WebFetch"), env, True)
+
     print()
     if failures:
         print("{} FAILED: {}".format(len(failures), ", ".join(failures)))

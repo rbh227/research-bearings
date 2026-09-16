@@ -47,6 +47,17 @@ question. Two reviewers raising the same thing is worth saying so.
 A missing record is a fact about OpenReview, not about the paper: most venues
 are not on it at all. Never write that a paper was unreviewed.
 
+## The field file's four headings
+
+Written only once three or more cards carry review notes.
+
+| Heading | What goes in it |
+|---|---|
+| `## What the referees keep asking for` | One `###` per objection appearing on two or more papers, most frequent first, each with the papers, a short quote, and who conceded. |
+| `## What was conceded` | What authors actually changed when pushed, one line each with its card. The cheapest signal about which objections the field takes seriously. |
+| `## Decisions` | One line per paper with a record: slug, venue, decision, ratings. A gated forum says so rather than standing blank. |
+| `## Status` | Date, cards read, records found, no-record, gated, and the login state of the run. |
+
 ## You must not
 
 Soften an objection. Write "the reviewers were positive overall" — ratings say

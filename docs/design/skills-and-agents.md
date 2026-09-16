@@ -35,9 +35,9 @@ Human gate: the question. Nothing downstream runs without `QUESTION.md`.
 | `/snowball` | ~~`paper-scout`~~ | ~~`landscape/<slug>.md`~~ | Ré (snowball, asymptote 25–35, group by thesis), Wohlin (snowballing as sampling). Shipped in chunk 2, **deleted 2026-09-14** with its agent, its template and its nine-case eval tier. It was the depth tool — it walks the citation neighbourhood of a question — and the plugin turned out to want breadth. In git at 249188a, along with the hops, the budget ledger and the Bash fence that existed for its agent. |
 | `/surveys` | `searcher` ×1, `survey-differ` | `landscape/surveys.md` | Petersen (mapping studies), vocabulary harvest. **Shipped in chunk 5** (`docs/design/chunk-05-gathering.md`). The searcher runs in survey mode; the differ reads abstracts from the records and says so. |
 | `/landscape` | `searcher` ×7, `merger` | `landscape/matrix.md`, `timeslice.md` | Ré, Wohlin, Kuhn (contradictions as seeds). **Shipped in chunk 5.** Seven questions, one gate, seven walks in parallel, a cell probe per axis pair, then the merger. |
-| `/datasets` | `dataset-scout` | `landscape/datasets.md` | Kapoor (leakage in standard splits) |
-| `/groups` | `author-tracker` | `landscape/groups.md` | goal: competitive landscape. Who is publishing, where they are heading. Hamming is a secondary source, not the reason. |
-| `/bits` | — | `BITS.md` | Ré (every cluster has a bit) |
+| `/datasets` | `dataset-scout` | `landscape/datasets.md` | Kapoor (leakage in standard splits). **Shipped in chunk 7.** Names from the cards and from the papers' experiments sections; Hugging Face and GitHub over REST, never the `gh` command, because the guard admits only the retrieval scripts in Bash. Every line names its source or says `could not determine, checked <hosts>`. |
+| `/groups` | `author-tracker` | `landscape/groups.md` | goal: competitive landscape. Who is publishing, where they are heading. Hamming is a secondary source, not the reason. **Shipped in chunk 7.** Card authors only, three years back: an author list scraped off a whole landscape is thousands of names and no signal. |
+| `/bits` | — | `BITS.md` | Ré (every cluster has a bit). **Shipped in chunk 7.** The landscape has no thesis groups to inherit — sections are per question and cells are formulation by regime — so `/bits` forms them and **records** them, and later runs reuse rather than recompute. A file whose groups reshuffle every run is one `/ideas` cannot build on. |
 | `/watch` | — | matrix updates | **deferred to milestone 5.** No sheet source and no goal it uniquely serves, and the agent it named is gone. |
 
 ~~`paper-scout` is the agent to get right first.~~ Deleted 2026-09-14 with `/snowball`; **replaced 2026-09-15 by `searcher`**, which authors no prose at all: it pastes the lines the script ranked, and the only thing it may add is a remembered paper that `verify` matched exactly. `/scout` now dispatches it too, one per analog field, with the home vocabulary blocked at the script.
@@ -64,10 +64,10 @@ Presentation carries the same weight as gathering, because unclear output was th
 
 | Skill | Agents | Output | Justification |
 |---|---|---|---|
-| `/read` | `predictor`, `reader`, `scorer` | `papers/<slug>.md` | Keshav (three passes), Mensh/Kording (central contribution, delta sentence), prediction-as-test, Olah (explain it back) |
-| `/audit` | `leakage-auditor` | leakage flags on cards | Kapoor/Narayanan (leakage taxonomy) |
-| `/reviews` | `openreview-reader` | review notes on cards | reviewers say what authors will not; three papers of OpenReview reviews show what the field's referees push on. Nearly free: OpenReview has a public API, so this is a second small script beside the walker, not a server. Not in the sheet. |
-| `/critique` | `critic` | critique report | devil's advocate concession ladder, generator ≠ judge |
+| `/read` | `predictor`, `reader`, `scorer` | `papers/<slug>.md` | Keshav (three passes), Mensh/Kording (central contribution, delta sentence), prediction-as-test, Olah (explain it back). **Shipped in chunk 7** (`docs/design/chunk-07-understanding.md`). Five papers a run behind a confirm; predictor and reader in parallel, scorer after; `--skim` for pass one; `--place` for cards written before a matrix existed. |
+| `/audit` | `leakage-auditor` | leakage flags on cards | Kapoor/Narayanan (leakage taxonomy). **Shipped in chunk 7.** One card per run, on request: reading does not pay for an auditor on papers that never become a baseline. Eight types written every time, each with a quote or what was checked. |
+| `/reviews` | `openreview-reader` | review notes on cards | reviewers say what authors will not; three papers of OpenReview reviews show what the field's referees push on. **Shipped in chunk 7**, as a verb in the second script beside the walker, not a server. Less free than expected: measured 2026-09-16, OpenReview answers `/notes/search` anonymously and gates `/notes?forum=` behind a bot challenge, so without a login the skill gets the submission, venue and decision and reports `login required` for the reviews. |
+| `/critique` | `critic` | critique report | devil's advocate concession ladder, generator ≠ judge. **Shipped in chunk 7.** One file of any kind under `research/`; every finding quotes the passage it attacks; the critiqued file is never edited. |
 
 The three-agent read protocol is the sheet's own design: `predictor` sees only title, abstract, intro and commits predictions; `reader` sees the whole paper and never sees the prediction; `scorer` sees both and writes what was non-obvious. Separate contexts are the point.
 
@@ -172,7 +172,7 @@ Only two rows fail both tests: `/watch` (milestone 5 anyway) and `/handoff`.
 | Stage | Agents |
 |---|---|
 | Landscape and presentation | 6 (`searcher`, `survey-differ`, `merger` built; `brief-writer`, `dataset-scout`, `author-tracker` planned) |
-| Reading | 6 (`predictor`, `reader`, `scorer`, `leakage-auditor`, `openreview-reader`, `critic`) |
+| Reading | 6 (`predictor`, `reader`, `scorer`, `leakage-auditor`, `openreview-reader`, `critic`) — **all six built in chunk 7**, with `dataset-scout` and `author-tracker` from the landscape row |
 | Ideation | 2 (`persona-ideator`, `diversity-planner`) — was 7; `analog-scout`, `field-carder`, `transfer-checker`, `flip-generator` and `novelty-checker` collapsed into `/scout`, which has no agents |
 | Selection | 2 (`premortem-agent`, `tournament-judge`) |
 | Experiment | 7 (`baseline-reproducer`, `experiment-designer`, `ablation-planner`, `variance-checker`, `results-tabulator`, `results-critic`, `failure-mode-auditor`) |
