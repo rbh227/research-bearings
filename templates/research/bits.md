@@ -45,9 +45,21 @@
 
 ## Too thin to name a bit
 
-<!-- One line per group holding a single card: the group, the card, and what
-     the assumption would be if a second card supported it. A bit from one
-     paper is that paper's design choice, not the field's assumption. -->
+<!-- Two kinds of thing land here, and both are "not a bit yet".
+
+     A group holding a single card: one line with the group, the card, and
+     what the assumption would be if a second card supported it.
+
+     A candidate assumption carried by one card, even where its group has
+     several: the same ### block a bit gets, with `n = 1. Not yet a bit.` and
+     a line saying what a second card would do to it — promote it, or kill
+     it. This shape was added 2026-09-16 after a critique separated a
+     two-part assumption whose second half rested on one card while the first
+     rested on three.
+
+     A bit from one paper is that paper's design choice, not the field's
+     assumption. Writing it here rather than under ## Bits is the difference
+     between a candidate and a claim. -->
 
 ## Status
 

@@ -168,6 +168,18 @@ measurement beside it.
   and appends it to the GitHub query only, since hub ids are already
   namespaced.
 
+**The critic found four real problems in a file written in the main thread an
+hour earlier.** Pointed at `BITS.md`, it caught a group whose thesis
+("one network trained end to end") was contradicted by one of its own cards, a
+card marked `_not read_` used as evidence about what a paper does not state, a
+two-part assumption whose halves had different support, and an ellipsis that
+lost which paper concatenates and which subtracts. All four were correct and
+all four are fixed. The ladder ran twice and scored both rebuttals 1, because
+both were agreements dressed as rebuttals and an admission is not evidence
+against a finding; on the first it also caught an error inside the rebuttal.
+Two ladder rules — never concede twice in a row, and the runaway-agreement
+flag — need the critic to concede and therefore did not fire.
+
 **`/reviews` ran into its own limit, honestly.** Three real papers gave three
 different states: two `no record`, one `login required` with the venue and url
 still named. That is the whole state table exercised without credentials, and
@@ -183,3 +195,11 @@ the cards say which of the three happened and when.
   `login required` is offline-tested against fixtures and unexercised live.
 - `--place` leaves the same-cell comparison unfilled. Filling it needs a
   re-read, and the skill says so rather than pretending a lookup can do it.
+- Two of the concession ladder's rules have never fired: "never concede twice
+  in a row" and the runaway-agreement flag both need the critic to concede,
+  and across four findings it conceded nothing. Both are in `agents/critic.md`
+  with their conditions; neither is exercised live.
+- `/bits` has been verified to reuse recorded groups and never dissolve one,
+  including across a full rewrite of its bits. It has **not** been shown
+  assigning a genuinely new card or starting a group marked new: there are
+  three cards and no fourth, and a fake one would have tested nothing.
