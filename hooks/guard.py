@@ -381,6 +381,8 @@ def selftest():
         # that is what gets checked, in the file, rather than assumed.
         import re as _re
         agents_dir = os.path.join(plugin_root(), "agents")
+        # Chunk 8's persona-ideator and diversity-planner join the list: they ask
+        # and plan rather than retrieve, so neither is granted Bash either.
         for name, forbidden in (("predictor", ("Bash", "WebSearch", "WebFetch")),
                                 ("reader", ("Bash", "WebSearch", "WebFetch")),
                                 ("scorer", ("Bash", "WebSearch", "WebFetch")),
@@ -388,6 +390,8 @@ def selftest():
                                 ("author-tracker", ("Bash", "WebSearch", "WebFetch")),
                                 ("leakage-auditor", ("Bash", "WebSearch", "WebFetch")),
                                 ("critic", ("Bash", "WebSearch", "WebFetch")),
+                                ("persona-ideator", ("Bash", "WebSearch", "WebFetch")),
+                                ("diversity-planner", ("Bash", "WebSearch", "WebFetch")),
                                 ("dataset-scout", ("WebSearch", "WebFetch"))):
             path = os.path.join(agents_dir, name + ".md")
             try:
@@ -408,11 +412,26 @@ def selftest():
                       os.path.join(project, "research", "critiques", "card-2026-09-16.md")),
               env, False)
         for agent in ("predictor", "reader", "scorer", "openreview-reader",
-                      "dataset-scout", "author-tracker", "leakage-auditor", "critic"):
+                      "dataset-scout", "author-tracker", "leakage-auditor", "critic",
+                      "persona-ideator", "diversity-planner"):
             check("{}'s WebSearch is DENIED".format(agent),
                   web("research-bearings:" + agent, "WebSearch"), env, True)
             check("{}'s WebFetch is DENIED".format(agent),
                   web("research-bearings:" + agent, "WebFetch"), env, True)
+
+        # Chunk 8's two agents write under research/ideas/ and nowhere else. The
+        # loops above already cover their tools; these are the write scope.
+        for name in ("persona-ideator", "diversity-planner"):
+            check("{}'s Write outside research/ is DENIED".format(name),
+                  payload("research-bearings:" + name, "/tmp/ideas.md"), env, True)
+        check("persona-ideator's Write into research/ideas/personas/ is allowed",
+              payload("research-bearings:persona-ideator",
+                      os.path.join(project, "research", "ideas", "personas", "funder.md")),
+              env, False)
+        check("diversity-planner's Write into research/ideas/ is allowed",
+              payload("research-bearings:diversity-planner",
+                      os.path.join(project, "research", "ideas", "plans", "diversity-2026-09-16.md")),
+              env, False)
 
     print()
     if failures:

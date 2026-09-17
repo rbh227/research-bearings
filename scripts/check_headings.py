@@ -33,6 +33,10 @@ CONTRACTS = {
     "templates/research/groups.md": ["agents/author-tracker.md", "skills/groups/SKILL.md"],
     "templates/research/bits.md": ["skills/bits/SKILL.md"],
     "templates/research/critique.md": ["agents/critic.md", "skills/critique/SKILL.md"],
+    "templates/research/ideas-log.md": ["skills/brainstorm/SKILL.md", "skills/ideas/SKILL.md"],
+    "templates/research/idea.md": ["skills/ideas/SKILL.md"],
+    "templates/research/persona.md": ["agents/persona-ideator.md"],
+    "templates/research/diversity.md": ["agents/diversity-planner.md"],
 }
 
 # agent -> the output headings its contract must define

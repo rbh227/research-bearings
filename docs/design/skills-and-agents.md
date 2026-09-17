@@ -82,7 +82,13 @@ The three-agent read protocol is the sheet's own design: `predictor` sees only t
 | `/brainstorm` | `persona-ideator` ×4–6 | appends to `IDEAS.md` | STORM (personas ask their own questions), Polya (transformations), Hamming |
 | `/ideas` | `diversity-planner`, + the loop | `ideas/<slug>.md`, appends to `IDEAS.md` | Nova (iterative retrieval planning), narrow-exploration study (diversity threshold), negative space (abandoned directions), Kuhn (contradictions as seeds) |
 
-**`IDEAS.md` is the running idea log** (Schulman). `/brainstorm`, `/flip` and `/ideas` all append to it, so ideas accumulate across sessions instead of dying with one run.
+**Both shipped in chunk 8** (2026-09-16), with `check_ideas.py` over the pages and the log. Two decisions the chunk made:
+
+**Personas come from the record, with a warrant.** A persona is drawn from the decision-maker in `QUESTION.md`, a lab in the groups ledger, a venue on the cards, a dataset producer, or an adjacent field on an analog page, and carries the line it came from. With none of those files it falls back to STORM's five roles and is stamped unwarranted. An invented affiliation generates requirements nobody has.
+
+**The diversity rule is counted, not computed.** The measured rule is "refuse to stop while the set is less diverse than the field's own recent papers", and nothing here computes similarity — that decision struck `similarity.py` in chunk 3 and it stands. So `/ideas` may not stop while every surviving candidate shares one seed kind, or while every candidate's nearest-existing came back from a home-vocabulary query; the per-seed-kind and per-field counts go in `## Status` every run. A threshold with no measurement behind it would be decorative, and a decorative safety check is worse than none (prior art: the budget `/scout` passed and never charged).
+
+**`IDEAS.md` is the running idea log** (Schulman). `/brainstorm` and `/ideas` both append to it, so ideas accumulate across sessions instead of dying with one run. It is append-only: an increment is logged under `## Dropped` with the counts behind it, never deleted.
 
 **Anomalies as seeds** (Beveridge, Kuhn): `/ideas` reads the merger's contradiction list as an explicit seed source, alongside bits, analogs, abandoned directions and personas.
 
@@ -162,7 +168,7 @@ Only two rows fail both tests: `/watch` (milestone 5 anyway) and `/handoff`.
 
 | Gap | Fix |
 |---|---|
-| Schulman's running idea log | `IDEAS.md`, appended by `/brainstorm`, `/flip`, `/ideas` |
+| Schulman's running idea log | `IDEAS.md`, appended by `/brainstorm` and `/ideas` |
 | Beveridge and Kuhn: anomalies as seeds | `/ideas` reads the merger's contradiction list as a seed source |
 | Uzzi's typicality | stays a written note, never computed. Deliberate. |
 | PaperQA2 contradiction detection at read time | one line in `reader`: compare against other cards in the same matrix cell, flag incompatibility |

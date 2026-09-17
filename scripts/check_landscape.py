@@ -25,25 +25,14 @@ import os
 import re
 import sys
 
+# The file shape every checker shares. checklib.py holds these so four checkers
+# cannot drift apart; what only this checker asks stays below.
+from checklib import PAPER_LINE, sections, banned_words
+
 MATRIX_HEADINGS = ("Axes", "Matrix", "Cells", "Contradictions", "Sources", "Status")
 SECTION_HEADINGS = ("Question", "Foundational", "Current", "Surveys", "What was searched", "What returned nothing")
-BANNED = ("unexplored", "gap", "novel", "nobody")
-PAPER_LINE = re.compile(r"^\s*-\s+.+\s·\s")
 ZERO_LINE = re.compile(r"^\s*-\s+query\s+`[^`]+`\s+returned\s+.*\brows\b", re.I)
 CHECKED = re.compile(r"·\s*verified\b|_candidate:")
-
-
-def sections(text):
-    """{heading: body}, comments stripped so template guidance never counts."""
-    text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
-    out, current = {}, None
-    for line in text.splitlines():
-        if line.startswith("## "):
-            current = line[3:].strip()
-            out[current] = []
-        elif current is not None:
-            out[current].append(line)
-    return {k: "\n".join(v) for k, v in out.items()}
 
 
 def title_of(line):
@@ -74,13 +63,10 @@ def authored_only(text):
 
 
 def absence_claims(text, where):
-    out = []
-    body = authored_only(text).lower()
-    for word in BANNED:
-        for m in re.finditer(rf"\b{word}\b", body):
-            line = body[:m.start()].count("\n") + 1
-            out.append(f"{where} line {line}: '{word}' — absence is mechanical here; a cell is a query and a count")
-    return out
+    return [
+        f"{where} line {line}: '{word}' — absence is mechanical here; a cell is a query and a count"
+        for word, line in banned_words(authored_only(text))
+    ]
 
 
 def check(matrix_text, section_texts):

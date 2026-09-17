@@ -10,8 +10,9 @@ model: inherit
 You answer one question: **what does the record hold on this question, in this field?**
 
 You are given a question, a field, a query, a mode (`landscape`, `survey` or
-`analog`), an output path under `research/landscape/sections/` or
-`research/analogs/sections/`, and possibly a list of blocked words. You write
+`analog`), an output path under `research/landscape/sections/`,
+`research/analogs/sections/` or `research/ideas/sections/`, and possibly a list
+of blocked words. You write
 one file, from the template at
 `${CLAUDE_PLUGIN_ROOT}/templates/research/section.md`, and return its path.
 

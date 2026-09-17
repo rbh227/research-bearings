@@ -33,30 +33,17 @@ import os
 import re
 import sys
 
+# The file shape every checker shares. checklib.py holds these so four checkers
+# cannot drift apart; what only this checker asks stays below.
+from checklib import PAPER_LINE, CANDIDATE, sections, banned_words
+
 HEADINGS = ("Question", "Shape", "Fields", "Verification", "Status")
 MIN_FIELDS = 5
 UNRESOLVED = "_unresolved: not found by title_"
-BANNED = ("unexplored", "gap", "novel", "nobody")
-# "- <title> · <year> · ..." — the shape of a paper line under ## Fields.
-PAPER_LINE = re.compile(r"^\s*-\s+.+\s·\s")
+# The four id forms a resolved paper line may carry.
 ID_ON_LINE = re.compile(r"S2 `[^`]+`|arXiv `[^`]+`|DOI `[^`]+`|OpenAlex `[^`]+`")
 # verify's near match: reported, never certified. A line carrying it is
 # checked, and stays in the file as a candidate rather than a citation.
-CANDIDATE = "_candidate:"
-
-
-def sections(text):
-    """Split on ## headings; returns {name: body}. Comments are stripped, so a
-    template's own guidance never counts as content."""
-    text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
-    out, current = {}, None
-    for line in text.splitlines():
-        if line.startswith("## "):
-            current = line[3:].strip()
-            out[current] = []
-        elif current is not None:
-            out[current].append(line)
-    return {k: "\n".join(v) for k, v in out.items()}
 
 
 def vocabulary(project):
@@ -153,16 +140,11 @@ def authored_only(text):
 def absence_claims(text):
     """Where the file says the field lacks something, rather than what the
     search returned."""
-    out = []
-    body = authored_only(text).lower()
-    for word in BANNED:
-        for m in re.finditer(rf"\b{word}\b", body):
-            line = body[:m.start()].count("\n") + 1
-            out.append(
-                f"line {line}: '{word}' — absence is mechanical here; "
-                "report what the search returned and let the reader conclude"
-            )
-    return out
+    return [
+        f"line {line}: '{word}' — absence is mechanical here; "
+        "report what the search returned and let the reader conclude"
+        for word, line in banned_words(authored_only(text))
+    ]
 
 
 PASSING = """# Per-region change on paired overhead imagery

@@ -2,7 +2,7 @@
 """Structural check on a paper card, the output of /research-bearings:read.
 
 Chunk 7 ships no evals. This is the whole automated done-check for a card, and
-like the other two checkers it is built to run in a second: everything it asks
+like the other checkers it is built to run in a second: everything it asks
 can be decided by looking, so nothing here needs a model.
 
 What it enforces, and why each one is here:
@@ -36,6 +36,11 @@ import os
 import re
 import sys
 
+# The file shape every checker shares: ## sections, the paper-line form, and the
+# three tags /verify writes. checklib.py holds them so four checkers cannot
+# drift apart; what only this checker asks stays below.
+from checklib import REFERENCE_LINE, VERIFIED, CANDIDATE, NOT_FOUND, sections
+
 HEADINGS = (
     "Identity", "Matrix position", "Delta", "Bit flipped", "Not compared against",
     "Kill experiment", "Data and split", "Reproduction", "What to steal",
@@ -48,29 +53,8 @@ NOT_RUN = "_not run_"
 CANNOT = "_cannot be written_"
 UNPLACED = "_unplaced_"
 
-# "- <title> · <year> · ..." — the reference line shape, shared with sections.
-REFERENCE_LINE = re.compile(r"^\s*-\s+.+\s·\s")
-# The three tags /verify writes. A reference carrying none of them is unchecked.
-VERIFIED = re.compile(r"·\s*verified\s*$")
-CANDIDATE = "_candidate:"
-NOT_FOUND = "_not found:"
-
 PASS_LINE = re.compile(r"^\s*-\s*Read:.*\bpass\s+(1|full)\b", re.I | re.M)
 CELL_LINE = re.compile(r"^\s*-\s*Cell:\s*`[^`]+`", re.M)
-
-
-def sections(text):
-    """Split on ## headings; returns {name: body}. Comments are stripped, so a
-    template's own guidance never counts as content."""
-    text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
-    out, current = {}, None
-    for line in text.splitlines():
-        if line.startswith("## "):
-            current = line[3:].strip()
-            out[current] = []
-        elif current is not None:
-            out[current].append(line)
-    return {k: "\n".join(v) for k, v in out.items()}
 
 
 def check(text):
