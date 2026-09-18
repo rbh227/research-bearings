@@ -1,7 +1,7 @@
 # 04: `/spec`, the Heilmeier page
 
 Type: task
-Status: ready-for-agent
+Status: done
 Blocked by: 02, 03
 
 ## What to build
@@ -32,9 +32,45 @@ planned.
 
 ## Acceptance
 
-- [ ] All eight Heilmeier questions are answered in eight paragraphs on one page.
-- [ ] Every factual sentence carries its source file, and `## Sources` lists them.
-- [ ] The midterm and final checks are dated and testable.
-- [ ] A page over about 800 words is reported as still a brainstorm.
-- [ ] The skill refuses an idea with no pre-mortem and says which one is missing.
-- [ ] No agent is dispatched.
+- [x] All eight Heilmeier questions are answered in eight paragraphs on one page.
+- [x] Every factual sentence carries its source file, and `## Sources` lists them.
+- [x] The midterm and final checks are dated and testable.
+- [x] A page over about 800 words is reported as still a brainstorm.
+- [x] The skill refuses an idea with no pre-mortem and says which one is missing.
+- [x] No agent is dispatched.
+
+## Resolution
+
+2026-09-18. `templates/research/heilmeier.md`, `skills/spec/SKILL.md`. Heading
+parity green. No agents, as specified.
+
+**No agent, and the skill says why.** An agent here would have to be handed
+every file and could still answer question 2 from training rather than from a
+card. The sourcing IS the work, so it happens in the main thread where the files
+already are.
+
+**An unsourced sentence may exist; it may not be invisible.** The alternative
+rules both fail: forbidding them produces a page that omits what is true but
+uncited, and allowing them silently produces a hallucination with eight
+headings. So they are written as `not established in the cards I read` in place
+and listed under `## Sources` as `unsourced:`.
+
+**The risks paragraph is the pre-mortem's paragraph.** It is drawn from
+`## What would have to be true that probably is not` and `## Verdict`, cited, and
+the skill refuses an idea with no pre-mortem for exactly this reason: question 5
+would otherwise be written from imagination. A risks section gentler than the
+judge it came from is the page overruling its judge with no new evidence, and
+that gets its own refusals row.
+
+**The one-page test is reported, never enforced.** The skill counts the eight
+answers and writes the verdict; it does not trim. A page cut to fit and a page
+that fit are different findings, and only one of them means the idea is
+understood.
+
+**Two refusals and one warning.** No pre-mortem and `not executable as written`
+both refuse. Not appearing in `RANKING.md` is a warning and the page is still
+written — an unranked idea is a workflow state, not a defect in the idea.
+
+**`/brief` is retired here, not deferred.** Milestone 2 deferred "the Heilmeier
+one-pager" under that name; this is that page. The skill says so, and ticket 11
+removes `/brief` from the planned list.
