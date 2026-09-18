@@ -67,7 +67,7 @@ import sys
 
 # The file shape every checker shares. checklib.py holds these so five checkers
 # cannot drift apart; what only this checker asks stays below.
-from checklib import sections
+from checklib import pages_under, sections
 
 EXPERIMENT_HEADINGS = (
     "Hypothesis",
@@ -308,16 +308,8 @@ def check(text):
         return ["this page has both ## Stop rule and ## Verdict: an experiment page is "
                 "never edited after a run, so a result belongs in its own dated file"]
     return ["cannot tell whether this is an experiment page or a result page: "
-            "it has neither ## Stop rule nor ## Verdict"]
+            "it carries none of either page's headings, or as many of one as the other"]
 
-
-def pages_under(arg):
-    if os.path.isdir(arg):
-        return sorted(
-            os.path.join(arg, n) for n in os.listdir(arg)
-            if n.endswith(".md") and os.path.isfile(os.path.join(arg, n))
-        )
-    return [arg]
 
 
 def main(argv):
@@ -584,7 +576,7 @@ def selftest():
 
     # 16. Neither kind, and both kinds.
     case("16 a page that is neither is reported rather than passed",
-         any("neither ## Stop rule nor ## Verdict" in p for p in check("# x\n\n## Notes\n\nhi\n")))
+         any("none of either page's headings" in p for p in check("# x\n\n## Notes\n\nhi\n")))
     case("16b a page carrying both is refused: a result is its own dated file",
          any("never edited after a run" in p for p in check(GOOD_EXPERIMENT + GOOD_RESULT)))
 
@@ -612,7 +604,6 @@ def selftest():
 
 
 if __name__ == "__main__":
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     if "--selftest" in sys.argv:
         sys.exit(selftest())
     sys.exit(main(sys.argv[1:]))

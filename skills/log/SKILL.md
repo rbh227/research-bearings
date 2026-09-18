@@ -117,7 +117,7 @@ JSON, JSONL, CSV or TSV. YAML and INI are flattened rather than parsed and the
 output says so, because there is no YAML parser in the standard library and this
 plugin has no dependencies.
 
-**Nothing is inferred.** A run with no seed reports `seed: not found`, never a
+**Nothing is inferred.** A run with no seed reports `seed_state: "not found"`, never a
 default. A `.json` whose name says neither config nor metrics is reported as
 unclassified rather than guessed at.
 

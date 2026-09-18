@@ -194,4 +194,4 @@ Only two rows fail both tests: `/watch` (milestone 5 anyway) and `/handoff`.
 | Ideation | 2 (`persona-ideator`, `diversity-planner`) — was 7; `analog-scout`, `field-carder`, `transfer-checker`, `flip-generator` and `novelty-checker` collapsed into `/scout`, which has no agents |
 | Selection | 2 (`premortem-agent`, `tournament-judge`) — **both built in chunk 9** |
 | Experiment | 7 (`baseline-reproducer`, `experiment-designer`, `ablation-planner`, `variance-checker`, `results-tabulator`, `results-critic`, `failure-mode-auditor`) — **all seven built in chunk 9**, with no Bash on the user's code |
-| **Total** | **23** (4 built) |
+| **Total** | **23** — all built as of chunk 9, 2026-09-18 |

@@ -39,7 +39,7 @@ import sys
 # The file shape every checker shares: ## sections, the paper-line form, and the
 # three tags /verify writes. checklib.py holds them so four checkers cannot
 # drift apart; what only this checker asks stays below.
-from checklib import REFERENCE_LINE, VERIFIED, CANDIDATE, NOT_FOUND, sections
+from checklib import REFERENCE_LINE, VERIFIED, CANDIDATE, NOT_FOUND, pages_under, sections
 
 HEADINGS = (
     "Identity", "Matrix position", "Delta", "Bit flipped", "Not compared against",
@@ -117,11 +117,6 @@ def check(text):
     return problems
 
 
-def cards_under(path):
-    if os.path.isdir(path):
-        return sorted(os.path.join(path, f) for f in os.listdir(path) if f.endswith(".md"))
-    return [path]
-
 
 def main(argv):
     if not argv:
@@ -129,7 +124,7 @@ def main(argv):
         return 2
     paths = []
     for arg in argv:
-        paths += cards_under(arg)
+        paths += pages_under(arg)
     if not paths:
         print("no cards found")
         return 0

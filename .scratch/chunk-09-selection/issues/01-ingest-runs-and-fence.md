@@ -21,7 +21,7 @@ their final and best values, the mtime range, and an exit code if a log carries
 one.
 
 **States, not errors.** A file it cannot parse is reported per file with the
-reason and the walk continues. A run with no seed reports `seed: not found` —
+reason and the walk continues. A run with no seed reports `seed_state: "not found"` —
 never a guess, never an inference. A directory that is not run-shaped is
 reported as such rather than skipped silently.
 
@@ -38,7 +38,7 @@ moves: no shell syntax, no chaining, no other binary, nothing outside the plugin
 
 - [x] `python3 scripts/ingest_runs.py --selftest` is green, against fixture run directories built in a temp dir: a run with JSON config and CSV metrics; one with JSONL metrics; one with no seed; one with an unparseable config; one directory that is not a run at all.
 - [x] The selftest asserts the JSON shape and the state names, never internals.
-- [x] A run with no seed reports `seed: not found`; an unparseable file names the file and the reason.
+- [x] A run with no seed reports `seed_state: "not found"`; an unparseable file names the file and the reason.
 - [x] The script makes no writes anywhere under the directory it is given.
 - [x] `python3 hooks/guard.py --selftest` is green with the widened root, and gains cases: `ingest_runs.py` allowed; `python train.py` denied; `python3 <plugin>/scripts/ingest_runs.py x && rm -rf y` denied; a script outside the plugin denied.
 - [x] Every retrieval script that was reachable before is still reachable.

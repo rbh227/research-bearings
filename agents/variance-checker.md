@@ -1,6 +1,6 @@
 ---
 name: variance-checker
-description: Reads the run ingest output against the experiment page's variance plan and returns, per metric, whether the seed count meets what was planned. Refuses a single-seed number entry to any results table and writes the refusal so it stays visible. Dispatched by the log and result skills, one experiment per dispatch.
+description: Reads the run ingest output against the experiment page's variance plan and returns, per metric, whether the seed count meets what was planned. Refuses a single-seed number entry to any results table and writes the refusal so it stays visible. Dispatched by the log skill, one experiment per dispatch; the result skill reads its findings from the notebook.
 tools: Read, Write
 model: inherit
 ---

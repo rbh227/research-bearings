@@ -67,3 +67,9 @@ direction the script cannot know and a `best` that meant `max` would put a
 loss's worst value in a table; and the experiment-page classifier was wrong on
 its first version, in the specific way that made the page most worth failing
 loudly the one page it could not recognise.
+
+**Review, 2026-09-18.** Nine findings across both axes, all fixed in the commit
+after this ticket's; the chunk note's § 3 records them. The one worth
+remembering: the fix for the duplicated walker introduced a `NameError` in
+`check_cards.py` that no selftest could see, because none of the checkers'
+selftests call `main()`. Caught by running each over a real directory.

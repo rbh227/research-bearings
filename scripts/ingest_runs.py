@@ -13,6 +13,15 @@ files instead of prose.
 adopt. A subdirectory is run-shaped if it holds a config, a metrics file, or a
 log, and the classification is by filename because a `.json` can be either.
 
+**How a file is classified, by name.** `.yaml`, `.yml`, `.toml`, `.ini` and
+`.cfg` are configs. `.jsonl`, `.csv` and `.tsv` are metrics. `.log`, `.out`,
+`.err` and `.txt` are logs, as are extensionless `stdout`, `stderr`, `log` and
+`output`. A `.json` is the ambiguous case: its stem decides — `config`, `cfg`,
+`params`, `hparams`, `args`, `settings`, `options`, `flags` and the like make it
+a config; `metrics`, `results`, `scores`, `history`, `scalars`, `eval` and
+`summary` make it metrics; anything else (`best_model.json`, `log.json`) is
+reported under `unclassified` and not read.
+
 **States, not errors.** Every file it cannot read is reported with the reason
 and the walk continues. A directory that is not run-shaped is reported as such
 rather than skipped silently, because "I found nothing here" and "I did not
@@ -63,7 +72,7 @@ from datetime import datetime, timezone
 CONFIG_STEMS = ("config", "cfg", "params", "hparams", "hyperparams", "args",
                 "settings", "options", "opts", "flags", "run_config", "train_config")
 METRIC_STEMS = ("metric", "metrics", "result", "results", "score", "scores",
-                "history", "scalars", "eval", "evaluation", "summary", "log")
+                "history", "scalars", "eval", "evaluation", "summary")
 CONFIG_EXT = (".json", ".yaml", ".yml", ".toml", ".ini", ".cfg")
 METRIC_EXT = (".json", ".jsonl", ".csv", ".tsv")
 LOG_EXT = (".log", ".out", ".err", ".txt")
@@ -72,11 +81,15 @@ LOG_EXT = (".log", ".out", ".err", ".txt")
 SEED_KEYS = ("seed", "seeds", "random_seed", "rng_seed", "torch_seed",
              "numpy_seed", "np_seed", "data_seed", "manual_seed", "global_seed")
 
-# An exit code, in the spellings a training script and a scheduler use.
+# An exit code, in the spellings a training script, a scheduler and subprocess
+# use. Every pattern names the word "exit" or "returncode": a first version
+# also matched bare `return`, and "query returned 5 results" came back as exit
+# code 5 (review, 2026-09-18). A false exit code is a false file fact, and M1
+# is answered from this field.
 EXIT_PATTERNS = (
     re.compile(r"\bexit(?:ed)?\s+(?:with\s+)?(?:code|status)[:=\s]+(-?\d+)", re.I),
-    re.compile(r"\bexit[_ ]?code[:=\s]+(-?\d+)", re.I),
-    re.compile(r"\breturn(?:ed|code)?[:=\s]+(-?\d+)", re.I),
+    re.compile(r"\bexit[_ ]?(?:code|status)[:=\s]+(-?\d+)", re.I),
+    re.compile(r"\breturn[_ ]?code[:=\s]+(-?\d+)", re.I),
     re.compile(r"\bProcess finished with exit code\s+(-?\d+)", re.I),
 )
 
@@ -407,14 +420,20 @@ def find_exit_code(path):
             tail = fh.read().decode("utf-8", errors="replace")
     except OSError:
         return None
+    # The LAST exit line in the log, whichever spelling it uses — not the last
+    # match of the first pattern that hits, which would let an early
+    # "exit code 0" outrank a later "exited with status 137".
+    last = None
     for pattern in EXIT_PATTERNS:
-        matches = pattern.findall(tail)
-        if matches:
-            try:
-                return int(matches[-1])
-            except ValueError:
-                return None
-    return None
+        for m in pattern.finditer(tail):
+            if last is None or m.start() > last.start():
+                last = m
+    if last is None:
+        return None
+    try:
+        return int(last.group(1))
+    except ValueError:
+        return None
 
 
 # --------------------------------------------------------------------------
@@ -545,11 +564,17 @@ def walk(root):
                 continue
             runs.append(report)
             continue                      # do not descend into a run
-        seen = report["unclassified"]
+        # A directory that could not be read is not a directory that held
+        # nothing. inspect() put the OSError under `unparsed`; say so here,
+        # because "found nothing" and "could not look" are different findings.
+        if report["unparsed"]:
+            reason = "could not read: " + report["unparsed"][0]["reason"]
+        else:
+            reason = "holds no config, metrics file or log"
         not_runs.append({
             "path": report["path"],
-            "reason": "holds no config, metrics file or log",
-            "unclassified": seen,
+            "reason": reason,
+            "unclassified": report["unclassified"],
         })
         if depth >= MAX_DEPTH:
             continue
@@ -714,6 +739,35 @@ def selftest():
         case("16 one run directory passed directly is that one run",
              one["counts"]["runs"] == 1 and one["runs"][0]["seed_state"] == "found",
              "got {}".format(one["counts"]))
+
+        # 18. Exit codes: prose is not an exit code, and the last exit line wins.
+        write("runs", "f", "config.json", body=json.dumps({"seed": 1}))
+        write("runs", "f", "train.log",
+              body="query returned 5 results\nexit code 0\nepoch 2\nexited with status 137\n")
+        f = {r["path"]: r for r in walk(os.path.join(tmp, "runs"))["runs"]}.get("f", {})
+        case("18 `returned 5 results` is not an exit code, and the last exit line wins",
+             f.get("exit_code") == 137, "got {}".format(f.get("exit_code")))
+        write("runs", "g", "config.json", body=json.dumps({"seed": 1}))
+        write("runs", "g", "train.log", body="the model returned 3 boxes\nall done\n")
+        g = {r["path"]: r for r in walk(os.path.join(tmp, "runs"))["runs"]}.get("g", {})
+        case("18b a log with prose and no exit line reports no exit code",
+             g.get("exit_code") is None, "got {}".format(g.get("exit_code")))
+
+        # 19. A directory that cannot be read is reported as unreadable, not empty.
+        locked = os.path.join(tmp, "runs", "locked")
+        os.makedirs(locked)
+        write("runs", "locked", "config.json", body="{}")
+        os.chmod(locked, 0)
+        try:
+            out2 = walk(os.path.join(tmp, "runs"))
+            row = [n for n in out2["not_runs"] if n["path"].endswith("locked")]
+            unreadable = bool(row) and row[0]["reason"].startswith("could not read")
+            root_user = os.geteuid() == 0 if hasattr(os, "geteuid") else False
+            case("19 an unreadable directory says `could not read`, never `holds no config`",
+                 unreadable or root_user,
+                 "got {}".format(row[0]["reason"] if row else "no row"))
+        finally:
+            os.chmod(locked, 0o700)
 
         # 17. A missing root is the one error.
         case("17 a root that does not exist exits non-zero",

@@ -168,7 +168,50 @@ read the result — is the acceptance run, and it belongs to the user.
   anyone opening the file a year later knows what it promises without having to
   find the skill that wrote it.
 
-## 3. What is open
+## 3. What the review found
+
+Two-axis review against `1096ceb`, 2026-09-18, one Standards reviewer and one
+Spec reviewer in separate contexts. Nine findings, all fixed in one commit.
+
+- **`ingest_runs.py` read prose as an exit code.** The pattern for `return`
+  matched "query returned 5 results" and reported exit code 5. M1 is answered
+  from that field, so a false exit code is a false file fact. Every pattern now
+  names `exit` or `returncode`, and `find_exit_code` takes the last exit line in
+  the log by position rather than the last match of the first pattern that hit —
+  which would have let an early "exit code 0" outrank a later "exited with
+  status 137". Cases 18 and 18b.
+- **An unreadable run directory was reported as empty.** `inspect()` recorded
+  the `OSError`, and `walk()` overwrote it with "holds no config, metrics file or
+  log" — the exact "found nothing" versus "could not look" confusion the
+  docstring promised to prevent. The reason now propagates as `could not read:`.
+  Case 19.
+- **`check_experiments.py` kept a stale message.** The classifier was rewritten
+  to count headings, and the "neither ## Stop rule nor ## Verdict" message it
+  had replaced was still what a page with two experiment headings received.
+- **`pages_under()` was a fourth copy.** Moved to `checklib.py`; the three
+  checkers import it. The fix itself had a defect the reviewers would not have
+  seen: `check_cards.py`'s import line was not updated, and its selftest never
+  calls `main()`, so the `NameError` only appeared when each checker was run
+  over a real directory. It now is, as part of closing the review.
+- **`/rank` said "nothing is computed" one line after describing an average.**
+  The grid position is the rounded mean of the judges' scores; the skill now
+  says so and says what that is — arithmetic on written judgements, not a
+  measurement — and confines the no-score rule to novelty, typicality,
+  diversity and quality, which is what the spec's Out of Scope actually forbids.
+- **`variance-checker` claimed a dispatcher it does not have.** `/result` reads
+  its findings from the notebook; only `/log` dispatches it.
+- **The spec's `seed: not found` was not the JSON key.** The ingester reports
+  `seed_state: "not found"`; the prose that quoted the spec's spelling now quotes
+  the field.
+- **A verdict string was mangled in a refusals row**, "executable with changes
+  to be safe", and `premortem-agent` was one line over the documented limit.
+  Both fixed; 134 lines.
+- **Two stale lines in the docs.** The design doc's agent total still said "4
+  built"; the build plan, which is gitignored and so outside the diff, still said
+  `baseline-reproducer` "runs it if you say so" one paragraph after the new "no
+  agent runs your code". Both corrected on disk.
+
+## 4. What is open
 
 - **Nothing has been run.** Every file in this chunk is a contract, and no
   pre-mortem, ranking, Heilmeier page, baseline, experiment, notebook entry or

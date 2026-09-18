@@ -73,11 +73,13 @@ paths, the two pre-mortem paths, the labels A and B, and its output path
 like, not how many pairings there are, not what the other judges said. A judge
 that knows an idea came from a persona question is ranking the generator.
 
-**6. Draw the grid.** Average each idea's feasibility and interest across its
-pairings, round to an integer, and place it on the five-by-five text grid with
-the hard-but-feasible region marked. Rough positions on two axes, from written
-judgements with evidence lines behind them. **Nothing is computed** — a decimal
-here would be a lie about where the numbers came from.
+**6. Draw the grid.** Each idea's position is the rounded mean of the
+feasibility and interest scores its judges gave it, placed on the five-by-five
+text grid with the hard-but-feasible region marked. Say what that is: arithmetic
+on written judgements, each of which carries an evidence line, and not a
+measurement of anything. The grid is integers because a decimal would claim a
+precision the scores never had. **No score is computed for novelty, typicality,
+diversity or quality** — the decision that struck `similarity.py` stands.
 
 **7. Order by cheapest kill.** Read each surviving idea's `## Cheapest kill`
 section — the experiment and the cost line. Order by what that costs, cheapest

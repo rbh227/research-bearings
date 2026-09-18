@@ -64,7 +64,7 @@ import sys
 
 # The file shape every checker shares. checklib.py holds these so four checkers
 # cannot drift apart; what only this checker asks stays below.
-from checklib import (REFERENCE_LINE, VERIFIED, CANDIDATE, NOT_FOUND,
+from checklib import (pages_under, REFERENCE_LINE, VERIFIED, CANDIDATE, NOT_FOUND,
                       sections, banned_words)
 
 HEADINGS = (
@@ -201,11 +201,6 @@ def check_log(text, pages_dir=None):
             )
     return problems
 
-
-def pages_under(path):
-    if os.path.isdir(path):
-        return sorted(os.path.join(path, f) for f in os.listdir(path) if f.endswith(".md"))
-    return [path]
 
 
 def is_log(path):

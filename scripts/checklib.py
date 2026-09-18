@@ -20,6 +20,7 @@ Not here: anything one checker alone asks. A rule with one caller belongs to its
 caller, where it can be read beside the reason it exists.
 """
 
+import os
 import re
 
 # The four words an absence claim hides behind. One walk is not the literature:
@@ -68,3 +69,19 @@ def banned_words(body):
     for word in BANNED:
         for m in re.finditer(rf"\b{word}\b", lowered):
             yield word, lowered[: m.start()].count("\n") + 1
+
+
+def pages_under(path):
+    """The .md files directly under `path` if it is a directory, else [path].
+
+    Every checker's `main()` takes paths or a directory and needed this; it was
+    a fourth copy by 2026-09-18 (review of chunk 9). Subdirectories are not
+    descended into, because each checker's directory holds pages and its run's
+    other outputs live one level down — see check_ideas.py's docstring.
+    """
+    if os.path.isdir(path):
+        return sorted(
+            os.path.join(path, f) for f in os.listdir(path)
+            if f.endswith(".md") and os.path.isfile(os.path.join(path, f))
+        )
+    return [path]
