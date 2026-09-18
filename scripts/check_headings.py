@@ -37,12 +37,24 @@ CONTRACTS = {
     "templates/research/idea.md": ["skills/ideas/SKILL.md"],
     "templates/research/persona.md": ["agents/persona-ideator.md"],
     "templates/research/diversity.md": ["agents/diversity-planner.md"],
+    "templates/research/premortem.md": ["agents/premortem-agent.md"],
+    "templates/research/ranking.md": ["skills/rank/SKILL.md"],
+    "templates/research/heilmeier.md": ["skills/spec/SKILL.md"],
+    "templates/research/baseline.md": ["agents/baseline-reproducer.md", "skills/baseline/SKILL.md"],
+    "templates/research/experiment.md": ["agents/experiment-designer.md", "skills/design/SKILL.md"],
+    "templates/research/notebook.md": ["skills/log/SKILL.md"],
+    "templates/research/result.md": ["agents/results-tabulator.md", "skills/result/SKILL.md"],
 }
 
 # agent -> the output headings its contract must define
 AGENT_OUTPUTS = {
     "agents/question-critic.md": ["Findings", "Concessions", "Could not determine"],
     "agents/critic.md": ["Findings", "Concessions", "Could not determine"],
+    # tournament-judge writes a comparison file rather than a template's page:
+    # one pairing, four headings, and no template of its own because the file
+    # is read by /rank and by nobody else.
+    "agents/tournament-judge.md": ["Winner", "What decided it", "Scores",
+                                   "What would flip it"],
 }
 
 

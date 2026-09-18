@@ -412,7 +412,20 @@ def selftest():
         agents_dir = os.path.join(plugin_root(), "agents")
         # Chunk 8's persona-ideator and diversity-planner join the list: they ask
         # and plan rather than retrieve, so neither is granted Bash either.
-        for name, forbidden in (("predictor", ("Bash", "WebSearch", "WebFetch")),
+        # Chunk 9's nine. Six are told-and-shown: their frontmatter grants no
+        # Bash, which is what stops them, because the guard's fence admits any
+        # of our agents to the plugin's own scripts. Three are granted Bash and
+        # may run exactly one thing, asserted below.
+        for name, forbidden in (("premortem-agent", ("Bash", "WebSearch", "WebFetch")),
+                                ("tournament-judge", ("Bash", "WebSearch", "WebFetch")),
+                                ("experiment-designer", ("Bash", "WebSearch", "WebFetch")),
+                                ("ablation-planner", ("Bash", "WebSearch", "WebFetch")),
+                                ("variance-checker", ("Bash", "WebSearch", "WebFetch")),
+                                ("results-critic", ("Bash", "WebSearch", "WebFetch")),
+                                ("baseline-reproducer", ("WebSearch", "WebFetch")),
+                                ("results-tabulator", ("WebSearch", "WebFetch")),
+                                ("failure-mode-auditor", ("WebSearch", "WebFetch")),
+                                ("predictor", ("Bash", "WebSearch", "WebFetch")),
                                 ("reader", ("Bash", "WebSearch", "WebFetch")),
                                 ("scorer", ("Bash", "WebSearch", "WebFetch")),
                                 ("openreview-reader", ("Bash", "WebSearch", "WebFetch")),
@@ -461,6 +474,55 @@ def selftest():
               payload("research-bearings:diversity-planner",
                       os.path.join(project, "research", "ideas", "plans", "diversity-2026-09-16.md")),
               env, False)
+
+        # Chunk 9's nine agents: the web fence, the write scope for the five new
+        # directories, and the Bash fence in both directions. The prefix rule
+        # already covers every agent this plugin ships; these prove it rather
+        # than assume it.
+        chunk9 = ("premortem-agent", "tournament-judge", "baseline-reproducer",
+                  "experiment-designer", "ablation-planner", "variance-checker",
+                  "results-tabulator", "results-critic", "failure-mode-auditor")
+        for agent in chunk9:
+            check("{}'s WebSearch is DENIED".format(agent),
+                  web("research-bearings:" + agent, "WebSearch"), env, True)
+            check("{}'s WebFetch is DENIED".format(agent),
+                  web("research-bearings:" + agent, "WebFetch"), env, True)
+            check("{}'s Write outside research/ is DENIED".format(agent),
+                  payload("research-bearings:" + agent, "/tmp/result.md"), env, True)
+
+        for agent, where in (
+                ("premortem-agent", ("premortems", "single-capture-2026-09-18.md")),
+                ("tournament-judge", ("rankings", "a-vs-b-2026-09-18.md")),
+                ("baseline-reproducer", ("baselines", "gupta-2019-xbd.md")),
+                ("experiment-designer", ("experiments", "single-capture.md")),
+                ("ablation-planner", ("experiments", "notes", "ablations.md")),
+                ("variance-checker", ("results", "notes", "variance.md")),
+                ("results-tabulator", ("results", "notes", "table.md")),
+                ("results-critic", ("results", "notes", "verdict.md")),
+                ("failure-mode-auditor", ("results", "notes", "audit.md"))):
+            check("{}'s Write into research/{}/ is allowed".format(agent, where[0]),
+                  payload("research-bearings:" + agent,
+                          os.path.join(project, "research", *where)), env, False)
+
+        # The three that may run the ingester, and the one command they may run.
+        for agent in ("baseline-reproducer", "results-tabulator", "failure-mode-auditor"):
+            check("{} may run the run ingester".format(agent),
+                  bash("research-bearings:" + agent,
+                       'python3 "{}" /home/me/runs'.format(ingest)), env, False)
+            check("{} may not run the user's training script".format(agent),
+                  bash("research-bearings:" + agent, "python3 train.py"), env, True)
+
+        # /rank and /log write RANKING.md and NOTEBOOK.md from the main thread,
+        # but the agents beside them must still be inside the write root.
+        check("an agent writing research/RANKING.md is allowed",
+              payload("research-bearings:tournament-judge",
+                      os.path.join(project, "research", "RANKING.md")), env, False)
+        check("an agent writing research/NOTEBOOK.md is allowed",
+              payload("research-bearings:variance-checker",
+                      os.path.join(project, "research", "NOTEBOOK.md")), env, False)
+        check("an agent writing the project's own train.py is DENIED",
+              payload("research-bearings:experiment-designer",
+                      os.path.join(project, "train.py")), env, True)
 
     print()
     if failures:
