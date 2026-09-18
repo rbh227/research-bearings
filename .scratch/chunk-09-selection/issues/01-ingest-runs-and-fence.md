@@ -83,3 +83,11 @@ from `("scripts", "retrieval")` to `("scripts",)`; the six new cases prove the
 ingester is allowed, the retrieval scripts still are, `python train.py` is not,
 a chained `&& rm -rf` is not, a script outside the plugin is not, and a sibling
 directory whose name merely starts with `scripts` is not.
+
+**Adversarial review, 2026-09-18.** Two findings against this ticket, both
+reproduced and fixed. A `README.txt` beside the runs made the parent the run and
+hid its children — `.txt` is now a log only by name, every directory is
+descended into, and skipped artifact subtrees are reported under `excluded`. And
+the raw config hash could not group runs that differ only in seed, so the
+ingester now reports `condition_hash` (the canonical config with seed keys
+removed) beside it. 27 cases.

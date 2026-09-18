@@ -30,16 +30,19 @@
 
 <!-- Oldest first, appended. Each attempt opens one `###` block before the run:
 
-     ### 2026-09-20 14:02 · <slug> · cfg 4a91c2e0f31b
+     ### 2026-09-20 14:02 · <slug> · cond 7c3e0a9d1b52
      - Experiment: research/experiments/<slug>.md
      - Opened: before the run
      - Config: runs/exp-14/config.json · sha256 4a91c2e0f31b…
+     - Condition: 7c3e0a9d1b52… (the config with its seed keys removed)
      - Seeds: 17, 18, 19, 20, 21
      - Intent: <one line — what this attempt is testing, in the researcher's words>
 
-     The config hash is how a later ingest finds this entry again, so it is the
-     hash of the config file's bytes as ingest_runs.py reported it, and the
-     block title carries its first twelve characters.
+     Two hashes, from ingest_runs.py and never retyped. The CONDITION hash is
+     how a later ingest finds this entry again: a five-seed attempt is five
+     config files with five config hashes and one condition hash, so the block
+     title carries the condition hash's first twelve characters. The config
+     hash is the provenance of the one config this entry was opened from.
 
      Seeds are the ones planned. If they are not known yet, `Seeds: not yet
      fixed` — never a guess, and never copied from the variance plan as though
@@ -63,7 +66,7 @@
 
      An ingest that finds no opening entry appends a whole entry marked:
 
-     ### 2026-09-22 09:14 · <run-dir> · cfg 8b02f11c9a44
+     ### 2026-09-22 09:14 · <run-dir> · cond 8b02f11c9a44
      - Experiment: NONE — this run was not logged before its result was known
      - Opened: after the fact, by ingest
 

@@ -39,10 +39,14 @@ That is the difference between a rule and a habit.
    result was to be reported.
 2. **Read the ingest output.** Per run: the seeds found, and the metric keys
    with their final, min, max and count.
-3. **Group runs by configuration.** Runs that differ only in seed are one
-   condition; a metric's seed count is how many distinct seeds produced it.
-   Runs whose config hash differs in anything else are different conditions and
-   are counted separately.
+3. **Group runs by `condition_hash`.** The ingest reports two hashes per run.
+   `config_hash` is the raw bytes and differs between every seed, so it cannot
+   group anything. `condition_hash` is the canonical config with the seed keys
+   removed: runs that share it differ only in seed and are one condition, and a
+   metric's seed count is how many distinct seeds produced it. Runs whose
+   condition hash differs changed something other than the seed and are
+   counted separately. A run with no condition hash — its config would not
+   parse — belongs to no condition and is `refused: seed not found`.
 4. **Per metric, per condition, return one of:**
 
    | State | When |
@@ -76,8 +80,9 @@ there is nothing to carry.
 ## You must not
 
 Run anything. Read a file outside the ingest output and the experiment page.
-Infer a seed the ingest reported as not found. Treat runs with different config
-hashes as the same condition. Average across conditions. Decide whether a
+Infer a seed the ingest reported as not found. Treat runs with different
+condition hashes as the same condition, or read the raw configs to decide
+otherwise — the ingest already did that, and that is what the condition hash is. Average across conditions. Decide whether a
 difference is significant, meaningful, or good. Edit the experiment page or the
 notebook — you return findings and the skill writes them. Let a single-seed
 number through because it is the only one available.
@@ -95,7 +100,8 @@ many are short, and how many are refused.
 | "One seed is all they ran, so report it." | Then it enters a table and gets compared to a five-seed number. That comparison is what Henderson measured as meaningless. |
 | "The config doesn't record a seed but it was probably the default." | `refused: seed not found`. A run whose seed nobody recorded cannot be shown to differ from another run. |
 | "Three of five seeds is close enough to meeting the plan." | It is `short of plan`, carrying three. Close enough is a judgement the researcher makes, and it needs the real count. |
-| "These two runs are clearly the same condition." | Their config hashes differ. Something changed; you do not know what, and neither does anybody reading the table later. |
+| "These two runs are clearly the same condition." | Their condition hashes differ, so something other than the seed changed. You do not know what, and neither does anybody reading the table later. |
+| "The config hashes differ, so these are different conditions." | The config hash includes the seed; five seeds are five config hashes. Group on the condition hash, which is what it is for. |
 | "The gap is large enough that seeds don't matter." | Whether the gap survives variance is exactly the question, and you are not the one who answers it. |
 | "I'll note the refusal in my summary." | It goes in the notebook entry, in the refusal shape. A refusal nobody can find later is a silent omission. |
 

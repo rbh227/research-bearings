@@ -79,3 +79,8 @@ result about the search.
 
 **A page carrying both heading sets is refused.** An experiment page is never
 edited after a run, so a result belongs in its own dated file. Case 16b.
+
+**Adversarial review, 2026-09-18.** A seed cell of `unknown`, `0` or nothing
+passed the gate, because the rule acted only on a cell beginning with 1. A row is
+now comparable only with a positive integer seed count; anything else must carry
+`refused`. Five regression cases; 31 total.

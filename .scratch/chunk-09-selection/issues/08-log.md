@@ -84,3 +84,8 @@ about this run, and the later disagreement would be invisible.
 **The variance checker groups by config hash and refuses to merge conditions.**
 Two runs whose configs differ in anything but the seed are different conditions;
 treating them as one is how a table averages across a change nobody noticed.
+
+**Adversarial review, 2026-09-18.** The notebook entry and the ingest match were
+keyed on the config hash, which includes the seed — a five-seed attempt could
+never find its opening entry. Entries now carry both hashes and match on the
+condition hash; `variance-checker` groups on it too.

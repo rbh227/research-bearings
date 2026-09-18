@@ -211,6 +211,34 @@ Spec reviewer in separate contexts. Nine findings, all fixed in one commit.
   `baseline-reproducer` "runs it if you say so" one paragraph after the new "no
   agent runs your code". Both corrected on disk.
 
+**Adversarial review, same day.** A Codex pass positioned against the design
+rather than the defects, with in-memory probes. Three findings, all reproduced,
+all fixed.
+
+- **A `README.txt` in `runs/` hid every run beneath it.** Any `.txt` was a
+  log, a log made a directory run-shaped, and the walk stopped at the first
+  run-shaped directory on each path — so a collection directory with a readme
+  became the run, and its children were never looked at, with nothing reported
+  and `truncated: false`. Three changes: a `.txt` is a log only when its name
+  says so; every directory is descended into; and the subtrees that are skipped
+  — `checkpoints/`, `wandb/` and the rest — are named in `ARTIFACT_DIRS` and
+  **reported under `excluded`** with the reason, so a reader can see what the
+  walk did not look at. A run that contains runs says so in `contains_runs`.
+- **The config hash could not group seeds.** `variance-checker` was told to
+  group runs that differ only in seed and forbidden to treat different config
+  hashes as one condition — and the seed is in the config bytes, so five seeds
+  were five hashes and every multi-seed experiment was five single-seed
+  conditions. The ingester now reports a second hash, `condition_hash`: the
+  canonical parsed config with every seed key removed. Runs that share it are
+  one condition. The raw hash stays for provenance. The variance checker, the
+  tabulator, `/log` and the notebook template all key on the condition hash;
+  the notebook entry carries both. This is the finding that would have made
+  the whole experiments half wrong on its first real use.
+- **A seed cell of `unknown`, `0` or nothing passed the result gate.** The
+  checker acted only on a cell beginning with 1. A row is now comparable only
+  with a positive integer seed count, and anything else must carry `refused`.
+  Five regression cases.
+
 ## 4. What is open
 
 - **Nothing has been run.** Every file in this chunk is a contract, and no

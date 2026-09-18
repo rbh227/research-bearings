@@ -41,8 +41,8 @@ most useful thing on the page.
 ```
 
 Appends an entry to `## Entries` with the date and time, the experiment page,
-the config file and its hash, the planned seeds, and one line on what this
-attempt is testing.
+the config file with its hash **and its condition hash**, the planned seeds, and
+one line on what this attempt is testing.
 
 **This is the mode that does the work.** The ingest mode is bookkeeping; this
 one is the mechanism. Run it before you start the job, not after.
@@ -75,8 +75,10 @@ hash, the seeds it found, the metric keys with their final, min, max and count,
 the mtime range, and an exit code if a log carries one. **Anything it could not
 parse comes back per file with the reason** — report that, do not swallow it.
 
-**2. Match by config hash.** Find the opening entry whose hash matches. That is
-what the hash is for.
+**2. Match by condition hash, then by config hash.** A five-seed attempt is
+five run directories with five config hashes and one condition hash, so the
+condition hash is what finds the opening entry; the config hash is the
+provenance of each run within it. Both are in the ingest output.
 
 **3. An ingest with no opening entry is a finding, not an error.** Append a new
 entry marked:
@@ -132,9 +134,10 @@ written before is a constraint. Only one of them makes selection impossible.
 
 **Every entry names its experiment page**, or says `NONE` and why.
 
-**The config hash is the key.** It is how a result finds its entry, so it is the
-hash of the config bytes as the ingester computed them, not a hash of anything
-retyped.
+**The condition hash is the key, and the config hash is the provenance.** Both
+come from the ingester, never from anything retyped. The condition hash is the
+config with its seed keys removed, so every seed of one attempt shares it; the
+config hash is the raw bytes, so every run has its own.
 
 **Unparseable files are reported, never swallowed.** What the script could not
 read is a state, and a state the researcher can act on.

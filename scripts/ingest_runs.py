@@ -48,10 +48,20 @@ JSON and TOML are parsed properly (`"parsed"`).
 Output is one JSON object on stdout:
 
   root           the directory that was walked, resolved
-  runs[]         path, config file and hash, seeds, metrics, mtime range,
-                 exit code, and per-file unparsed reasons
+  runs[]         path, config file and hash, condition hash, seeds, metrics,
+                 mtime range, exit code, per-file unparsed reasons, and how
+                 many runs sit beneath it
   not_runs[]     directories that held none of the three, with what was seen
+  excluded[]     subtrees the walk did not look at, each with the reason:
+                 an artifact directory, the depth limit, or the run cap
   truncated      true if the run cap was hit, with the cap
+
+Two hashes per run, and they answer different questions. `config_hash` is the
+sha256 of the config file's bytes: provenance, and how a notebook entry is
+found again. `condition_hash` is the sha256 of the canonical parsed config
+with every seed key removed: two runs that differ only in seed share one, and
+that is the key on which runs may be grouped and averaged. The raw hash alone
+cannot say which runs are one condition, because the seed is in the bytes.
 
 Run: python3 scripts/ingest_runs.py <directory>
      python3 scripts/ingest_runs.py --selftest
@@ -75,7 +85,18 @@ METRIC_STEMS = ("metric", "metrics", "result", "results", "score", "scores",
                 "history", "scalars", "eval", "evaluation", "summary")
 CONFIG_EXT = (".json", ".yaml", ".yml", ".toml", ".ini", ".cfg")
 METRIC_EXT = (".json", ".jsonl", ".csv", ".tsv")
-LOG_EXT = (".log", ".out", ".err", ".txt")
+LOG_EXT = (".log", ".out", ".err")
+# A .txt is a log only when its name says so. `README.txt`, `notes.txt` and
+# `requirements.txt` are not logs, and a first version that treated every .txt
+# as one made `runs/` itself run-shaped and hid every run beneath it (review,
+# 2026-09-18).
+TXT_LOG_STEMS = ("log", "logs", "stdout", "stderr", "output", "train", "console", "nohup")
+# Subtrees that belong to the run above them and are never runs themselves.
+# They are skipped AND REPORTED, so a reader can see what the walk did not look at.
+ARTIFACT_DIRS = ("checkpoints", "checkpoint", "ckpt", "ckpts", "weights", "models",
+                 "wandb", "tensorboard", "tb", "tb_logs", "lightning_logs", "mlruns",
+                 "__pycache__", ".git", ".hydra", "cache", ".cache", "tmp", "samples",
+                 "predictions", "outputs_images", "figures", "media")
 
 # Keys that carry a seed. Checked at every depth of a parsed config.
 SEED_KEYS = ("seed", "seeds", "random_seed", "rng_seed", "torch_seed",
@@ -134,6 +155,8 @@ def classify(name):
         return "unclassified"
     if ext in LOG_EXT:
         return "log"
+    if ext == ".txt":
+        return "log" if matches(TXT_LOG_STEMS) else None
     if ext == "" and stem_l in ("stdout", "stderr", "log", "output"):
         return "log"
     return None
@@ -253,6 +276,34 @@ def parse_config(path):
             return None, "unparsed", [], "no `key: value` lines found"
         return data, "flattened", ambiguous, None
     return None, "unparsed", [], "unhandled config extension {}".format(ext or "(none)")
+
+
+def strip_seeds(node):
+    """A copy of a parsed config with every seed key removed, at any depth."""
+    if isinstance(node, dict):
+        return {k: strip_seeds(v) for k, v in node.items()
+                if str(k).lower().split(".")[-1] not in SEED_KEYS}
+    if isinstance(node, list):
+        return [strip_seeds(v) for v in node]
+    return node
+
+
+def condition_hash(data):
+    """sha256 of the canonical config with the seed keys removed.
+
+    Two runs that differ only in seed are one condition, and the raw config
+    hash cannot say so: the seed is in the bytes, so five seeds are five
+    hashes. This is the key `variance-checker` and `results-tabulator` group
+    on. The raw hash stays beside it for provenance — it is how a notebook
+    entry is found again — and this one says which runs may be averaged.
+
+    Canonical means sorted keys and JSON, so key order in the file does not
+    change the answer. A config that would not parse has no condition hash,
+    and the report says `null` rather than guessing.
+    """
+    canonical = json.dumps(strip_seeds(data), sort_keys=True, default=str,
+                           separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def find_seeds(data):
@@ -453,6 +504,7 @@ def inspect(directory, root):
         "abs_path": directory,
         "config_file": None,
         "config_hash": None,
+        "condition_hash": None,
         "config_parse": None,
         "seeds": [],
         "seed_state": "not found",
@@ -515,6 +567,7 @@ def inspect(directory, root):
             seeds = find_seeds(data)
             report["seeds"] = seeds
             report["seed_state"] = "found" if seeds else "not found"
+            report["condition_hash"] = condition_hash(data)
         if len(configs) > 1:
             report["other_configs"] = [os.path.relpath(p, root) for p in configs[1:]]
 
@@ -547,11 +600,18 @@ def inspect(directory, root):
 def walk(root):
     """Find every run-shaped directory at or below `root`.
 
-    A run's own subdirectories are not descended into: `checkpoints/` and
-    `wandb/` belong to the run above them, not beside it.
+    Every directory is descended into, whether or not it is itself a run. The
+    first version stopped at the first run-shaped directory on each path, on
+    the theory that `checkpoints/` belongs to the run above it — and a
+    `README.txt` in `runs/` then made `runs/` the run and hid every experiment
+    beneath it, with nothing reported (review, 2026-09-18). So artifact
+    subtrees are now named explicitly in ARTIFACT_DIRS, skipped, and REPORTED
+    under `excluded`, and everything else is looked at. A run that contains
+    runs says so in `contains_runs`, so a collection directory that happens to
+    hold a stray config is visible as a collection.
     """
     root = os.path.realpath(root)
-    runs, not_runs = [], []
+    runs, not_runs, excluded = [], [], []
     truncated = False
 
     stack = [(root, 0)]
@@ -561,43 +621,67 @@ def walk(root):
         if is_run:
             if len(runs) >= MAX_RUNS:
                 truncated = True
+                excluded.append({"path": report["path"], "reason": "run cap of {} reached".format(MAX_RUNS)})
                 continue
+            report["contains_runs"] = 0
             runs.append(report)
-            continue                      # do not descend into a run
-        # A directory that could not be read is not a directory that held
-        # nothing. inspect() put the OSError under `unparsed`; say so here,
-        # because "found nothing" and "could not look" are different findings.
-        if report["unparsed"]:
-            reason = "could not read: " + report["unparsed"][0]["reason"]
         else:
-            reason = "holds no config, metrics file or log"
-        not_runs.append({
-            "path": report["path"],
-            "reason": reason,
-            "unclassified": report["unclassified"],
-        })
-        if depth >= MAX_DEPTH:
-            continue
+            # A directory that could not be read is not a directory that held
+            # nothing. inspect() put the OSError under `unparsed`; say so here,
+            # because "found nothing" and "could not look" are different findings.
+            if report["unparsed"]:
+                reason = "could not read: " + report["unparsed"][0]["reason"]
+            else:
+                reason = "holds no config, metrics file or log"
+            not_runs.append({
+                "path": report["path"],
+                "reason": reason,
+                "unclassified": report["unclassified"],
+            })
         try:
             children = sorted(os.scandir(directory), key=lambda e: e.name)
         except OSError:
             continue
         for entry in children:
-            if entry.is_dir() and not entry.is_symlink():
-                stack.append((entry.path, depth + 1))
+            if not entry.is_dir() or entry.is_symlink():
+                continue
+            rel = os.path.relpath(entry.path, root)
+            if entry.name.lower() in ARTIFACT_DIRS:
+                excluded.append({"path": rel, "reason": "artifact directory, belongs to the run above it"})
+                continue
+            if depth + 1 > MAX_DEPTH:
+                excluded.append({"path": rel, "reason": "deeper than {} levels".format(MAX_DEPTH)})
+                continue
+            stack.append((entry.path, depth + 1))
+
+    # A run beneath another run: count it on the parent, so a collection
+    # directory that holds a stray config is visible as what it is.
+    by_path = {r["abs_path"]: r for r in runs}
+    for r in runs:
+        parent = os.path.dirname(r["abs_path"])
+        while parent.startswith(root) and parent != r["abs_path"]:
+            if parent in by_path:
+                by_path[parent]["contains_runs"] += 1
+                break
+            if parent == root:
+                break
+            parent = os.path.dirname(parent)
 
     return {
         "verb": "ingest",
         "root": root,
         "runs": runs,
         "not_runs": not_runs,
+        "excluded": excluded,
         "truncated": truncated,
         "run_cap": MAX_RUNS,
         "counts": {
             "runs": len(runs),
             "not_runs": len(not_runs),
+            "excluded": len(excluded),
             "runs_with_no_seed": sum(1 for r in runs if r["seed_state"] == "not found"),
             "runs_with_unparsed_files": sum(1 for r in runs if r["unparsed"]),
+            "conditions": len({r["condition_hash"] for r in runs if r["condition_hash"]}),
         },
     }
 
@@ -768,6 +852,52 @@ def selftest():
                  "got {}".format(row[0]["reason"] if row else "no row"))
         finally:
             os.chmod(locked, 0o700)
+
+        # 20. A README.txt in the parent does not hide the runs beneath it, and
+        # artifact directories are excluded by name and reported.
+        write("coll", "README.txt", body="these are my runs\n")
+        write("coll", "seed1", "config.json", body=json.dumps({"seed": 1, "lr": 0.1}))
+        write("coll", "seed1", "metrics.csv", body="step,acc\n1,0.5\n")
+        write("coll", "seed2", "config.json", body=json.dumps({"seed": 2, "lr": 0.1}))
+        write("coll", "seed2", "metrics.csv", body="step,acc\n1,0.6\n")
+        write("coll", "seed1", "checkpoints", "epoch1.pt", body="")
+        write("coll", "seed1", "checkpoints", "config.json", body=json.dumps({"seed": 1}))
+        write("coll", "other", "config.json", body=json.dumps({"seed": 3, "lr": 0.2}))
+        coll = walk(os.path.join(tmp, "coll"))
+        found = sorted(r["path"] for r in coll["runs"])
+        case("20 a README.txt beside the runs does not make the parent the run",
+             found == ["other", "seed1", "seed2"], "got {}".format(found))
+        case("20b an artifact directory is excluded by name and reported",
+             any(e["path"].endswith(os.path.join("seed1", "checkpoints")) and "artifact" in e["reason"]
+                 for e in coll["excluded"]),
+             "got {}".format(coll["excluded"]))
+        case("20c a .txt that is not a log is not a log", classify("README.txt") is None
+             and classify("requirements.txt") is None and classify("train_log.txt") == "log")
+
+        # 21. Two runs that differ only in seed share a condition hash; a run
+        # that differs in anything else does not.
+        by = {r["path"]: r for r in coll["runs"]}
+        case("21 runs differing only in seed share a condition hash and not a config hash",
+             by["seed1"]["condition_hash"] == by["seed2"]["condition_hash"]
+             and by["seed1"]["config_hash"] != by["seed2"]["config_hash"],
+             "got {} / {}".format(by["seed1"]["condition_hash"][:8], by["seed2"]["condition_hash"][:8]))
+        case("21b a run differing in a setting has a different condition hash",
+             by["other"]["condition_hash"] != by["seed1"]["condition_hash"])
+        case("21c the condition count is reported", coll["counts"]["conditions"] == 2,
+             "got {}".format(coll["counts"]))
+        case("21d key order does not change the condition hash",
+             condition_hash({"a": 1, "seed": 4, "b": {"c": 2}}) == condition_hash({"b": {"c": 2}, "a": 1, "seed": 9}))
+        case("21e an unparseable config has no condition hash",
+             d.get("condition_hash") is None)
+
+        # 22. A run that contains runs says so.
+        write("nest", "config.json", body=json.dumps({"lr": 1}))
+        write("nest", "inner", "config.json", body=json.dumps({"seed": 1}))
+        write("nest", "inner", "metrics.csv", body="s,a\n1,1\n")
+        nest = {r["path"]: r for r in walk(os.path.join(tmp, "nest"))["runs"]}
+        case("22 a run that contains runs reports the count rather than hiding them",
+             nest.get("nest", {}).get("contains_runs") == 1 and "inner" in nest,
+             "got {}".format({k: v.get("contains_runs") for k, v in nest.items()}))
 
         # 17. A missing root is the one error.
         case("17 a root that does not exist exits non-zero",

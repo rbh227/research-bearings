@@ -46,10 +46,14 @@ And on a result page:
                                  The columns are found by header name, so the
                                  order can change; a table with no run-directory
                                  column at all fails on the header.
-  no single-seed number without  Henderson again, enforced rather than stated.
-  its refusal                    A one-seed row may appear ONLY carrying
+  a positive seed count, or a    Henderson again, enforced rather than stated.
+  refusal, on every row          A one-seed row may appear ONLY carrying
                                  `refused`, which is how the refusal stays
                                  visible instead of becoming a silent omission.
+                                 And an empty cell, `unknown` or `0` is not a
+                                 pass either: a first version acted only on a
+                                 cell beginning with 1, and every other way of
+                                 having no seeds walked through the gate.
 
 Which rules run is decided by the page itself: a page with a stop rule is an
 experiment, a page with a verdict is a result. A page with neither is reported
@@ -265,14 +269,27 @@ def check_result(text):
                 )
         if seed_col is not None:
             cell = cells[seed_col] if seed_col < len(cells) else ""
-            seeds = re.match(r"^\s*(\d+)", cell)
-            if seeds and int(seeds.group(1)) == 1:
-                if "refused" not in " ".join(cells).lower():
+            refused = "refused" in " ".join(cells).lower()
+            seeds = re.match(r"^\s*(\d+)\b", cell)
+            count = int(seeds.group(1)) if seeds else None
+            # A first version acted only when the cell began with 1, so an
+            # empty cell, `unknown` and `0` all passed the gate the single-seed
+            # rule exists to close (review, 2026-09-18). A row is comparable
+            # only with a positive integer seed count; anything else is
+            # refused, and the refusal has to be on the row.
+            if count is None or count < 1:
+                if not refused:
                     problems.append(
-                        "## Table row '{}' is a single-seed number with no refusal: "
-                        "Henderson — a one-seed row may appear only carrying "
-                        "`refused`, so the refusal stays visible".format(label)
+                        "## Table row '{}' has no positive seed count (`{}`): a number "
+                        "with no demonstrated seeds is not comparable, and may appear "
+                        "only carrying `refused`".format(label, cell.strip() or "empty")
                     )
+            elif count == 1 and not refused:
+                problems.append(
+                    "## Table row '{}' is a single-seed number with no refusal: "
+                    "Henderson — a one-seed row may appear only carrying "
+                    "`refused`, so the refusal stays visible".format(label)
+                )
 
     return problems
 
@@ -554,6 +571,16 @@ def selftest():
         "| damage F1 | 0.612 | 5 | ±0.008 | runs/exp-14/ |",
         "| damage F1 | 0.612 | 1 | refused: single seed | runs/exp-14/ |"))
     case("13b a single-seed number carrying `refused` passes", not got, "got {}".format(got))
+
+    # 13c-e. A missing, non-numeric or zero seed count is not a pass.
+    for bad in ("", "unknown", "0", "n/a"):
+        got = check(GOOD_RESULT.replace("| damage F1 | 0.612 | 5 | ±0.008 | runs/exp-14/ |",
+                                        "| damage F1 | 0.612 | {} | ±0.008 | runs/exp-14/ |".format(bad)))
+        case("13c a seed count of `{}` fails without a refusal".format(bad or "empty"),
+             any("no positive seed count" in p for p in got), "got {}".format(got))
+    got = check(GOOD_RESULT.replace("| damage F1 | 0.612 | 5 | ±0.008 | runs/exp-14/ |",
+                                    "| damage F1 | 0.612 | 0 | refused: seed not found | runs/exp-14/ |"))
+    case("13d a seed count of 0 carrying `refused: seed not found` passes", not got, "got {}".format(got))
 
     # 14. A table with no run-directory column at all.
     got = check(GOOD_RESULT.replace("| metric | value | seeds | variance | run directory |",
