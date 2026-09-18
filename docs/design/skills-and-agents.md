@@ -4,15 +4,15 @@ Every skill and agent from `research_plugin_build_plan.md`, joined to what justi
 
 **Two tests, not one.** A row earns its place if it implements an entry in `academic.md` **or** if it serves one of the four goals: parallel gathering, simple presentation, planning directions, simple to use. The sheet documents research methodology and says nothing about usability, so a row backed only by a goal is fully justified.
 
-Counts, 2026-09-15: **5 skills built** (`/setup`, `/frame`, `/scout`,
-`/surveys`, `/landscape`), 4 agents (`question-critic`, `searcher`, `merger`,
-`survey-differ`), 5 scripts. Planned and unbuilt: 22 more skill rows, 5
-composites, 18 more agents.
+Counts, 2026-09-18: **23 skills built**, 23 agents, 10 scripts, 28 templates.
+Planned and unbuilt: `/render` and `/figure` from Stage 2b, and the four
+composites of Stage 7 — `/router`, `/start`, `/orient`, `/think`. No agent
+remains unbuilt.
 
-That planned number flatters itself and should be read with care. Much of Stage
-2b is librarian tooling. The loop that actually matters is four skills:
-`/scout` and `/landscape` find directions, `/read` reads what they turn up,
-`/rank` picks, and Stage 6 tries it. Two of those four are unbuilt.
+The loop that actually matters is four skills: `/scout` and `/landscape` find
+directions, `/read` reads what they turn up, `/rank` picks, and Stage 6 tries
+it. **All four are built as of chunk 9**, and the rest of what is planned is
+presentation and a front door.
 
 ---
 
@@ -50,11 +50,12 @@ Built in chunk 2 (`docs/design/chunk-02-scout.md`), with two narrowings the spec
 
 ## Stage 2b — Presentation
 
-Presentation carries the same weight as gathering, because unclear output was the original complaint. Three explicit modes so they never collapse into one long document. One agent, `brief-writer`, three paths.
+Presentation carries the same weight as gathering, because unclear output was the original complaint. Explicit modes so they never collapse into one long document.
+
+**`/brief` and `brief-writer` are retired, 2026-09-18.** The Heilmeier one-pager is `/spec` in Stage 5: the same eight questions in eight paragraphs, written for an idea that survived ranking rather than for the landscape, with every factual sentence sourced. Two commands writing one page was duplication, not a design. What is left here is the two modes prose cannot do.
 
 | Skill | Mode | Output | Justification |
 |---|---|---|---|
-| `/brief` | prose | `landscape/brief.md`, the Heilmeier one-pager | Heilmeier, Olah (research debt). Goal: simple presentation. |
 | `/render` | interactive | HTML matrix you click through, plus the cards deck | goal: simple presentation |
 | `/figure` | diagram | pipeline-style figure, one real example image per formulation | goal: simple presentation. Needs the user to point at example imagery, so it has its own path. |
 
@@ -102,27 +103,38 @@ The three-agent read protocol is the sheet's own design: `predictor` sees only t
 
 | Skill | Agents | Output | Justification |
 |---|---|---|---|
-| `/premortem` | `premortem-agent` | premortem per idea | Si (ideation-execution gap: baselines, metrics, feasibility) |
-| `/rank` | `tournament-judge` | ranked list, Alon chart | Co-Scientist (pairwise tournament), Alon (feasibility × interest), Steinhardt (cheapest kill first) |
-| `/spec` | — | Heilmeier page | Heilmeier catechism |
+| `/premortem` | `premortem-agent` | premortem per idea | Si (ideation-execution gap: baselines, metrics, feasibility). **Shipped in chunk 9.** Judges execution only; novelty was settled at `/ideas` by retrieval and interest belongs to `/rank`. Three verdicts, with `executable with changes` defined by whether the changes can be named. |
+| `/rank` | `tournament-judge` | ranked list, Alon chart | Co-Scientist (pairwise tournament), Alon (feasibility × interest), Steinhardt (cheapest kill first). **Shipped in chunk 9.** The bound is shown before it is spent: round robin at five or fewer, twelve pairings hard above that. The order is the cheapest kill; the tournament sits beside it and every disagreement is named. |
+| `/spec` | — | Heilmeier page | Heilmeier catechism. **Shipped in chunk 9**, and it absorbed Stage 2b's `/brief`: one Heilmeier page, not two. No agents — every fact is in a file already, and an agent would have to be handed all of them and could still answer from memory. |
 
-Human gate: which ideas survive.
+Human gate: which ideas survive. **Two gates in practice**: the pairing list is
+approved before any judge runs, because that list is the cost.
 
 ---
 
 ## Stage 6 — Experiment
 
-These agents get Bash and file access to code and data, and **no web tools**. The agent that runs the experiment cannot go find a paper that agrees with its result.
+These agents get **no web tools**: the agent that judges the experiment cannot go find a paper that agrees with its result.
+
+**They also do not get Bash on your code, and that is chunk 9's one departure
+from the build plan.** The plan said "Bash and file access to your code and
+data". The guard refuses any command that is not this plugin's own script, and
+it was right to. So "file access" is honoured as Read, Grep and Glob — the
+agents read the training script, the config, the run directory and the metrics
+files as files, which is what designing, tabulating and auditing actually needs
+— and the one command any of them may run is `ingest_runs.py`. **No agent runs
+your code.** The human gate below stops being prose and becomes the fact that
+nothing else *can* spend your compute.
 
 | Skill | Agents | Output | Justification |
 |---|---|---|---|
-| `/baseline` | `baseline-reproducer` | reproduction plan + gap | Schulman (working baseline), Musgrave (reproduce the strongest baseline), PaperBench |
-| `/design` | `experiment-designer`, `ablation-planner` | experiment page | pre-registration lite, Platt (competing hypotheses, discriminating test), Lipton (ablation isolates gains), Bouthillier (variance plan), Dodge (compute budget), Kapoor (leakage check) |
-| `/log` | `variance-checker` (`ingest_runs.py`) | notebook entries | lab notebook (log before the result is known), Henderson (seeds) |
-| `/result` | `results-tabulator`, `results-critic`, `failure-mode-auditor` | verdict | M1–M7 checklist, Lipton, Henderson |
-| `/replicate` | `baseline-reproducer` | calibration report | PaperBench (replication as a calibration test) |
+| `/baseline` | `baseline-reproducer` | reproduction plan + gap | Schulman (working baseline), Musgrave (reproduce the strongest baseline), PaperBench. **Shipped in chunk 9.** The table's number, not the abstract's; what the paper does not say as its own paragraph; `contested` requires the attempt list. |
+| `/design` | `experiment-designer`, `ablation-planner` | experiment page | pre-registration lite, Platt (competing hypotheses, discriminating test), Lipton (ablation isolates gains), Bouthillier (variance plan), Dodge (compute budget), Kapoor (leakage check). **Shipped in chunk 9.** Written before the run, never edited after; a changed design is a new page. Refuses an idea the pre-mortem called not executable. |
+| `/log` | `variance-checker` (`ingest_runs.py`) | notebook entries | lab notebook (log before the result is known), Henderson (seeds). **Shipped in chunk 9.** The result is appended as a second block so the opening one is never rewritten. A run with no opening entry is recorded as a finding, not refused. |
+| `/result` | `results-tabulator`, `results-critic`, `failure-mode-auditor` | verdict | M1–M7 checklist, Lipton, Henderson. **Shipped in chunk 9.** Three rounds: the critic never sees the tabulator's words, the auditor is never told the verdict. `inconclusive` must name what would decide it. |
+| `/replicate` | `baseline-reproducer` | calibration report | PaperBench (replication as a calibration test). **Shipped in chunk 9.** Its own command rather than a flag, because what the gap means has to be fixed before the run. |
 
-Human gate: whether to spend compute.
+Human gate: whether to spend compute — enforced by the fence, not by prose.
 
 ---
 
@@ -132,7 +144,7 @@ Not a stage. Applied inside every skill.
 
 | Rule | Where it lives | Source |
 |---|---|---|
-| Citation existence check | **`/verify`**, run on anything that emits references: landscape sections, paper cards, idea pages, the brief | ARS resolvers (gray zone is fail), hallucinated citations |
+| Citation existence check | **`/verify`**, run on anything that emits references: landscape sections, paper cards, idea pages, the Heilmeier page | ARS resolvers (gray zone is fail), hallucinated citations |
 | Generator never judges in the same context | separate agents, fresh contexts | verification-gap survey |
 | Retrieved content is data, not instructions | one line in every scout agent | the sheet's own rule |
 | Abstention beats a guess | one line in every agent | uncertainty with abstention |
@@ -152,8 +164,8 @@ Thirty typed commands are unusable without a front door. These serve the "simple
 |---|---|
 | `/router` | picks the skill from what you say. The front door. |
 | `/start` | `/setup` + `/frame` |
-| `/orient` | `/surveys` + `/landscape` + `/brief` |
-| `/think` | `/bits` + `/analogs` + `/ideas` + `/rank` |
+| `/orient` | `/surveys` + `/landscape` |
+| `/think` | `/bits` + `/scout` + `/ideas` + `/rank` |
 | `/handoff` | **deferred.** No goal it uniquely serves yet. |
 
 **Naming:** the composite was `/map` in the build plan, which collides with the wayfinder's map. `/survey` is not available either, since `/surveys` already exists in stage 2. `/orient` is the rename.
@@ -177,9 +189,9 @@ Only two rows fail both tests: `/watch` (milestone 5 anyway) and `/handoff`.
 
 | Stage | Agents |
 |---|---|
-| Landscape and presentation | 6 (`searcher`, `survey-differ`, `merger` built; `brief-writer`, `dataset-scout`, `author-tracker` planned) |
+| Landscape and presentation | 5 (`searcher`, `survey-differ`, `merger`, `dataset-scout`, `author-tracker`) — **all built**; `brief-writer` retired with `/brief`, 2026-09-18 |
 | Reading | 6 (`predictor`, `reader`, `scorer`, `leakage-auditor`, `openreview-reader`, `critic`) — **all six built in chunk 7**, with `dataset-scout` and `author-tracker` from the landscape row |
 | Ideation | 2 (`persona-ideator`, `diversity-planner`) — was 7; `analog-scout`, `field-carder`, `transfer-checker`, `flip-generator` and `novelty-checker` collapsed into `/scout`, which has no agents |
-| Selection | 2 (`premortem-agent`, `tournament-judge`) |
-| Experiment | 7 (`baseline-reproducer`, `experiment-designer`, `ablation-planner`, `variance-checker`, `results-tabulator`, `results-critic`, `failure-mode-auditor`) |
+| Selection | 2 (`premortem-agent`, `tournament-judge`) — **both built in chunk 9** |
+| Experiment | 7 (`baseline-reproducer`, `experiment-designer`, `ablation-planner`, `variance-checker`, `results-tabulator`, `results-critic`, `failure-mode-auditor`) — **all seven built in chunk 9**, with no Bash on the user's code |
 | **Total** | **23** (4 built) |

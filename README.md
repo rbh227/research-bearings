@@ -32,8 +32,9 @@ ideas survive; nothing runs on compute until you say so.
 | **Gathering** | what exists on it, in your field and in the fields that share its shape | `/surveys` `/landscape` `/scout` |
 | **Processing** | cards, ideas, a ranked list, an experiment | `/read` `/brainstorm` `/ideas` `/rank` |
 
-Those are the nine commands people type. Eight are built; `/rank` is designed
-and not built. Every skill is invoked as `/research-bearings:<name>`.
+Those are the nine commands people type, and all nine are built. Twenty-three
+skills ship in total; six remain planned. Every skill is invoked as
+`/research-bearings:<name>`.
 
 ## Skills
 
@@ -63,11 +64,15 @@ the design is in `docs/design/skills-and-agents.md` and nothing exists yet.
 - `/bits` — **built.** One assumption per group of cards that share a thesis, with the cards and cells behind it. Groups are recorded and reused, so the file `/ideas` will read does not reshuffle.
 - `/brainstorm` — **built.** The dump: what are the important problems before anything about feasibility, Polya's seven transformations one at a time, and four to six persona agents built from your field's own record. Decides nothing. Appends to `research/IDEAS.md`.
 - `/ideas` — **built.** Generates from five seed kinds — bits, analog opportunities, the merger's contradictions, directions the record shows were dropped, and the personas' questions — puts every candidate to the index and writes both counts, then plans retrieval from the fields that would make the set less self-similar and generates again. Writes `research/ideas/<slug>.md`.
-- `/premortem` — planned. Why each idea fails, before it is tried.
-- `/rank` — planned. Pairwise tournament, feasibility against interest, cheapest kill first.
-- `/spec` — planned. The Heilmeier page for a surviving idea.
-- `/baseline` `/design` `/log` `/result` `/replicate` — planned. Reproduce the strongest baseline, pre-register the experiment, log before the result is known, tabulate, replicate.
-- `/brief` `/render` `/figure` — planned. The Heilmeier one-pager, the matrix as a clickable page, a pipeline figure.
+- `/premortem` — **built.** One fresh-context agent per idea, none of which generated it: the baselines it must beat and whether they run, the field's own metric, what the evaluation plan depends on, and a verdict in three states. Judges execution, never novelty. Writes `research/premortems/<slug>-<date>.md`.
+- `/rank` — **built.** A bounded pairwise tournament whose judges see two ideas and never their authors, Alon's feasibility-against-interest grid, and a final order by cheapest kill rather than by wins — with every place the two orders disagree named. Writes `research/RANKING.md`.
+- `/spec` — **built.** The Heilmeier page for a survivor: eight questions, eight paragraphs, one page, every factual sentence sourced to a file. Reports when the page fails the catechism's own one-page test. Writes `research/specs/<slug>.md`.
+- `/baseline` — **built.** The plan to reproduce the strongest published number you intend to beat, with the card and table it came from and what the paper leaves unstated, then the gap. Writes `research/baselines/<card-slug>.md`.
+- `/replicate` — **built.** The same machinery pointed at a paper you are not building on, so the gap is a fact about your pipeline rather than about the paper.
+- `/design` — **built.** The pre-registration, written before the run and never edited after: seven fields, Platt's competing hypotheses with the run that separates them, the leakage taxonomy against your own split, and a stop rule named while the number is unknown. Writes `research/experiments/<slug>.md`.
+- `/log` — **built.** Every attempt appended to one immutable notebook before its result is known, then the run directory ingested and attached by config hash. Reads run directories you did not format for it. Appends to `research/NOTEBOOK.md`.
+- `/result` — **built.** Three rounds, none of which sees what the others concluded: a tabulator building the table from the runs only, a fresh critic applying the pre-registered stop rule literally, and an auditor walking M1 to M7. Writes `research/results/<slug>-<date>.md`.
+- `/render` `/figure` — planned. The matrix as a clickable page, a pipeline figure.
 - `/router` `/start` `/orient` `/think` — planned. The front door and three composites.
 
 ## Agents
@@ -96,11 +101,19 @@ its heading contract and its refusals table included.
 - `persona-ideator` — what would this person want to know? One stakeholder drawn from the record with a warrant, five to ten questions, each citing the file behind it or marked as coming from the role.
 - `diversity-planner` — what is this set of ideas not drawing on? Says what the candidates have in common before it proposes a field, and never proposes an idea.
 
+- `premortem-agent` — how does this idea die in execution? Judges execution and never novelty, in the compute and time your context states, and writes `constraint unknown` rather than assuming a cluster.
+- `tournament-judge` — of these two, which should be run first? Sees both ideas and both pre-mortems and nothing about who wrote either. One sentence decides it; a tie is refused.
+- `baseline-reproducer` — exactly what would it take to hit this published number? The table's figure, not the abstract's, and what the paper does not say as its own paragraph.
+- `experiment-designer` — what will be run, and what result would make you stop? The seven fields, plus the competing hypothesis that the gain came from somewhere you did not intend.
+- `ablation-planner` — if this works, how will anyone know which part worked? An ablation removes exactly one thing, or says the two cannot be separated.
+- `variance-checker` — does this number have enough seeds to be compared to anything? A single-seed number is refused a table, and the refusal is written down.
+- `results-tabulator` — what do the run directories actually say? Builds from the ingest output only and writes no judgement of any kind.
+- `results-critic` — applying the rule written before the run, did it survive? Never learns what anyone hoped for, and `inconclusive` has to name what would decide it.
+- `failure-mode-auditor` — is there a file that rules this failure out? All seven modes every time, each with a path or `unchecked:` and what was looked at. No score.
+
 ### Planned
 
-- `brief-writer` — the Heilmeier one-pager.
-- `premortem-agent` `tournament-judge` — why it fails; which of two is better, with the judge isolated from the generator.
-- `baseline-reproducer` `experiment-designer` `ablation-planner` `variance-checker` `results-tabulator` `results-critic` `failure-mode-auditor` — the experiment stage; Bash and files, no web tools.
+None. Every agent in the design doc is built.
 
 ![The read trio: predictor sees the abstract only, reader the full text, scorer both](docs/diagrams/read-trio.svg)
 
