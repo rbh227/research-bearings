@@ -3,14 +3,24 @@
 
 A PreToolUse hook on Write|Edit|Bash|WebSearch|WebFetch. Agents shipped by
 this plugin may only write under <project>/research/ and may only run this
-plugin's retrieval script. Everything else — the main thread, other plugins'
+plugin's own scripts. Everything else — the main thread, other plugins'
 agents, Claude Code's built-in agents — passes through untouched.
 
   Write|Edit          file_path must resolve under <project>/research/.
-  Bash                the command must be exactly `python3 <plugin>/scripts/retrieval/<x>.py ...`
+  Bash                the command must be exactly `python3 <plugin>/scripts/<x>.py ...`
                       with no shell operators outside quotes and no command
                       substitution anywhere. Back since 2026-09-15, when the
                       `searcher` agent was granted Bash.
+
+                      The root widened from scripts/retrieval/ to scripts/ on
+                      2026-09-18 so `ingest_runs.py` could live where it
+                      belongs rather than be smuggled into the retrieval
+                      directory. What the fence actually guarantees is
+                      unchanged: this plugin's own reviewed code, one command,
+                      no shell syntax, no chaining, no other binary. It is
+                      still the case that no agent can run the user's training
+                      script — that is the whole reason "whether to spend
+                      compute" is a human gate and not a sentence in a skill.
   WebSearch|WebFetch  denied to every agent this plugin ships except
                       `searcher`, which may WebSearch as a last resort when
                       every index returned nothing (docs/APIS.md). The main
@@ -35,7 +45,7 @@ import sys
 
 PLUGIN_PREFIX = "research-bearings:"
 WRITE_ROOT = "research"
-SCRIPT_ROOT = ("scripts", "retrieval")
+SCRIPT_ROOT = ("scripts",)
 INTERPRETERS = ("python3", "python")
 # Characters that separate or redirect commands when the shell sees them
 # outside quotes. `&` counts as much as `;` does: `snowball.py health & curl
@@ -133,9 +143,9 @@ def decide_bash(payload, env):
         return None
 
     why = (
-        "research-bearings agents may only run this plugin's retrieval script: "
-        "`python3 <plugin>/scripts/retrieval/<script>.py ...`, nothing else and "
-        "nothing chained. Refused: {}".format(command[:200])
+        "research-bearings agents may only run this plugin's own scripts: "
+        "`python3 <plugin>/scripts/<script>.py ...`, nothing else and "
+        "nothing chained. Your own code is yours to run. Refused: {}".format(command[:200])
     )
     if has_shell_syntax(command):
         return why
@@ -347,6 +357,25 @@ def selftest():
         # 29-30. An unterminated quote is not a command we can reason about; other plugins' agents are free.
         check("an unterminated quote is DENIED", bash(scout, 'python3 "{}" search "flood'.format(script)), env, True)
         check("another plugin's agent Bash is allowed", bash("Explore", "ls -la"), env, False)
+
+        # 31-36. The widened root, added 2026-09-18. `scripts/` rather than
+        # `scripts/retrieval/`, so the ingester lives beside the checkers — and
+        # every guarantee that mattered is still asserted here rather than
+        # assumed.
+        ingest = os.path.join(plugin_root(), "scripts", "ingest_runs.py")
+        tabulator = "research-bearings:results-tabulator"
+        check("the run ingester is allowed, which is why the root widened",
+              bash(tabulator, 'python3 "{}" /home/me/runs'.format(ingest)), env, False)
+        check("the retrieval scripts are still reachable after the widening",
+              bash(scout, 'python3 "{}" health'.format(script)), env, False)
+        check("`python train.py` is DENIED — no agent runs the user's code",
+              bash(tabulator, "python train.py --config exp.yaml"), env, True)
+        check("the ingester chained into rm is DENIED",
+              bash(tabulator, 'python3 "{}" runs && rm -rf runs'.format(ingest)), env, True)
+        check("a script outside the plugin is DENIED even under a scripts/ name",
+              bash(tabulator, "python3 /home/me/project/scripts/train.py"), env, True)
+        check("a plugin path that only starts with scripts is DENIED",
+              bash(tabulator, 'python3 "{}/scripts-of-mine/x.py"'.format(plugin_root())), env, True)
 
         # 15-19. The web fence: searcher may WebSearch, nobody else may, and
         # nobody at all may WebFetch; the main thread and other plugins pass.
