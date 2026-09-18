@@ -1,7 +1,7 @@
 # 03: `/rank` and `tournament-judge`
 
 Type: task
-Status: ready-for-agent
+Status: done
 Blocked by: 02
 
 ## What to build
@@ -47,11 +47,46 @@ itself.
 
 ## Acceptance
 
-- [ ] The pairing count is shown and approved before the first judge is dispatched.
-- [ ] Twelve pairings is a hard cap; five or fewer ideas get a round robin.
-- [ ] A judge's prompt contains no seed kind, no generator, and no authorship.
-- [ ] Every pairing yields a winner and the one sentence that decided it.
-- [ ] Ideas set aside are listed separately and never ranked.
-- [ ] The file states the cheapest-kill order, the tournament order, and where they disagree.
-- [ ] A second run moves the previous order into `## Previous orders` and writes what changed.
-- [ ] Nothing proceeds past the ranking without the user naming survivors.
+- [x] The pairing count is shown and approved before the first judge is dispatched.
+- [x] Twelve pairings is a hard cap; five or fewer ideas get a round robin.
+- [x] A judge's prompt contains no seed kind, no generator, and no authorship.
+- [x] Every pairing yields a winner and the one sentence that decided it.
+- [x] Ideas set aside are listed separately and never ranked.
+- [x] The file states the cheapest-kill order, the tournament order, and where they disagree.
+- [x] A second run moves the previous order into `## Previous orders` and writes what changed.
+- [x] Nothing proceeds past the ranking without the user naming survivors.
+
+## Resolution
+
+2026-09-18. `templates/research/ranking.md`, `agents/tournament-judge.md`,
+`skills/rank/SKILL.md`. Heading parity green.
+
+**The judge is never told the seed kind, and its contract says why.** An idea's
+`## Seed` says where it came from, not what it is worth. A judge that learns a
+candidate came from a persona question rather than a bit is ranking the
+generator, so the skill's dispatch step lists what is withheld and the agent's
+refusals table has an entry for inferring it from the page anyway.
+
+**A tie is refused outright.** A judge that declines to pick has cost a call and
+bought nothing, so closeness goes in the deciding sentence and the winner is
+still named. That is also why `## What decided it` is capped at one sentence:
+three reasons is a judge that has not decided which difference mattered.
+
+**Scores are written before they are numbered.** The contract requires the
+evidence line first and the one-to-five second, with the file and heading it
+came from. Nothing is computed, and the grid is integers because a decimal would
+be a lie about where the numbers came from — the same decision that struck
+`similarity.py` in chunk 3.
+
+**Where the two orders disagree is its own line, and it is never omitted.** When
+they agree the line says they agree. Its absence and its emptiness are different
+findings, and the disagreement is the whole reason both orders are written: an
+idea the judges loved whose kill costs three months is the trap.
+
+**A re-run re-runs the tournament rather than reusing it.** Only `## Order` is
+preserved, into `## Previous orders`. A judge's opinion formed before a result
+landed is an opinion about a different world.
+
+**An idea with no cost line is placed last and says so.** The alternative is
+inventing a cost, which puts a made-up number at the top of the thing that
+decides what gets run next.
