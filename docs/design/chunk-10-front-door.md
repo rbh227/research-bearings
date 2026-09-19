@@ -183,9 +183,8 @@ count — the upstream pages the derived file never mentions — and the shared
 rules, `/think` and the router's brief carry both, saying they can disagree.
 On the live folder: two newer by date, zero not named. The selftest gained the
 case where the two disagree the other way. The answer given was stop; the
-brief printed and `/premortem`… no: the next move named was `/bits` again or
-`/ideas`, as the router would offer them, and nothing past the first pause
-ran.
+brief printed with `/bits` and `/ideas` as the moves the router would offer,
+and nothing past the first pause ran.
 
 **The three tables agree.** The README's loop table (with `/read` as its own
 step before `/think`), the design doc's stage tables, and the state script's

@@ -61,6 +61,7 @@ Standard library only, plus `checklib` beside it for the heading split.
 import datetime
 import json
 import os
+import re
 import sys
 
 import checklib
@@ -331,11 +332,13 @@ def staleness_of(root, files, row):
             text = fh.read()
     except OSError:
         text = ""
+    # A slug counts as named only as a whole token: `xbd` inside
+    # `gupta-2019-xbd` is not a mention of a card called `xbd`.
     not_named = []
     for rel in inputs_of(row):
         if rel.endswith("/"):
             for stem in files[rel].get("pages", []):
-                if stem not in text:
+                if not re.search(r"(?<![\w-])" + re.escape(stem) + r"(?![\w-])", text):
                     not_named.append(rel + stem + ".md")
     return {
         "upstream_newer": len(newer),
@@ -368,10 +371,14 @@ def read(root):
                 reached = row["stage"]
     out["stage_reached"] = reached
 
-    # Pending pre-mortems: idea slugs with no premortems/<slug>-*.md.
+    # Pending pre-mortems: idea slugs with no premortems/<slug>-<date>.md. The
+    # date suffix is matched as a date, not as "anything after a dash": an idea
+    # `pre` must not be satisfied by `pre-image-only-head-2026-09-17`.
     idea_slugs = files["ideas/"]["pages"]
     pm_pages = files["premortems/"]["pages"]
-    pending = [s for s in idea_slugs if not any(p == s or p.startswith(s + "-") for p in pm_pages)]
+    pending = [s for s in idea_slugs
+               if not any(p == s or re.fullmatch(re.escape(s) + r"-\d{4}-\d{2}-\d{2}(-\d+)?", p)
+                          for p in pm_pages)]
     out["pending"] = {"premortem": pending}
 
     moves, staleness, repairs, on_demand = [], {}, [], []
@@ -573,6 +580,20 @@ def selftest():
         case("21 an idea with no pre-mortem keeps premortem ready and is named",
              status(out, "premortem") == "ready" and out["pending"]["premortem"] == ["two"])
         case("22 rank is ready once one pre-mortem exists", status(out, "rank") == "ready")
+        # An idea whose slug is a prefix of another's is not covered by the
+        # other's pre-mortem; a slug that is a substring of a longer token is
+        # not named by it.
+        write("sel", "ideas/pre.md", filled("idea.md"))
+        write("sel", "ideas/pre-image-head.md", filled("idea.md"))
+        write("sel", "premortems/pre-image-head-2026-09-18.md", filled("premortem.md"))
+        out = read(os.path.join(tmp, "sel"))
+        case("22b a prefix slug is still pending when only the longer slug has a pre-mortem",
+             sorted(out["pending"]["premortem"]) == ["pre", "two"], str(out["pending"]))
+        write("dmg2", "papers/xbd.md", filled("card.md"))
+        write("dmg2", "BITS.md", filled("bits.md") + "\n- group one: a-2019, b-2020, gupta-2019-xbd\n", age=3 * 86400)
+        st3 = read(os.path.join(tmp, "dmg2"))["staleness"]["BITS.md"]
+        case("22c a slug inside a longer token is not a mention",
+             "papers/xbd.md" in st3["not_named"] and "papers/a-2019.md" not in st3["not_named"], str(st3))
 
         # 8. An unreadable date.
         global stat_fn
@@ -615,7 +636,7 @@ def selftest():
              str({k: (e["written_by"], e["template"]) for k, e in out["files"].items()
                   if not e["written_by"] or e["template"] == "not found"}))
 
-    print("{} cases, {} failed".format(29, len(failures)))
+    print("{} cases, {} failed".format(31, len(failures)))
     return 1 if failures else 0
 
 
