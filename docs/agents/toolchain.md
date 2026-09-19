@@ -8,7 +8,7 @@ This repo is a Claude Code plugin. There is no compiler and no package manager, 
 | --- | --- |
 | build | `none` |
 | static checks | `claude plugin validate ./ --strict && claude plugin validate skills/ --strict && claude plugin validate agents/ --strict && python3 scripts/check_headings.py && python3 scripts/check_analogs.py --selftest && python3 scripts/check_landscape.py --selftest` |
-| one test file | `python3 hooks/guard.py --selftest && python3 scripts/retrieval/snowball.py --selftest && python3 scripts/check_analogs.py --selftest && python3 scripts/check_landscape.py --selftest` |
+| one test file | `python3 hooks/guard.py --selftest && python3 scripts/retrieval/snowball.py --selftest && python3 scripts/check_analogs.py --selftest && python3 scripts/check_landscape.py --selftest && python3 scripts/state.py --selftest` |
 | full suite | `none` — the behavioural tier went with the snowballing skill on 2026-09-14. `/scout`'s done-check is `scripts/check_analogs.py`, which is a static check, not a judge. `scripts/run_evals.sh` went with it; it is in git at 249188a if a case suite exists again. |
 
 Consumers: `/implement`, `/tdd`, `/codex-review`, `/run-tickets`. Run **static checks** before every commit and **one test file** per red-green slice. There is no full suite to run before a review gate; the static checks are the gate.

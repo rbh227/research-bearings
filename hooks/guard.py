@@ -376,6 +376,12 @@ def selftest():
               bash(tabulator, "python3 /home/me/project/scripts/train.py"), env, True)
         check("a plugin path that only starts with scripts is DENIED",
               bash(tabulator, 'python3 "{}/scripts-of-mine/x.py"'.format(plugin_root())), env, True)
+        # 37. The state script, added with the front door (chunk 10). It runs in
+        # the main thread, which the guard never sees; this proves that an agent
+        # which one day calls it is admitted under the same fence as the ingester.
+        state = os.path.join(plugin_root(), "scripts", "state.py")
+        check("the state script is allowed under the widened root, like the ingester",
+              bash(tabulator, 'python3 "{}" /home/me/project/research'.format(state)), env, False)
 
         # 15-19. The web fence: searcher may WebSearch, nobody else may, and
         # nobody at all may WebFetch; the main thread and other plugins pass.
