@@ -1,0 +1,21 @@
+<svg viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="banner-title banner-desc">
+  <title id="banner-title">Research Bearings</title>
+  <desc id="banner-desc">The wordmark, and the six stations of the research loop: frame, gather, read, think, experiment, result.</desc>
+  <rect width="1200" height="400" fill="#f5f5f5"/>
+  <text x="80" y="176" fill="#2d3142" font-family="'Geist', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="128" font-weight="700" letter-spacing="-0.045em">Research</text>
+  <text x="80" y="296" fill="#2d3142" font-family="'Geist', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="128" font-weight="700" letter-spacing="-0.045em">Bearings</text>
+  <g font-family="'Geist', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="20" font-weight="500" text-anchor="middle">
+    <rect x="80" y="328" width="140" height="44" rx="22" fill="#2d3142"/>
+    <text x="150" y="357" fill="#f5f5f5">Frame</text>
+    <rect x="236" y="328" width="140" height="44" rx="22" fill="#2d3142"/>
+    <text x="306" y="357" fill="#f5f5f5">Gather</text>
+    <rect x="392" y="328" width="140" height="44" rx="22" fill="#2d3142"/>
+    <text x="462" y="357" fill="#f5f5f5">Read</text>
+    <rect x="548" y="328" width="140" height="44" rx="22" fill="#2d3142"/>
+    <text x="618" y="357" fill="#f5f5f5">Think</text>
+    <rect x="704" y="328" width="172" height="44" rx="22" fill="#2d3142"/>
+    <text x="790" y="357" fill="#f5f5f5">Experiment</text>
+    <rect x="892" y="328" width="140" height="44" rx="22" fill="#2d3142"/>
+    <text x="962" y="357" fill="#f5f5f5">Result</text>
+  </g>
+</svg>

@@ -51,3 +51,14 @@ argument, is now one clause in the `/scout` line and the analogs file itself.
 - Every path in the layout block exists.
 - The four SVGs parse as XML and reference the fonts the HTML does.
 - Static checks green.
+
+## Addendum, 2026-09-18
+
+The README was restructured after chunk 10 shipped 1.0.0: a wordmark banner
+(`docs/diagrams/banner.svg`) and a monospace pipeline block at the top, then
+commands, quick start, the 27 skills in tables by stage, the 23 agents in one
+table, how it works, sources, checks, and the project structure. The three
+remaining diagrams were redrawn simpler — five nodes, four nodes, three nodes,
+no tags and no legend strips — in the same palette. The loop diagram was
+retired; the pipeline block at the top of the README carries the six stations
+and the three gates.

@@ -1,256 +1,238 @@
-# research-bearings
+# Research Bearings
 
-A Claude Code plugin for the part of research that is hard to delegate:
-deciding what to work on. It frames a question worth answering, maps what your
-field and the fields that never cite yours have already done, and keeps every
-paper it names checkable against the record. Everything it writes lands under
-`research/` in your project as plain markdown with fixed headings, so you can
-read it, grep it, and argue with it.
+**Typed skills and contract-bound agents for the part of research that is hard to delegate: deciding what to work on.**
 
-## Install
+A Claude Code plugin that frames a question worth answering, maps what your field and the fields that never cite yours have already done, turns papers into cards you can build on, generates and ranks ideas, and pre-registers the experiment before you spend compute. Everything it writes lands under `research/` in your project as plain markdown with fixed headings, and every paper it names is checkable against the record.
+
+![Research Bearings](docs/diagrams/banner.svg)
+
+```
+  FRAME         GATHER        READ          THINK         EXPERIMENT    RESULT
+ ┌────────┐    ┌────────┐    ┌────────┐    ┌────────┐    ┌────────┐    ┌────────┐
+ │Question│ ─▶ │ Matrix │ ─▶ │ Cards  │ ─▶ │ Ranked │ ─▶ │ Design │ ─▶ │Verdict │
+ │  gate  │    │Analogs │    │3 agents│    │  gate  │    │  gate  │    │3 rounds│
+ └────────┘    └────────┘    └────────┘    └────────┘    └────────┘    └────────┘
+  /start        /orient       /read         /think        /design       /result
+```
+
+Three human gates: you approve the question, you pick which ideas survive, you decide whether to spend compute. Nothing downstream runs until you say so, and no agent ever runs your code.
+
+---
+
+## Commands
+
+Type `/research-bearings:router`, or ask "what next?", and the front door reads what exists under `research/`, names the one command that comes next with the evidence beside it, and runs it when you say yes. These are the commands it hands you.
+
+| What you're doing | Command | Key principle |
+|---|---|---|
+| Starting from nothing | `/start` | Setup, then frame. A pause between. |
+| Framing a question worth answering | `/frame` | A question names who decides differently |
+| Mapping what exists | `/orient` | Surveys first, then a matrix; every line verified |
+| Finding fields that solved your problem under another name | `/scout` | Strip your vocabulary, search theirs |
+| Reading a paper into a card | `/read` | Predict before you read; a judge that never saw the guess |
+| Going from cards to a ranked shortlist | `/think` | Attack every idea before ranking it |
+| Writing the one page a professor reads | `/spec` | Heilmeier's eight, every sentence sourced |
+| Pre-registering an experiment | `/design` | The stop rule is named while the number is unknown |
+| Logging a run | `/log` | Every attempt, before its result is known |
+| Reading a result | `/result` | Three rounds, none sees the others' verdict |
+
+Every skill is invoked as `/research-bearings:<name>`.
+
+---
+
+## Quick start
 
 ```bash
 claude plugin marketplace add ~/Desktop/Research-Skills
 claude plugin install research-bearings@rbh227
 ```
 
-Then type `/research-bearings:router`, or just ask "what next?" — it reads what
-exists under `research/`, prints a one-screen brief, names the one command that
-comes next with the precondition it checked, and runs it when you say yes.
+Then, in any project:
 
-No API key is required. `/setup` probes every source it can talk to and writes
-`research/CONNECTIONS.md` saying which are reachable and which three keys would
-help most. See [Sources and keys](#sources-and-keys).
+```
+/research-bearings:router
+```
 
-## The loop
+On an empty folder it names `/start`. No API key is required; `/setup` probes every source it can reach and writes which ones answered and which three keys would help most. See [Sources and keys](#sources-and-keys).
 
-![The research loop, with its three human gates](docs/diagrams/loop.svg)
+---
 
-Three stages, and a person decides between them. Nothing downstream runs until
-you approve the question; nothing gets read into ideas until you pick which
-ideas survive; nothing runs on compute until you say so.
+## All 27 skills
 
-| Stage | What it produces | One command | The commands it runs |
-|---|---|---|---|
-| **Questions** | a question worth answering, with a named person whose decision it changes | `/start` | `/setup` `/frame` |
-| **Gathering** | what exists on it, in your field and in the fields that share its shape | `/orient` | `/surveys` `/landscape` (then `/scout`) |
-| **Processing** | cards, ideas, a ranked list, an experiment | `/read`, then `/think` | `/read` `/bits` `/scout` `/ideas` `/premortem` `/rank` |
+One skill, one job, one file. Each writes into `research/` under fixed headings that a script checks.
 
-Each composite pauses at every file boundary and asks once; a file that already
-exists gets a rerun-keep-stop question carrying its date and how many files
-upstream are newer. `/router` names whichever of these comes next. Twenty-seven
-skills ship in total; two remain planned. Every skill is invoked as
-`/research-bearings:<name>`.
+### Front door
 
-## Skills
-
-One skill, one job, one file. **Built** means it runs today; **planned** means
-the design is in `docs/design/skills-and-agents.md` and nothing exists yet.
+| Skill | What it does | Use when |
+|---|---|---|
+| `router` | Reads the state through one script, prints a brief, names the next command with the precondition it checked, asks once, runs it. Offers a fork of two or three when the folder has one. | "What next?" |
+| `start` | `/setup` then `/frame`, with the context file's summary and one question between them. | Day one |
+| `orient` | `/surveys` then `/landscape`, ending in a printed brief: surveys found, cells filled, cells that returned nothing, the three uncarded papers the matrix ranks highest. | After the question is approved |
+| `think` | `/bits`, `/scout`, `/ideas`, `/premortem`, `/rank`. Pauses at every file boundary; a file that exists gets a rerun-keep-stop question carrying its date and what is newer than it. | After the cards are read |
 
 ### Questions
 
-- `/setup` — **built.** Checks the machine, probes the sources, interviews you for what it cannot check, writes `research/CONTEXT.md` and `research/CONNECTIONS.md`.
-- `/frame` — **built.** Diverges into candidate framings, converges with Booth's ladder and the Heilmeier eight, has a fresh-context critic attack the survivor. Writes `research/QUESTION.md`.
+| Skill | What it does | Use when |
+|---|---|---|
+| `setup` | Checks the machine, probes the sources, interviews you for what it cannot check. Writes `CONTEXT.md` and `CONNECTIONS.md`. | Starting or inheriting a project |
+| `frame` | Diverges into candidate framings, converges with Booth's ladder and the Heilmeier eight, has a fresh-context critic attack the survivor. Writes `QUESTION.md`. | A question feels vague or unfalsifiable |
 
 ### Gathering
 
-- `/surveys` — **built.** One searcher restricted to reviews, then a differ that extracts each survey's own taxonomy and open challenges and harvests vocabulary into `QUESTION.md`. Writes `research/landscape/surveys.md`.
-- `/landscape` — **built.** Seven questions from `QUESTION.md`, seven searchers in parallel, a probe per matrix cell, then a merger that lays the sections side by side. Writes `research/landscape/matrix.md` and `timeslice.md`.
-- `/scout` — **built.** Strips your field's nouns off the problem, names the fields that share its shape, sends one searcher per field with your vocabulary blocked, writes what might transfer. Writes `research/analogs/<slug>.md`.
-- `/datasets` — **built.** Dataset names from the cards and the papers' experiments sections, looked up on the Hugging Face hub and GitHub, one row each with split protocol, licence and who uses it. Every line names its source or says `could not determine, checked <hosts>`. Writes `research/landscape/datasets.md`.
-- `/groups` — **built.** The authors on your cards, their last three years, grouped into labs with one checkable sentence each about where they are heading. Writes `research/landscape/groups.md`.
+| Skill | What it does | Use when |
+|---|---|---|
+| `surveys` | One searcher restricted to reviews, then a differ that extracts each survey's own taxonomy and harvests vocabulary into the question. | Before the landscape |
+| `landscape` | Seven questions from `QUESTION.md`, seven searchers in parallel, a probe per matrix cell, a merger that lays the sections side by side. Writes `matrix.md` and `timeslice.md`. | You want to know what exists in your own field |
+| `scout` | Strips your field's nouns off the problem, names the fields that share its shape, sends one searcher per field with your vocabulary blocked. Writes `analogs/<slug>.md`. | You suspect someone solved this under a different name |
+| `datasets` | Dataset rows from the cards, looked up on the Hugging Face hub and GitHub: split protocol, licence, who uses it, or `could not determine, checked <hosts>`. | After reading, before any baseline |
+| `groups` | The authors on your cards, their last three years, grouped into labs with one checkable sentence each. | You want the competitive landscape |
 
 ### Processing
 
-- `/read` — **built.** The three-agent read: a predictor that is handed a file ending at the introduction, a reader that gets the whole paper and never the prediction, a scorer that sees both and writes what a careful first reading would have missed. Proposes five papers from the matrix and waits for your yes. `--skim` for a pass-one card. Writes `research/papers/<slug>.md`.
-- `/verify` — **built.** Tags every reference in one file — verified, candidate, or not found with the indexes checked — in place, and never deletes a line.
-- `/audit` — **built.** The eight Kapoor and Narayanan leakage types against one card, each with the passage that supports it or what was checked. One card per run, on request.
-- `/reviews` — **built.** What OpenReview's referees pushed on, onto the card, and the pattern across papers once three cards carry notes.
-- `/critique` — **built.** A fresh-context critic that quotes the passage behind every finding, then scores your rebuttals: evidence not persuasion, concede only at four, never twice in a row.
-- `/bits` — **built.** One assumption per group of cards that share a thesis, with the cards and cells behind it. Groups are recorded and reused, so the file `/ideas` will read does not reshuffle.
-- `/brainstorm` — **built.** The dump: what are the important problems before anything about feasibility, Polya's seven transformations one at a time, and four to six persona agents built from your field's own record. Decides nothing. Appends to `research/IDEAS.md`.
-- `/ideas` — **built.** Generates from five seed kinds — bits, analog opportunities, the merger's contradictions, directions the record shows were dropped, and the personas' questions — puts every candidate to the index and writes both counts, then plans retrieval from the fields that would make the set less self-similar and generates again. Writes `research/ideas/<slug>.md`.
-- `/premortem` — **built.** One fresh-context agent per idea, none of which generated it: the baselines it must beat and whether they run, the field's own metric, what the evaluation plan depends on, and a verdict in three states. Judges execution, never novelty. Writes `research/premortems/<slug>-<date>.md`.
-- `/rank` — **built.** A bounded pairwise tournament whose judges see two ideas and never their authors, Alon's feasibility-against-interest grid, and a final order by cheapest kill rather than by wins — with every place the two orders disagree named. Writes `research/RANKING.md`.
-- `/spec` — **built.** The Heilmeier page for a survivor: eight questions, eight paragraphs, one page, every factual sentence sourced to a file. Reports when the page fails the catechism's own one-page test. Writes `research/specs/<slug>.md`.
-- `/baseline` — **built.** The plan to reproduce the strongest published number you intend to beat, with the card and table it came from and what the paper leaves unstated, then the gap. Writes `research/baselines/<card-slug>.md`.
-- `/replicate` — **built.** The same machinery pointed at a paper you are not building on, so the gap is a fact about your pipeline rather than about the paper.
-- `/design` — **built.** The pre-registration, written before the run and never edited after: seven fields, Platt's competing hypotheses with the run that separates them, the leakage taxonomy against your own split, and a stop rule named while the number is unknown. Writes `research/experiments/<slug>.md`.
-- `/log` — **built.** Every attempt appended to one immutable notebook before its result is known, then the run directory ingested and attached by config hash. Reads run directories you did not format for it. Appends to `research/NOTEBOOK.md`.
-- `/result` — **built.** Three rounds, none of which sees what the others concluded: a tabulator building the table from the runs only, a fresh critic applying the pre-registered stop rule literally, and an auditor walking M1 to M7. Writes `research/results/<slug>-<date>.md`.
-- `/render` `/figure` — planned. The matrix as a clickable page, a pipeline figure.
+| Skill | What it does | Use when |
+|---|---|---|
+| `read` | The three-agent read: a predictor that sees only the introduction, a reader that never sees the prediction, a scorer that sees both. Proposes five papers from the matrix and waits. Writes `papers/<slug>.md`. | The matrix has lines nobody has read |
+| `verify` | Tags every reference in one file as verified, candidate, or not found with the indexes checked. Never deletes a line. | Anything that names papers |
+| `audit` | The eight Kapoor and Narayanan leakage types against one card, each with the passage or what was checked. | Before you build on a number |
+| `reviews` | What OpenReview's referees pushed on, onto the card; the pattern across papers once three carry notes. | You want to know what this field's reviewers push on |
+| `critique` | A fresh-context critic that quotes the passage behind every finding, then scores your rebuttals on evidence, concedes only at four, never twice in a row. | Any file under `research/` |
+| `bits` | One assumption per group of cards that share a thesis. Groups are recorded and reused, so `/ideas` reads a file that does not reshuffle. | Several papers are carded |
+| `brainstorm` | The dump: important problems before feasibility, Polya's transformations one at a time, four to six persona agents from your field's own record. Decides nothing. | You want everything out of your head |
+| `ideas` | Generates from five seed kinds, puts every candidate to the index and writes the row count it came back with, then plans retrieval from the fields that would make the set less self-similar. Novelty is a retrieval result, never a feeling. | You have bits, analogs, or a log |
 
-### The front door
+### Selection
 
-- `/router` — **built.** Reads the state of `research/` through one script, prints the brief, names the next command with the precondition it checked — or offers a fork of two or three, or, given a goal it can see will be refused, names the missing file and the nearest step instead — asks once, and runs it. Fires on "what next?" as well as by name. Writes nothing.
-- `/start` — **built.** `/setup` then `/frame`, with a pause between: the context file's summary, then one question. The rules every composite shares are written here.
-- `/orient` — **built.** `/surveys` then `/landscape`, ending in a printed brief: surveys found, cells filled, cells whose query returned nothing, the three uncarded papers the matrix ranks highest, the next move.
-- `/think` — **built.** `/bits`, `/scout`, `/ideas`, `/premortem`, `/rank`. The pre-mortem is in the sequence because `/rank` sets aside every idea without one, and because it is the step nobody runs when it is a separate command.
+| Skill | What it does | Use when |
+|---|---|---|
+| `premortem` | One fresh-context agent per idea, none of which generated it: the baselines it must beat, the field's metric, what the evaluation depends on, a verdict in three states. Judges execution, never novelty. | After `/ideas`, before `/rank` |
+| `rank` | A bounded pairwise tournament whose judges see two ideas and never their authors, Alon's feasibility-against-interest grid, and a final order by cheapest kill, with every disagreement named. | After the pre-mortems |
+| `spec` | The Heilmeier page for a survivor: eight questions, eight paragraphs, one page, every factual sentence sourced to a file. | An idea survived ranking |
+
+### Experiments
+
+| Skill | What it does | Use when |
+|---|---|---|
+| `baseline` | The plan to reproduce the strongest published number you intend to beat, with the table it came from and what the paper leaves unstated, then the gap. | Before `/design` |
+| `replicate` | The same machinery pointed at a paper you are not building on, so the gap is a fact about your pipeline. | You want to know if your gaps mean anything |
+| `design` | The pre-registration: seven fields, Platt's competing hypotheses with the run that separates them, the leakage taxonomy against your split, a stop rule. Never edited after. | Before you spend compute |
+| `log` | Every attempt appended to one immutable notebook before its result is known, then the run directory ingested and attached by config hash. | Before and after every run |
+| `result` | A tabulator that builds the table from the runs only, a fresh critic that applies the stop rule literally, an auditor that walks the seven failure modes. | After `/log` |
+
+Planned and not built: `render` (the matrix as a clickable page) and `figure` (a pipeline figure).
+
+---
 
 ## Agents
 
-An agent exists where a separate context is the mechanism: a judge that must not
-see how the thing was made, a worker that must see one question and not the
-others, or a writer whose tools are the contract. Each is 75 to 135 lines,
-its heading contract and its refusals table included.
+An agent exists where a separate context is the mechanism: a judge that must not see how the thing was made, a worker that must see one question and not the others, or a writer whose tools are the contract.
 
-### Built
+| Agent | The one question it answers | What it never sees |
+|---|---|---|
+| `question-critic` | What is wrong with this question? | The reasoning that produced it |
+| `searcher` | What does the record hold on this question, in this field? | The other six searchers |
+| `merger` | Laid side by side, what do the sections say, and where do they disagree? | Anything but the sections; Read and Write only |
+| `survey-differ` | How does each survey carve up the field? | Anything past the abstracts, and it says so |
+| `predictor` | From the first page alone, what will this paper do and where will it be weak? | The body of the paper |
+| `reader` | What does this paper actually do, and what does it change? | The prediction |
+| `scorer` | What did a careful first reading get wrong? | Nothing; it is the only one that sees both notes |
+| `openreview-reader` | What did the referees push on? | Praise; it quotes reviewers |
+| `dataset-scout` | What is actually in the data this field trains on? | Anything not in a host record or a quoted passage |
+| `author-tracker` | Who is working on this and where are they heading? | Anything not checkable against the titles beside it |
+| `leakage-auditor` | Could this number be higher than the method deserves? | A type it may skip; all eight are written |
+| `critic` | What is wrong with this file? | The reasoning behind it |
+| `persona-ideator` | What would this person want to know? | A persona with no warrant in the record |
+| `diversity-planner` | What is this set of ideas not drawing on? | An idea to propose; it never does |
+| `premortem-agent` | How does this idea die in execution? | Novelty; that was settled by retrieval |
+| `tournament-judge` | Of these two, which should run first? | Who wrote either |
+| `baseline-reproducer` | What would it take to hit this published number? | Your code running; it writes the plan |
+| `experiment-designer` | What will be run, and what result would make you stop? | The result |
+| `ablation-planner` | If this works, how will anyone know which part worked? | The design's author's reasons |
+| `variance-checker` | Does this number have enough seeds to be compared? | A single-seed number in a table; it refuses one |
+| `results-tabulator` | What do the run directories actually say? | The hypothesis; it judges nothing |
+| `results-critic` | Applying the rule written before the run, did it survive? | What anyone hoped for |
+| `failure-mode-auditor` | Is there a file that rules this failure out? | The verdict |
 
-- `question-critic` — what is wrong with this question? A fresh context every call, so the generator never judges its own page.
-- `searcher` — what does the record hold on this question, in this field? One question, one file; seven run at once and none sees another's. Bash is fenced to the retrieval script.
-- `merger` — laid side by side, what do the sections say, and where do they disagree? Read and Write only, so it cannot add a claim.
-- `survey-differ` — how does each survey carve up the field, and where do the carvings differ? Reads abstracts from the records and says so.
+---
 
-- `predictor` — from the first page alone, what is this paper going to do and where will it be weak? Handed an intro file that ends where the introduction ends, so it cannot read further.
-- `reader` — what does this paper actually do, and what does it change? Writes the delta sentence or says it cannot be written, and compares against the other cards in its matrix cell.
-- `scorer` — what did a careful first reading get wrong? The only agent that sees both notes, which is why the scoring is its job.
-- `openreview-reader` — what did the referees push on, and what did the authors concede? Quotes reviewers rather than paraphrasing them into praise.
-- `dataset-scout` — what is actually in the data this field trains on? Every fact from a host record or a quoted passage, or `could not determine`.
-- `author-tracker` — who is working on this and where are they heading? Every direction sentence checkable against the titles beside it.
-- `leakage-auditor` — could this number be higher than the method deserves? Eight types, every one written, each with a quote or what was checked.
-- `critic` — what is wrong with this file? Fresh context, quotes the passage behind every finding, and scores rebuttals on the ladder.
+## How it works
 
-- `persona-ideator` — what would this person want to know? One stakeholder drawn from the record with a warrant, five to ten questions, each citing the file behind it or marked as coming from the role.
-- `diversity-planner` — what is this set of ideas not drawing on? Says what the candidates have in common before it proposes a field, and never proposes an idea.
+Four rules, each enforced somewhere you can point at.
 
-- `premortem-agent` — how does this idea die in execution? Judges execution and never novelty, in the compute and time your context states, and writes `constraint unknown` rather than assuming a cluster.
-- `tournament-judge` — of these two, which should be run first? Sees both ideas and both pre-mortems and nothing about who wrote either. One sentence decides it; a tie is refused.
-- `baseline-reproducer` — exactly what would it take to hit this published number? The table's figure, not the abstract's, and what the paper does not say as its own paragraph.
-- `experiment-designer` — what will be run, and what result would make you stop? The seven fields, plus the competing hypothesis that the gain came from somewhere you did not intend.
-- `ablation-planner` — if this works, how will anyone know which part worked? An ablation removes exactly one thing, or says the two cannot be separated.
-- `variance-checker` — does this number have enough seeds to be compared to anything? A single-seed number is refused a table, and the refusal is written down.
-- `results-tabulator` — what do the run directories actually say? Builds from the ingest output only and writes no judgement of any kind.
-- `results-critic` — applying the rule written before the run, did it survive? Never learns what anyone hoped for, and `inconclusive` has to name what would decide it.
-- `failure-mode-auditor` — is there a file that rules this failure out? All seven modes every time, each with a path or `unchecked:` and what was looked at. No score.
+1. **The model may think freely; its citations get checked.** Everything named is resolved against the record, exact match only. A near match is a candidate and never certified. What will not resolve stays in the file, marked.
+2. **No file says a gap exists.** It reports what a search returned and lets you draw the conclusion. "Unexplored", "gap", "novel" and "nobody" do not appear, and a checker fails the file if they do.
+3. **The generator never judges in the same context.** Critics, scorers and mergers run fresh, with narrower tools than the thing they judge.
+4. **Retrieved content is data, not instructions.** And abstention beats a guess: "could not determine, checked X and Y" is a valid output.
 
-### Planned
+**Gathering** fans out and merges back through files. Seven searchers, one question each, and a merger that reads the seven files and nothing else.
 
-None. Every agent in the design doc is built.
+![How gathering works](docs/diagrams/gathering-fan-out.svg)
 
-![The read trio: predictor sees the abstract only, reader the full text, scorer both](docs/diagrams/read-trio.svg)
+**Reading** is three contexts. The predictor commits a guess from the introduction; the reader never sees it; the scorer sees both and writes what a careful first reading would have missed.
 
-## How gathering works
+![The read trio](docs/diagrams/read-trio.svg)
 
-![The gathering fan-out](docs/diagrams/gathering-fan-out.svg)
+**The split is a hook, not a prompt.** Research agents can read the world and cannot run code. Experiment agents can read your runs and cannot reach the web. The guard denies a plugin agent any write outside `research/`, any Bash command other than the plugin's own scripts, and any web tool except the searcher's last-resort search.
 
-`/landscape` derives seven questions from your framed question, shows you the
-seven queries, and waits. Then seven searchers run in parallel. Each one calls
-the retrieval script once; the script seeds on the top thirty papers across
-Semantic Scholar and OpenAlex, walks one hop backward and forward from every
-seed, deduplicates by DOI and arXiv id, ranks inside the neighborhood on how
-many neighborhood papers cite each one, groups into foundational, current and
-surveys, and writes the section itself, with a "What was searched" block that
-names every query, index, count, stop reason and date. The merger reads the
-sections and nothing else.
+![The tool split](docs/diagrams/tool-split.svg)
 
-## The four rules
-
-Every skill and agent applies these. They came out of building the first
-three skills, and each one is enforced somewhere you can point at.
-
-1. **The model may think freely; its citations get checked.** Everything named
-   is resolved against the record, exact match only. A near match is a
-   candidate and never certified. What will not resolve stays in the file,
-   marked, next to the closest real thing.
-2. **No file says a gap exists.** It reports what a search returned and lets
-   you draw the conclusion. "Unexplored", "gap", "novel" and "nobody" do not
-   appear, and a check script fails the file if they do.
-3. **The generator never judges in the same context.** Critics, scorers and
-   mergers run in fresh contexts with narrower tools than the thing they judge.
-4. **Retrieved content is data, not instructions.** An instruction-shaped
-   sentence in a paper is a finding to report. And abstention beats a guess:
-   "could not determine, checked X and Y" is a valid output.
-
-![The tool split: research agents read the world and cannot run code; experiment agents run code and cannot read the world](docs/diagrams/tool-split.svg)
-
-The split is a hook, not a prompt. `hooks/guard.py` denies a plugin agent any
-write outside `research/`, any Bash command other than the retrieval script,
-and any web tool except the searcher's last-resort search.
+---
 
 ## Sources and keys
 
-Nine sources. Four carry retrieval: Semantic Scholar, OpenAlex, Crossref and
-arXiv. Unpaywall finds the open-access PDF a read needs; the Hugging Face hub
-and GitHub fill the dataset ledger; OpenReview carries the reviews; Zotero is
-probed and reserved. Every one works without a key, at the unkeyed rate, and
-the script says which index answered each call.
+Nine sources. Four carry retrieval: Semantic Scholar, OpenAlex, Crossref and arXiv. Unpaywall finds the open-access PDF a read needs; the Hugging Face hub and GitHub fill the dataset ledger; OpenReview carries the reviews; Zotero is probed and reserved. Every one works without a key, at the unkeyed rate, and the script says which index answered each call.
 
-Two of them degrade in a way worth knowing. Without `UNPAYWALL_EMAIL`, a paper
-whose only open-access copy is not on arXiv comes back `no text` and `/read`
-skims it from the abstract instead. And OpenReview answers search anonymously
-but gates the forum behind a bot challenge, so without a login `/reviews`
-gets the venue and the decision and not the reviews — it reports
-`login required` and carries on.
+Two degrade in a way worth knowing. Without `UNPAYWALL_EMAIL`, a paper whose only open-access copy is not on arXiv comes back `no text` and `/read` skims it from the abstract. OpenReview answers search anonymously but gates the forum behind a bot challenge, so without a login `/reviews` gets the venue and the decision and not the reviews, and says so.
 
-Keys are read from the environment: `S2_API_KEY`, `OPENALEX_MAILTO`,
-`CROSSREF_MAILTO` and the rest are listed with where to get them and the
-one-line test for each in [`docs/APIS.md`](docs/APIS.md).
+Keys are read from the environment. `S2_API_KEY`, `OPENALEX_MAILTO`, `CROSSREF_MAILTO` and the rest are listed with where to get them and a one-line test for each in [`docs/APIS.md`](docs/APIS.md).
 
 ```bash
 python3 scripts/retrieval/snowball.py status --md     # every source, live, in a few seconds
 ```
 
-Web search is allowed in exactly two places, both named in that document.
+---
 
-## Running the evals
-
-Three layers, all in the repo.
+## Running the checks
 
 ```bash
-# offline, seconds: the script, the guard, and the three structural checks
+# offline, seconds: the scripts, the guard, the structural checks, the grader facts
 python3 scripts/retrieval/snowball.py --selftest
 python3 scripts/retrieval/papers.py --selftest
+python3 scripts/ingest_runs.py --selftest
+python3 scripts/state.py --selftest
 python3 hooks/guard.py --selftest
-python3 scripts/check_headings.py \
-  && python3 scripts/check_analogs.py --selftest \
-  && python3 scripts/check_landscape.py --selftest \
-  && python3 scripts/check_cards.py --selftest
+python3 scripts/check_headings.py
+python3 evals/fixtures/check_cases.py
 
-# behavioural cases under evals/<case>/, run by Claude Code's eval harness:
-# 33 cases — the front door, and two or more for every typed loop command.
-# Most need a research/ folder, which each case's scaffold assembles from the
-# fixtures under evals/fixtures/; see evals/fixtures/README.md for grants.
+# 33 behavioural cases, run by Claude Code's eval harness; each is a full Claude child
 claude plugin eval . --scaffold --allow-tools "Bash(python3 *)"
-python3 scripts/state.py --selftest      # the state read behind the router, offline
 
-# recall of a live landscape run against the gold list, by gold heading
+# recall of a live landscape run against the gold list
 python3 evals/landscape/recall.py evals/landscape/runs/damage --headings "damage assessment"
 ```
 
-The gold list is `evals/gold/wildfire-cv.md`; read its provenance note before
-reading a recall number. The last landscape run, its queries, its misses and
-what it says about the design are in [`evals/landscape/README.md`](evals/landscape/README.md).
+The cases need fixture folders, which each case's scaffold assembles from the outputs of past live runs; [`evals/fixtures/README.md`](evals/fixtures/README.md) says which grants each needs. The gold list is `evals/gold/wildfire-cv.md`; read its provenance note before reading a recall number.
 
-## Layout
+---
 
-```
-skills/            router, start, orient, think;
-                   setup, frame, surveys, landscape, scout, read, verify, reviews,
-                   datasets, groups, audit, bits, critique, brainstorm, ideas,
-                   premortem, rank, spec, baseline, replicate, design, log, result
-agents/            question-critic, searcher, merger, survey-differ,
-                   predictor, reader, scorer, openreview-reader,
-                   dataset-scout, author-tracker, leakage-auditor, critic,
-                   persona-ideator, diversity-planner,
-                   premortem-agent, tournament-judge, baseline-reproducer,
-                   experiment-designer, ablation-planner, variance-checker,
-                   results-tabulator, results-critic, failure-mode-auditor
-scripts/retrieval/ snowball.py: status, search, verify, neighborhood, the resolvers
-                   papers.py:   fetch, reviews, datasets, authors
-scripts/           state.py: the loop as a table — what exists, what is stale, what is next
-                   ingest_runs.py: run directories nobody formatted for it
-                   check_headings.py, check_analogs.py, check_landscape.py,
-                   check_cards.py, check_ideas.py, check_experiments.py
-                   checklib.py: the file shape the checkers share
-hooks/             the guard: write scope, Bash fence, web fence
-templates/         the 28 file formats; the source of truth for every heading
-docs/APIS.md       sources, keys, rates, one-line tests
-docs/design/       one note per chunk: what was decided and what the run found
-docs/diagrams/     the four diagrams above, as HTML and SVG
-evals/             33 cases, the fixtures and their assembler, the gold list,
-                   and the landscape and read runs
-```
+## Project structure
 
-The methodology every skill applies traces to a source in a reading sheet kept
-local and not shipped; `docs/design/skills-and-agents.md` joins each skill to
-its justification.
+| Path | What lives there |
+|---|---|
+| `skills/` | 27 skills, one `SKILL.md` each: purpose, inputs, agents dispatched, the file written with its headings, a refusals table |
+| `agents/` | 23 agents: the one question each answers, its tools, its output headings, what it must not do |
+| `scripts/` | `state.py` (the loop as a table), `ingest_runs.py` (run directories nobody formatted for it), six checkers and their shared library |
+| `scripts/retrieval/` | `snowball.py` (status, search, verify, neighborhood) and `papers.py` (fetch, reviews, datasets, authors) |
+| `hooks/` | The guard: write scope, Bash fence, web fence |
+| `templates/` | The 28 file formats; the source of truth for every heading |
+| `evals/` | 33 cases, the fixtures and their assembler, the gold list, the landscape and read runs |
+| `docs/APIS.md` | Sources, keys, rates, one-line tests |
+| `docs/design/` | One note per chunk: what was decided, what the build found, what the live runs corrected |
+| `docs/diagrams/` | The banner and the three diagrams above, as SVG and HTML |
+
+The methodology every skill applies traces to a source in a reading sheet kept local and not shipped; `docs/design/skills-and-agents.md` joins each skill to its justification.
+
+---
+
+## License
+
+MIT.
