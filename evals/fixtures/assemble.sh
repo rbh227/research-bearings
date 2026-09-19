@@ -6,6 +6,7 @@
 # Shapes:
 #   empty     nothing at all — no research/ folder
 #   wildfire  QUESTION.md and the landscape from the wildfire run (no cards)
+#   wildfire-surveyed  QUESTION.md and only the surveys file from that run
 #   damage    QUESTION.md, the landscape, three cards, datasets, groups, BITS.md
 #             and the critique from the damage runs
 #
@@ -23,7 +24,7 @@
 
 set -euo pipefail
 
-shape="${1:?usage: assemble.sh <empty|wildfire|damage> [target]}"
+shape="${1:?usage: assemble.sh <empty|wildfire|wildfire-surveyed|damage> [target]}"
 target="${2:-$PWD/research}"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 evals="$(dirname "$here")"
@@ -38,6 +39,15 @@ stamp() {  # stamp <YYYYMMDDhhmm> <path>...
 case "$shape" in
   empty)
     rm -rf "$target"
+    ;;
+  wildfire-surveyed)
+    # The wildfire run with only its surveys file: what /orient sees after
+    # its first step, before the landscape exists.
+    rm -rf "$target"; mkdir -p "$target/landscape"
+    cp -p "$landscape_runs/wildfire/research/QUESTION.md" "$target/"
+    cp -p "$landscape_runs/wildfire/research/landscape/surveys.md" "$target/landscape/"
+    stamp 202609150900 "$target/QUESTION.md"
+    stamp 202609151000 "$target/landscape/surveys.md"
     ;;
   wildfire)
     rm -rf "$target"; mkdir -p "$target"

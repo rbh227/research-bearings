@@ -1,8 +1,9 @@
 # Fixtures for the front-door cases
 
 `assemble.sh <shape> [target]` builds a `research/` folder from the files the
-live runs left under `landscape/runs/` and `read/runs/`. Three shapes: `empty`,
-`wildfire` (question and landscape, no cards), `damage` (question, landscape,
+live runs left under `landscape/runs/` and `read/runs/`. Four shapes: `empty`,
+`wildfire` (question and landscape, no cards), `wildfire-surveyed` (question and
+surveys only), `damage` (question, landscape,
 three cards, datasets, groups, a bits file dated before two of the cards, one
 critique). It copies and never invents; the dates it sets are explained at the
 top of the script.
