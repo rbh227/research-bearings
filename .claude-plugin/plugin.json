@@ -1,8 +1,8 @@
 {
   "name": "research-bearings",
   "displayName": "Research Bearings",
-  "version": "0.9.0",
-  "description": "Typed skills and contract-bound agents that run the research loop, from framing a question worth answering to paper cards you can build on and the ledgers behind them.",
+  "version": "1.0.0",
+  "description": "A front door and 27 typed skills that run the research loop \u2014 from a question worth answering, through paper cards you can build on, to a ranked shortlist and a pre-registered experiment \u2014 with contract-bound agents and every paper checkable against the record.",
   "author": {
     "name": "rbh227",
     "email": "rbh227@lehigh.edu"

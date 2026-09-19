@@ -126,3 +126,18 @@ than its author has judged.
 - **M1–M7**: Lu et al.'s seven failure modes — implementation bugs that pass self-review, hallucinated citations, hallucinated results, shortcut reliance, a bug reframed as an insight, methodology fabrication, frame-lock. All seven are answered every run including the clean ones, each with a file path or `unchecked:` and what was looked at. **No score**: one number cannot carry seven kinds of doubt.
 - **run-shaped**: What `ingest_runs.py` calls a directory holding a config, a metrics file or a log. There is no layout to adopt; it reads run directories nobody formatted for it. A `.json` is classified by name, and one whose name says neither config nor metrics is reported as unclassified rather than guessed at.
 - **no agent runs your code**: The chunk's largest departure from the build plan, and the guard's doing. `SCRIPT_ROOT` admits this plugin's own `scripts/` and nothing else, so "whether to spend compute" is a fact about the code rather than a sentence in a skill.
+
+## Front-door terms
+
+Added with chunk 10 (2026-09-18), the last milestone: `/router` and the three
+composites.
+
+- **router**: `/research-bearings:router`, the front door. Reads the state script, prints the brief, names the next command with the precondition it checked, asks once, invokes on yes. Never a signpost that only points, never a chauffeur that runs unasked. Reachable by description on "what next?" as well as by name.
+- **composite**: A skill that runs a fixed sequence of other skills in the main thread through the Skill tool — `/start`, `/orient`, `/think` — adding nothing to any of them and writing nothing itself. Not an agent: a composite judges nothing, so it needs no fresh context.
+- **file boundary**: The point in a composite between one step's output file and the next step. Every boundary asks once; the first step needs no yes because typing the composite was it. A skill's own gates (landscape's seven queries, rank's pairing list) are not boundaries and the composite does not touch them.
+- **staleness fact**: What the state script reports for a derived file that exists: the count of upstream files newer than it and the newest upstream date. It is carried in the rerun-keep-stop question and never decided on by the composite. Zero is a fact too.
+- **rerun, keep, or stop**: The question a composite asks at a boundary whose output already exists. Keep is not skip — a kept file is read by the next step as it stands — and nothing cascades: a rerun of an earlier step does not rerun later ones.
+- **brief**: The one screen the router prints and every composite ends with: stage reached, what exists with dates, what is stale, repairs, next moves. Derived from the state script and the files; never saved, because a saved brief is a heading to keep true.
+- **state script**: `scripts/state.py`. A dependency table in the loop's order and a read of a `research/` folder against it. Six move statuses: `ready`, `stale`, `repeat` (an output that grows, such as cards), `done`, `blocked`, `skipped` (a required upstream file absent while a later stage has output — a repair, not a move). `present-but-malformed` is a state a file can be in and still satisfy a precondition; the file is listed under repairs with the skill that writes it.
+- **on-demand skill**: verify, audit, critique, reviews, replicate. Rows in the state table flagged so the router finds them by stated goal and never names one as the next move.
+- **synthetic fixture**: `evals/fixtures/selection/`, six idea pages and six pre-mortems invented so `/rank`'s bound can be graded. The one fixture that is not a copy of a live run; every file in it says so in its first comment. Not research, and never copied into a real `research/`.

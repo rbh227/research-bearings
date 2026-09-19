@@ -14,6 +14,10 @@ claude plugin marketplace add ~/Desktop/Research-Skills
 claude plugin install research-bearings@rbh227
 ```
 
+Then type `/research-bearings:router`, or just ask "what next?" — it reads what
+exists under `research/`, prints a one-screen brief, names the one command that
+comes next with the precondition it checked, and runs it when you say yes.
+
 No API key is required. `/setup` probes every source it can talk to and writes
 `research/CONNECTIONS.md` saying which are reachable and which three keys would
 help most. See [Sources and keys](#sources-and-keys).
@@ -26,14 +30,16 @@ Three stages, and a person decides between them. Nothing downstream runs until
 you approve the question; nothing gets read into ideas until you pick which
 ideas survive; nothing runs on compute until you say so.
 
-| Stage | What it produces | Commands |
-|---|---|---|
-| **Questions** | a question worth answering, with a named person whose decision it changes | `/setup` `/frame` |
-| **Gathering** | what exists on it, in your field and in the fields that share its shape | `/surveys` `/landscape` `/scout` |
-| **Processing** | cards, ideas, a ranked list, an experiment | `/read` `/brainstorm` `/ideas` `/rank` |
+| Stage | What it produces | One command | The commands it runs |
+|---|---|---|---|
+| **Questions** | a question worth answering, with a named person whose decision it changes | `/start` | `/setup` `/frame` |
+| **Gathering** | what exists on it, in your field and in the fields that share its shape | `/orient` | `/surveys` `/landscape` (then `/scout`) |
+| **Processing** | cards, ideas, a ranked list, an experiment | `/read`, then `/think` | `/read` `/bits` `/scout` `/ideas` `/premortem` `/rank` |
 
-Those are the nine commands people type, and all nine are built. Twenty-three
-skills ship in total; six remain planned. Every skill is invoked as
+Each composite pauses at every file boundary and asks once; a file that already
+exists gets a rerun-keep-stop question carrying its date and how many files
+upstream are newer. `/router` names whichever of these comes next. Twenty-seven
+skills ship in total; two remain planned. Every skill is invoked as
 `/research-bearings:<name>`.
 
 ## Skills
@@ -73,7 +79,13 @@ the design is in `docs/design/skills-and-agents.md` and nothing exists yet.
 - `/log` — **built.** Every attempt appended to one immutable notebook before its result is known, then the run directory ingested and attached by config hash. Reads run directories you did not format for it. Appends to `research/NOTEBOOK.md`.
 - `/result` — **built.** Three rounds, none of which sees what the others concluded: a tabulator building the table from the runs only, a fresh critic applying the pre-registered stop rule literally, and an auditor walking M1 to M7. Writes `research/results/<slug>-<date>.md`.
 - `/render` `/figure` — planned. The matrix as a clickable page, a pipeline figure.
-- `/router` `/start` `/orient` `/think` — planned. The front door and three composites.
+
+### The front door
+
+- `/router` — **built.** Reads the state of `research/` through one script, prints the brief, names the next command with the precondition it checked — or offers a fork of two or three, or, given a goal it can see will be refused, names the missing file and the nearest step instead — asks once, and runs it. Fires on "what next?" as well as by name. Writes nothing.
+- `/start` — **built.** `/setup` then `/frame`, with a pause between: the context file's summary, then one question. The rules every composite shares are written here.
+- `/orient` — **built.** `/surveys` then `/landscape`, ending in a printed brief: surveys found, cells filled, cells whose query returned nothing, the three uncarded papers the matrix ranks highest, the next move.
+- `/think` — **built.** `/bits`, `/scout`, `/ideas`, `/premortem`, `/rank`. The pre-mortem is in the sequence because `/rank` sets aside every idea without one, and because it is the step nobody runs when it is a separate command.
 
 ## Agents
 
@@ -194,8 +206,12 @@ python3 scripts/check_headings.py \
   && python3 scripts/check_landscape.py --selftest \
   && python3 scripts/check_cards.py --selftest
 
-# behavioural cases under evals/<case>/, run by Claude Code's eval harness
-claude plugin eval . --case 'frame-*'
+# behavioural cases under evals/<case>/, run by Claude Code's eval harness:
+# 32 cases — the front door, and two or more for every typed loop command.
+# Most need a research/ folder, which each case's scaffold assembles from the
+# fixtures under evals/fixtures/; see evals/fixtures/README.md for grants.
+claude plugin eval . --scaffold --allow-tools "Bash(python3 *)"
+python3 scripts/state.py --selftest      # the state read behind the router, offline
 
 # recall of a live landscape run against the gold list, by gold heading
 python3 evals/landscape/recall.py evals/landscape/runs/damage --headings "damage assessment"
@@ -208,24 +224,31 @@ what it says about the design are in [`evals/landscape/README.md`](evals/landsca
 ## Layout
 
 ```
-skills/            setup, frame, surveys, landscape, scout,
-                   read, verify, reviews, datasets, groups, audit, bits, critique,
-                   brainstorm, ideas
+skills/            router, start, orient, think;
+                   setup, frame, surveys, landscape, scout, read, verify, reviews,
+                   datasets, groups, audit, bits, critique, brainstorm, ideas,
+                   premortem, rank, spec, baseline, replicate, design, log, result
 agents/            question-critic, searcher, merger, survey-differ,
                    predictor, reader, scorer, openreview-reader,
                    dataset-scout, author-tracker, leakage-auditor, critic,
-                   persona-ideator, diversity-planner
+                   persona-ideator, diversity-planner,
+                   premortem-agent, tournament-judge, baseline-reproducer,
+                   experiment-designer, ablation-planner, variance-checker,
+                   results-tabulator, results-critic, failure-mode-auditor
 scripts/retrieval/ snowball.py: status, search, verify, neighborhood, the resolvers
                    papers.py:   fetch, reviews, datasets, authors
-scripts/           check_headings.py, check_analogs.py, check_landscape.py,
-                   check_cards.py, check_ideas.py
-                   checklib.py: the file shape all four checkers share
+scripts/           state.py: the loop as a table — what exists, what is stale, what is next
+                   ingest_runs.py: run directories nobody formatted for it
+                   check_headings.py, check_analogs.py, check_landscape.py,
+                   check_cards.py, check_ideas.py, check_experiments.py
+                   checklib.py: the file shape the checkers share
 hooks/             the guard: write scope, Bash fence, web fence
-templates/         the file formats; the source of truth for every heading
+templates/         the 28 file formats; the source of truth for every heading
 docs/APIS.md       sources, keys, rates, one-line tests
 docs/design/       one note per chunk: what was decided and what the run found
 docs/diagrams/     the four diagrams above, as HTML and SVG
-evals/             cases, the gold list, and the landscape runs
+evals/             32 cases, the fixtures and their assembler, the gold list,
+                   and the landscape and read runs
 ```
 
 The methodology every skill applies traces to a source in a reading sheet kept

@@ -4,15 +4,14 @@ Every skill and agent from `research_plugin_build_plan.md`, joined to what justi
 
 **Two tests, not one.** A row earns its place if it implements an entry in `academic.md` **or** if it serves one of the four goals: parallel gathering, simple presentation, planning directions, simple to use. The sheet documents research methodology and says nothing about usability, so a row backed only by a goal is fully justified.
 
-Counts, 2026-09-18: **23 skills built**, 23 agents, 10 scripts, 28 templates.
-Planned and unbuilt: `/render` and `/figure` from Stage 2b, and the four
-composites of Stage 7 — `/router`, `/start`, `/orient`, `/think`. No agent
-remains unbuilt.
+Counts, 2026-09-18 (chunk 10): **27 skills built**, 23 agents, 11 scripts, 28
+templates, 32 eval cases. Planned and unbuilt: `/render` and `/figure` from
+Stage 2b. No agent remains unbuilt.
 
 The loop that actually matters is four skills: `/scout` and `/landscape` find
 directions, `/read` reads what they turn up, `/rank` picks, and Stage 6 tries
-it. **All four are built as of chunk 9**, and the rest of what is planned is
-presentation and a front door.
+it. **All four are built as of chunk 9**, the front door as of chunk 10, and
+what remains planned is presentation.
 
 ---
 
@@ -162,11 +161,13 @@ Thirty typed commands are unusable without a front door. These serve the "simple
 
 | Skill | Does |
 |---|---|
-| `/router` | picks the skill from what you say. The front door. |
-| `/start` | `/setup` + `/frame` |
-| `/orient` | `/surveys` + `/landscape` |
-| `/think` | `/bits` + `/scout` + `/ideas` + `/rank` |
+| `/router` | picks the skill from what you say. The front door. **Shipped in chunk 10** (`docs/design/chunk-10-front-door.md`). Reads the state through `scripts/state.py` and nothing else; a stated goal is checked against its precondition first; one yes, then the skill runs in the same thread. Fires on "what next?" by description. |
+| `/start` | `/setup` + `/frame`. **Shipped in chunk 10.** One pause between them, and the rules every composite shares are written here: one yes per file boundary, rerun-keep-stop with the staleness fact for a file that exists, the skill's own gates untouched, nothing written. |
+| `/orient` | `/surveys` + `/landscape`. **Shipped in chunk 10.** Ends in a printed brief; no file. |
+| `/think` | `/bits` + `/scout` + `/ideas` + **`/premortem`** + `/rank`. **Shipped in chunk 10.** The pre-mortem was not in the plan's list; since chunk 9 `/rank` sets aside every idea without one, so the composite without it would rank an unattacked set. |
 | `/handoff` | **deferred.** No goal it uniquely serves yet. |
+
+**The state script** (`scripts/state.py`) is the composites' one shared read: a dependency table in the loop's order — every command, what it writes, what it needs, its precondition in a sentence — and, over a `research/` folder, what exists, what is present but missing its template's headings, how many upstream files are newer than each derived file, and every move with a status. It is the first place the whole loop is written down as data.
 
 **Naming:** the composite was `/map` in the build plan, which collides with the wayfinder's map. `/survey` is not available either, since `/surveys` already exists in stage 2. `/orient` is the rename.
 
