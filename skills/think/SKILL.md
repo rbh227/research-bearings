@@ -1,7 +1,7 @@
 ---
 name: think
 description: From assumptions to a ranked shortlist as one command — /bits, /scout, /ideas, /premortem, /rank, with a pause at every file boundary. Use when the cards are read and the user says "think", "generate and rank ideas", "what should I work on", "take me from the cards to a shortlist". Adds nothing to any skill it runs; every gate inside /rank stays. Writes nothing itself.
-allowed-tools: Read, Glob, Bash(python3:*), AskUserQuestion, Skill
+allowed-tools: Read, Glob, Bash(python3 *scripts/state.py*), AskUserQuestion, Skill
 ---
 
 # think

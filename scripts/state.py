@@ -42,7 +42,8 @@ What each reported field is for:
                           repeat   met, output present, and the command adds rather
                                    than rewrites (cards, analog pages, ideas, ...)
                           done     met, output present and current
-                          blocked  a precondition is unmet; `missing` names it
+                          blocked  output absent and a precondition unmet; `missing`
+                                   names it. An output that exists is judged as a file.
                           skipped  output absent but a later stage has output; the
                                    file is required downstream, so it is a repair
                         Each carries `precondition` in one sentence and `writes`.
@@ -50,7 +51,9 @@ What each reported field is for:
                         in loop order, never on-demand rows and never skipped ones.
   repairs               Malformed files and skipped required files, each with the
                         command that writes it.
-  on_demand             The on-demand skills and whether each could run now.
+  on_demand             The on-demand skills — verify, audit, critique, reviews,
+                        replicate, and the two ledgers, datasets and groups — and
+                        whether each could run now.
 
 Never writes: not to the folder it reads, not anywhere. The selftest snapshots
 the fixture tree before and after and asserts it.
@@ -132,12 +135,6 @@ TABLE = [
          needs=[(ALL, ["landscape/matrix.md"])],
          precondition="landscape/matrix.md must exist; landscape writes it. Reading proposes from the matrix.",
          repeatable=True),
-    dict(command="datasets", stage="processing", writes=["landscape/datasets.md"],
-         needs=[(COUNT, "papers/", 1)],
-         precondition="At least one card under papers/; read writes them."),
-    dict(command="groups", stage="processing", writes=["landscape/groups.md"],
-         needs=[(COUNT, "papers/", 1)],
-         precondition="At least one card under papers/; read writes them."),
     dict(command="bits", stage="processing", writes=["BITS.md"],
          needs=[(COUNT, "papers/", 2)],
          precondition="At least two cards under papers/ that can share a thesis; read writes them."),
@@ -171,7 +168,15 @@ TABLE = [
     dict(command="result", stage="experiments", writes=["results/"],
          needs=[(ALL, ["NOTEBOOK.md"])],
          precondition="NOTEBOOK.md with an ingested run; log writes it.", repeatable=True),
-    # On demand: reachable by stated goal, never the next move.
+    # On demand: reachable by stated goal, never the next move. datasets and
+    # groups are here by the spec's word (story 11), not the loop table's
+    # first draft — a ledger is asked for, never the next step.
+    dict(command="datasets", stage="processing", writes=["landscape/datasets.md"],
+         needs=[(COUNT, "papers/", 1)],
+         precondition="At least one card under papers/; read writes them.", on_demand=True),
+    dict(command="groups", stage="processing", writes=["landscape/groups.md"],
+         needs=[(COUNT, "papers/", 1)],
+         precondition="At least one card under papers/; read writes them.", on_demand=True),
     dict(command="verify", stage="processing", writes=[], needs=[(ANY, ["QUESTION.md"])],
          precondition="Any file under research/ that names papers.", on_demand=True, repeatable=True),
     dict(command="audit", stage="processing", writes=[], needs=[(COUNT, "papers/", 1)],
@@ -234,12 +239,20 @@ def missing_headings(path, required):
     return [h for h in required if h not in present]
 
 
+def absent_entry(is_dir):
+    """The one shape an absent file or directory reports, wherever it is absent."""
+    if is_dir:
+        return {"state": "absent", "count": 0, "pages": [], "newest": None, "oldest": None,
+                "malformed": [], "dates_unknown": 0}
+    return {"state": "absent", "date": None}
+
+
 def inspect_file(root, rel, template):
     path = os.path.join(root, rel)
     required, tpath = template_headings(template)
     entry = {"template": os.path.relpath(tpath, ROOT) if required is not None else "not found"}
     if not os.path.isfile(path):
-        entry.update(state="absent", date=None)
+        entry.update(absent_entry(False))
         return entry
     missing = missing_headings(path, required)
     entry.update(state="present-but-malformed" if missing else "present",
@@ -252,7 +265,7 @@ def inspect_dir(root, rel, template):
     required, tpath = template_headings(template)
     entry = {"template": os.path.relpath(tpath, ROOT) if required is not None else "not found"}
     if not os.path.isdir(path):
-        entry.update(state="absent", count=0, pages=[], newest=None, oldest=None, malformed=[])
+        entry.update(absent_entry(True))
         return entry
     pages = [p for p in checklib.pages_under(path) if not os.path.islink(p)]
     times = [t for t in (mtime(p) for p in pages) if t is not None]
@@ -279,7 +292,8 @@ def need_met(files, need):
         missing = [f for f in need[1] if not present(files, f)]
         return not missing, missing
     if kind == ANY:
-        return any(present(files, f) for f in need[1]), [] if any(present(files, f) for f in need[1]) else list(need[1])
+        ok = any(present(files, f) for f in need[1])
+        return ok, [] if ok else list(need[1])
     if kind == COUNT:
         ok = files[need[1]].get("count", 0) >= need[2]
         return ok, [] if ok else ["{} (need {}, have {})".format(need[1], need[2], files[need[1]].get("count", 0))]
@@ -355,18 +369,21 @@ def read(root):
     files = {}
     for rel, (template, is_dir) in FILES.items():
         files[rel] = (inspect_dir if is_dir else inspect_file)(root, rel, template) if out["exists"] \
-            else ({"state": "absent", "count": 0, "pages": [], "newest": None, "oldest": None, "malformed": []}
-                  if is_dir else {"state": "absent", "date": None})
+            else absent_entry(is_dir)
         files[rel]["written_by"] = next((r["command"] for r in TABLE if rel in r["writes"]), None)
     out["files"] = files
     out["counts"] = {name: files[rel]["count"] for rel, name in COUNT_NAMES.items()}
 
-    # Stage reached: the latest stage any row's output is present in.
-    reached = None
-    for row in TABLE:
+    # Stage reached: the latest stage any row's output is present in. And the
+    # last loop row with output, in table order, because "skipped" is about
+    # rows, not stages: a question page beside a missing context file means
+    # setup was skipped even though both sit in the questions stage.
+    reached, last_with_output = None, -1
+    for i, row in enumerate(TABLE):
         if row.get("on_demand"):
             continue
         if any(present(files, w) for w in row["writes"]):
+            last_with_output = i
             if reached is None or STAGES.index(row["stage"]) > STAGES.index(reached):
                 reached = row["stage"]
     out["stage_reached"] = reached
@@ -382,7 +399,7 @@ def read(root):
     out["pending"] = {"premortem": pending}
 
     moves, staleness, repairs, on_demand = [], {}, [], []
-    for row in TABLE:
+    for i, row in enumerate(TABLE):
         met, missing = True, []
         for need in row["needs"]:
             ok, miss = need_met(files, need)
@@ -397,15 +414,19 @@ def read(root):
             move["missing"] = missing
             on_demand.append(move)
             continue
-        later_output = reached is not None and STAGES.index(reached) > STAGES.index(row["stage"])
+        later_output = last_with_output > i
         required_absent = [w for w in row["writes"] if w in REQUIRED and not present(files, w)]
-        if not met:
+        # A file that exists is judged as a file — done, stale or repeat — even
+        # when what it was built from is now missing; that absence is the
+        # upstream row's repair, not this row's block. Blocked is for a step
+        # that has not run and cannot.
+        if not met and not exists:
             move["status"], move["missing"] = "blocked", missing
         elif not exists and later_output and required_absent:
             move["status"] = "skipped"
             for w in required_absent:
                 repairs.append({"file": w, "command": row["command"], "kind": "missing upstream",
-                                "detail": "absent while {} has output".format(reached)})
+                                "detail": "absent while {} has output".format(TABLE[last_with_output]["command"])})
         elif not exists:
             move["status"] = "ready"
         elif row["command"] == "premortem" and pending:
@@ -447,9 +468,10 @@ def selftest():
     import tempfile
     import time
 
-    failures = []
+    failures, total = [], [0]
 
     def case(name, ok, detail=""):
+        total[0] += 1
         print("{} {}".format("ok  " if ok else "FAIL", name) + (" — {}".format(detail) if detail and not ok else ""))
         if not ok:
             failures.append(name)
@@ -615,14 +637,28 @@ def selftest():
 
         # 9. On demand rows are never recommended.
         out = read(os.path.join(tmp, "dmg"))
+        on_demand = {"verify", "audit", "critique", "reviews", "replicate", "datasets", "groups"}
         case("24 on-demand skills are listed with their readiness and never recommended",
-             {m["command"] for m in out["on_demand"]} == {"verify", "audit", "critique", "reviews", "replicate"}
+             {m["command"] for m in out["on_demand"]} == on_demand
              and all(m["precondition_met"] for m in out["on_demand"])
-             and not ({"verify", "audit", "critique", "reviews", "replicate"} & set(out["recommended"])))
+             and not (on_demand & set(out["recommended"])), str(out["recommended"]))
+        case("24b a ledger is never the next move: datasets and groups are not in recommended with one card",
+             not ({"datasets", "groups"} & set(out["recommended"])))
+
+        # 12. Question only (no CONTEXT.md): setup was skipped within its own
+        # stage, and the next move is surveys, not setup.
+        write("qonly", "QUESTION.md", filled("QUESTION.md"))
+        out = read(os.path.join(tmp, "qonly"))
+        case("24c a question beside a missing context file makes setup a repair, not the next move",
+             status(out, "setup") == "skipped" and out["recommended"][0] == "surveys"
+             and any(r["file"] == "CONTEXT.md" and r["kind"] == "missing upstream" for r in out["repairs"]),
+             str((status(out, "setup"), out["recommended"], out["repairs"])))
+        case("24d a file that exists is done, not blocked, when its own input is missing",
+             status(out, "frame") == "done", status(out, "frame"))
 
         # 10. Nothing written.
         before = sorted(os.path.relpath(os.path.join(d, n), tmp) for d, _, ns in os.walk(tmp) for n in ns)
-        for folder in ("ctx", "framed", "wild", "dmg", "bad", "sel"):
+        for folder in ("ctx", "framed", "wild", "dmg", "bad", "sel", "qonly"):
             read(os.path.join(tmp, folder))
         after = sorted(os.path.relpath(os.path.join(d, n), tmp) for d, _, ns in os.walk(tmp) for n in ns)
         case("25 nothing was written into any fixture tree", before == after,
@@ -636,7 +672,7 @@ def selftest():
              str({k: (e["written_by"], e["template"]) for k, e in out["files"].items()
                   if not e["written_by"] or e["template"] == "not found"}))
 
-    print("{} cases, {} failed".format(31, len(failures)))
+    print("{} cases, {} failed".format(total[0], len(failures)))
     return 1 if failures else 0
 
 

@@ -49,12 +49,13 @@ only. Nothing here guesses.
 - [x] A file missing a required heading reports `present-but-malformed`, and the next-moves list names the skill that writes it as a repair, not a rerun.
 - [x] The selftest snapshots the fixture tree before and after and asserts no write.
 - [x] The script runs on a folder named as its argument, so the eval scaffold and the chunk's live run can point it at fixtures.
-- [x] The static-checks verb and the guard selftest still pass; the guard admits the new script for any agent that might one day call it, as it admits the ingester, with no other fence change.
+- [x] The static-checks verb and the guard selftest still pass. (A guard case for the new script was added here and removed at review: the spec's Out of Scope forbids guard changes, and the script runs in the main thread the guard never sees.)
 
 ## Resolution
 
-2026-09-18. `scripts/state.py`, 27 selftest cases green; one guard case added
-(134 green); the toolchain's one-test-file verb now runs the state selftest.
+2026-09-18. `scripts/state.py`, 27 selftest cases green (33 after the review
+pass); the toolchain's one-test-file verb now runs the state selftest. A guard
+case added here was removed at review — the guard is out of scope and unchanged.
 
 **The table has six statuses, not the four the spec sketched.** `ready`,
 `stale`, `done` and `blocked` were planned. Two more turned out to be needed on

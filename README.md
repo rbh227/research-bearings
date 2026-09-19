@@ -207,7 +207,7 @@ python3 scripts/check_headings.py \
   && python3 scripts/check_cards.py --selftest
 
 # behavioural cases under evals/<case>/, run by Claude Code's eval harness:
-# 32 cases — the front door, and two or more for every typed loop command.
+# 33 cases — the front door, and two or more for every typed loop command.
 # Most need a research/ folder, which each case's scaffold assembles from the
 # fixtures under evals/fixtures/; see evals/fixtures/README.md for grants.
 claude plugin eval . --scaffold --allow-tools "Bash(python3 *)"
@@ -247,7 +247,7 @@ templates/         the 28 file formats; the source of truth for every heading
 docs/APIS.md       sources, keys, rates, one-line tests
 docs/design/       one note per chunk: what was decided and what the run found
 docs/diagrams/     the four diagrams above, as HTML and SVG
-evals/             32 cases, the fixtures and their assembler, the gold list,
+evals/             33 cases, the fixtures and their assembler, the gold list,
                    and the landscape and read runs
 ```
 

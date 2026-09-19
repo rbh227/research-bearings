@@ -41,9 +41,15 @@ grade a dispatch that will fail offline; run them with the domains in
 not search.
 
 The expected facts in each `llm` grader were read from
-`python3 scripts/state.py <assembled folder>` on the day the case was written.
-If the table in the state script or the fixtures change, re-run it and change
-the graders.
+`python3 scripts/state.py <assembled folder>` on the day the case was written,
+and `check_cases.py` holds them to it: it assembles every shape, reads it with
+the state script and asserts each fact a grader quotes. It runs in the
+toolchain's static-checks verb. When the table or a fixture changes, it fails,
+and the grader or the table is corrected — never this check alone.
+
+```bash
+python3 evals/fixtures/check_cases.py
+```
 
 To look at a shape by hand:
 

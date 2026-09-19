@@ -1,7 +1,7 @@
 ---
 name: start
 description: Day one as one command — /setup then /frame, with a pause between them. Runs setup, shows the context file's summary, asks whether to frame now, then runs frame. Use when starting a research project from nothing, or when the user says "start", "set this up and frame the question", "begin". Adds nothing to either skill and writes nothing itself. The rules every composite shares are written here.
-allowed-tools: Read, Glob, Bash(python3:*), AskUserQuestion, Skill
+allowed-tools: Read, Glob, Bash(python3 *scripts/state.py*), AskUserQuestion, Skill
 ---
 
 # start

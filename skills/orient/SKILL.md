@@ -1,7 +1,7 @@
 ---
 name: orient
 description: The gathering stage as one command — /surveys then /landscape, with a pause between, ending in a one-screen brief of what the run found and the next move. Use after /frame, when the user says "orient me", "map the literature", "what exists on my question", "run the surveys and the landscape". Adds nothing to either skill and writes no file of its own.
-allowed-tools: Read, Glob, Bash(python3:*), AskUserQuestion, Skill
+allowed-tools: Read, Glob, Bash(python3 *scripts/state.py*), AskUserQuestion, Skill
 ---
 
 # orient

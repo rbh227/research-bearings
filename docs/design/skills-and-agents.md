@@ -5,7 +5,7 @@ Every skill and agent from `research_plugin_build_plan.md`, joined to what justi
 **Two tests, not one.** A row earns its place if it implements an entry in `academic.md` **or** if it serves one of the four goals: parallel gathering, simple presentation, planning directions, simple to use. The sheet documents research methodology and says nothing about usability, so a row backed only by a goal is fully justified.
 
 Counts, 2026-09-18 (chunk 10): **27 skills built**, 23 agents, 11 scripts, 28
-templates, 32 eval cases. Planned and unbuilt: `/render` and `/figure` from
+templates, 33 eval cases. Planned and unbuilt: `/render` and `/figure` from
 Stage 2b. No agent remains unbuilt.
 
 The loop that actually matters is four skills: `/scout` and `/landscape` find

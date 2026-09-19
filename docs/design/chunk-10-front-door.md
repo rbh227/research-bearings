@@ -1,7 +1,7 @@
 # Chunk 10: the front door
 
-2026-09-18. The last milestone. Twenty-three typed commands become usable by
-somebody who did not build them: a router that reads what exists and names the
+2026-09-18. The last milestone. Twenty-three skills become usable by somebody
+who did not build them: a router that reads what exists and names the
 next move with its evidence, three composites that walk a stage in one sitting
 without taking a step nobody said yes to, and the loop written down once, as
 data, so that the router, the composites and a grader all read the same facts.
@@ -60,8 +60,9 @@ cases (written, parsed, not run) and two live runs, recorded in §3. Version
 
 - **"Hooks finalized" means the guard is the final hook set.** The front door
   runs in the main thread, which the guard never sees, so nothing here needed
-  a fence change; the guard gained one case proving the state script is
-  admitted like the ingester. No stop-time checker hook — the checkers run in
+  a fence change and the guard is untouched — a case added during the build
+  was removed at review, because the spec put the guard out of scope. No
+  stop-time checker hook — the checkers run in
   seconds and the toolchain says to run them before every commit, and a hook
   on every skill exit would be a second place the rules live. The evidence
   that would justify one is the checkers being forgotten in practice, and
@@ -69,7 +70,7 @@ cases (written, parsed, not run) and two live runs, recorded in §3. Version
 
 - **Evals for the front door and the loop's typed commands; written, not
   run.** Two or more cases each for router, start, orient, think and the nine
-  loop commands: 32 in the suite. Each is a full Claude child, so the cost is
+  loop commands: 33 in the suite after the review pass. Each is a full Claude child, so the cost is
   the user's to choose. Every gate case counts `Agent` calls at zero beside
   its rubric, so "waits" is a number. The experiments half has no cases; its
   acceptance is a script.
@@ -192,9 +193,48 @@ dependency table name the same commands in the same order. The one divergence
 is deliberate and written down: `/think` carries `/premortem`, and the design
 doc's Composites row says why.
 
-## 4. What is open
+## 4. What the review found
 
-- **No case has been run.** Thirty-two are written and parse at a zero cost
+Two axes, standards and spec, over the nine commits. Standards found no hard
+breach and six smells; spec found thirteen. What was fixed:
+
+- **`/datasets` and `/groups` were loop rows.** The spec's story 11 names
+  them on-demand, and the table's first draft had them as steps, so with one
+  card and no ledger the router would have offered a ledger as the next move.
+  They are on-demand rows now, in the table, the router's list and the
+  glossary. A ledger is asked for; it is never the next step.
+- **`skipped` was a stage rule and needed to be a row rule.** A question page
+  beside a missing context file sits in one stage, so setup was `ready` there
+  rather than a repair. It is now "absent while any later step has output".
+  The router case the spec asked for and the build skipped — framed, no
+  landscape — exists on the `question-only` shape and names `/surveys`.
+- **The graders' numbers had nothing holding them.** The harness cannot run
+  the state script inside a grader, so the numbers were copied by hand. A
+  mechanical check, `evals/fixtures/check_cases.py`, assembles every shape,
+  reads it with the state script and asserts each fact a grader quotes; it
+  runs in the static-checks verb, so a table change that drifts a rubric fails
+  before commit.
+- **The guard case was out of scope** and is removed; the note's decision
+  record said the opposite and now does not.
+- **Bash was scoped to any `python3`**, not to the plugin script. All four
+  skills now allow `python3 *scripts/state.py*` and nothing else.
+- Counts corrected where they drifted (the router said thirty commands; the
+  toolchain's prose omitted the state selftest), two ticket resolutions
+  written that were missing, three small duplications in the state script
+  removed.
+
+What was left as it stands, and why: the router's three-candidate rule
+(disclosed in §3; the cap is a guess the next live run tests); the composite
+cases grading the reachable half of the pause (the harness answers nothing);
+`/orient`'s five lines layered on the router's brief rather than one routine
+(the router has no landscape to summarise on most folders); the synthetic
+selection fixture (the spec said copy, `/rank` cannot be graded without idea
+pages, and every file says it is invented); the `checklib` import beside
+"standard library only" (the checkers' own precedent).
+
+## 5. What is open
+
+- **No case has been run.** Thirty-three are written and parse at a zero cost
   ceiling. The first real run will find grader wording that does not survive
   contact with a transcript; the fixtures README says where each expected
   number came from so the graders can be corrected rather than argued with.

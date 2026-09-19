@@ -49,7 +49,7 @@ recommended move the offer did not.
 date and two cards newer than it. The count was right and misleading: the file
 names all three cards. Fixed in the state script: `not_named` beside the date
 count, in the shared rules, `/think` and the router's brief, with the selftest
-case where the two disagree (29 cases). Answer given: stop. Nothing past the
+case where the two disagree (33 cases after the review pass). Answer given: stop. Nothing past the
 first pause ran.
 
 **Emulated, as chunks 5 and 7 were.** The skills were followed as written

@@ -2,12 +2,12 @@
 
 The four verbs skills use instead of hardcoded stack commands. A verb whose value is `none` is skipped, never guessed.
 
-This repo is a Claude Code plugin. There is no compiler and no package manager, but there are real checks: manifest validation, a heading-parity check between templates and the skills that write them, a selftest on the guard (write scope and the web fence), a selftest on the retrieval script (all four resolvers, offline), and structural checks on what /scout writes (`check_analogs.py`) and what /landscape writes (`check_landscape.py`, the matrix against its sections).
+This repo is a Claude Code plugin. There is no compiler and no package manager, but there are real checks: manifest validation, a heading-parity check between templates and the skills that write them, a selftest on the guard (write scope and the web fence), a selftest on the retrieval script (all four resolvers, offline), a selftest on the state script (the loop table over fixture folders, offline), a check that the eval graders' quoted facts still match what the state script reports for each fixture shape (`evals/fixtures/check_cases.py`), and structural checks on what /scout writes (`check_analogs.py`) and what /landscape writes (`check_landscape.py`, the matrix against its sections).
 
 | Verb | Command |
 | --- | --- |
 | build | `none` |
-| static checks | `claude plugin validate ./ --strict && claude plugin validate skills/ --strict && claude plugin validate agents/ --strict && python3 scripts/check_headings.py && python3 scripts/check_analogs.py --selftest && python3 scripts/check_landscape.py --selftest` |
+| static checks | `claude plugin validate ./ --strict && claude plugin validate skills/ --strict && claude plugin validate agents/ --strict && python3 scripts/check_headings.py && python3 scripts/check_analogs.py --selftest && python3 scripts/check_landscape.py --selftest && python3 evals/fixtures/check_cases.py` |
 | one test file | `python3 hooks/guard.py --selftest && python3 scripts/retrieval/snowball.py --selftest && python3 scripts/check_analogs.py --selftest && python3 scripts/check_landscape.py --selftest && python3 scripts/state.py --selftest` |
 | full suite | `none` — the behavioural tier went with the snowballing skill on 2026-09-14. `/scout`'s done-check is `scripts/check_analogs.py`, which is a static check, not a judge. `scripts/run_evals.sh` went with it; it is in git at 249188a if a case suite exists again. |
 

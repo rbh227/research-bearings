@@ -24,3 +24,28 @@ the staleness fact, and does not begin the landscape before an answer.
 - [ ] The brief's five items are named and each is derivable from the state script's output or the landscape files, never from memory.
 - [ ] No file under `research/` is written by the composite; the headings check passes with a skill that names no template.
 - [ ] The case exists and the harness lists it. Not run.
+
+## Resolution
+
+2026-09-18. `skills/orient/SKILL.md` (78 lines), quoting `/start`'s shared
+rules by name and adding its sequence and its five-line brief;
+`evals/orient-asks-about-existing-surveys` on a new fixture shape,
+`wildfire-surveyed` (question and surveys only). Validator, heading parity and
+the harness's case parse green.
+
+**The brief's five items each name their source.** Surveys found is the count
+of paper lines under `## Surveys`; cells filled is `## Cells` against
+`## Axes`; empty cells are the ones carrying only a query-and-count line, said
+as what the search returned; the three papers are in `/read`'s own proposal
+order minus those already carded; next is the state read. Nothing in the brief
+comes from memory, and nothing is saved.
+
+**The case is not the one the ticket named, and this was not said at the
+time** — the review caught the omission. The ticket asked for a pause after
+surveys on a framed project; that needs the harness to answer the yes at the
+boundary, which it cannot. The case grades the reachable half of the same
+rule: on a folder where the surveys file exists, the composite asks rerun, keep
+or stop with the date before the landscape step begins, and nothing runs.
+
+**The `case.yaml` name carried its directory prefix** and the harness dropped
+the case silently. Fixed; the parse counts it.

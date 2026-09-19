@@ -29,3 +29,24 @@ and the newest card's date, before anything else runs.
 - [ ] An argument reaches `/scout` and no other step.
 - [ ] No gate inside `/rank` is duplicated or removed.
 - [ ] The case exists and the harness lists it. Not run.
+
+## Resolution
+
+2026-09-18. `skills/think/SKILL.md` (77 lines), quoting `/start`'s shared rules
+and adding the five-step sequence, the argument pass-through to `/scout`, and
+the two exits; `evals/think-asks-about-stale-bits` on the damage shape.
+Validator, heading parity and the harness's case parse green. (This section
+was missing until the review pass; the work was committed without it.)
+
+**`/premortem` is in the sequence, with its reason in the skill's first
+paragraph**: `/rank` sets aside every idea without a pre-mortem, and the
+pre-mortem is the step nobody runs when it is its own command.
+
+**The pending rule matters here.** A `premortems/` directory with some files
+is not a finished step; `pending.premortem` names the idea slugs without one,
+and the boundary question carries that count.
+
+**The first boundary is the case**, and it was the live run in ticket 08: on
+the damage fixture `BITS.md` exists and two cards are newer by date, so the
+first thing `/think` does is ask rerun, keep or stop with that count — and,
+after the live run, with the count of cards the file never names beside it.
