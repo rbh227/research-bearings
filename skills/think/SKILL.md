@@ -43,9 +43,11 @@ Three things about this sequence in particular:
 
 - **The first boundary is usually a re-entry.** On a folder where `BITS.md`
   exists, the very first question is rerun, keep or stop, and it carries
-  what the state script reported: the file's date and how many cards are newer
-  than it. That count is the reason to rerun or not; the composite states it
-  and does not decide it.
+  what the state script reported: the file's date, how many cards are newer
+  than it by date, and how many cards it never names under its groups. Those
+  two counts are the reason to rerun or not, and they can disagree — a bits
+  file written after every card it names is current however old it is; the
+  composite states both and does not decide.
 - **`premortem` is `ready` while any idea page lacks one.** The state script's
   `pending.premortem` names the slugs, and the boundary question says how
   many ideas have no pre-mortem rather than treating the directory as done.

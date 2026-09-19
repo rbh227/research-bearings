@@ -41,9 +41,12 @@ composite was it.
 fact.** If the move's status is `stale`, `done` or `repeat`, ask **rerun,
 keep, or stop**, one question per existing file, and put in the question what
 the script reported: the file's date, and for a stale file the
-`upstream_newer` count with the newest upstream date ("`BITS.md`, dated
-2026-09-16 11:30; 2 cards newer than it, newest 2026-09-16 11:45"). Never
-skip an existing file silently; never rerun one unasked.
+`upstream_newer` count with the newest upstream date, **and** `not_named` —
+the upstream pages the file never mentions ("`BITS.md`, dated 2026-09-16
+11:30; 2 cards newer than it by date, newest 11:45; 0 cards it does not
+name"). The two can disagree, and both are the user's to weigh: a date is a
+proxy, and a bits file that names every card is current whatever the clock
+says. Never skip an existing file silently; never rerun one unasked.
 
 **A step is the skill, through the `Skill` tool.** Invoke it as
 `research-bearings:<command>`. Pass through any argument the user gave the

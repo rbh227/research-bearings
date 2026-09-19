@@ -1,7 +1,7 @@
 # 08: Two live runs, and the chunk note
 
 Type: task
-Status: ready-for-agent
+Status: done
 Blocked by: 06, 07
 
 ## What to build
@@ -28,8 +28,30 @@ tables and the state script's dependency table agreed on first contact.
 
 ## Acceptance
 
-- [ ] The router's brief and offered moves are recorded beside the state script's output for the same folder, and any disagreement is named.
-- [ ] `/think`'s first question is recorded verbatim with whether its staleness count was right, and nothing past the first pause ran.
-- [ ] Anything the runs corrected is fixed in the skill or the script, with the selftest extended where the script changed.
-- [ ] The chunk note exists with the four sections and closes the hooks line.
-- [ ] Every ticket in this chunk is closed with its resolution and SHA.
+- [x] The router's brief and offered moves are recorded beside the state script's output for the same folder, and any disagreement is named.
+- [x] `/think`'s first question is recorded verbatim with whether its staleness count was right, and nothing past the first pause ran.
+- [x] Anything the runs corrected is fixed in the skill or the script, with the selftest extended where the script changed.
+- [x] The chunk note exists with the four sections and closes the hooks line.
+- [x] Every ticket in this chunk is closed with its resolution and SHA.
+
+## Resolution
+
+2026-09-18. Two live runs on the assembled damage folder, recorded in
+`docs/design/chunk-10-front-door.md` § 3; the note written with its four
+sections; the hooks line closed in § 1.
+
+**`/router`** offered bits (stale), read (repeat), brainstorm (ready) — in
+agreement with the state script — and hid `scout` and `baseline`, ready at
+other stages. Fixed: the brief carries an **Also open** line with every
+recommended move the offer did not.
+
+**`/think`** asked, first thing, rerun/keep/stop on `BITS.md` with the file's
+date and two cards newer than it. The count was right and misleading: the file
+names all three cards. Fixed in the state script: `not_named` beside the date
+count, in the shared rules, `/think` and the router's brief, with the selftest
+case where the two disagree (29 cases). Answer given: stop. Nothing past the
+first pause ran.
+
+**Emulated, as chunks 5 and 7 were.** The skills were followed as written
+from the repo, not invoked from an installed plugin; the note's § 4 says the
+Skill-tool call between plugin skills is the untested mechanism.

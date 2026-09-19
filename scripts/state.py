@@ -29,9 +29,11 @@ What each reported field is for:
   counts                cards, analog_pages, idea_pages, premortems, specs, baselines,
                         experiment_pages, results, critiques.
   staleness             Per derived file that exists: how many upstream files are
-                        newer than it, the newest upstream date, and which inputs were
-                        counted. This is the fact a composite's rerun/keep/stop
-                        question carries.
+                        newer than it, the newest upstream date, which inputs were
+                        counted, and `not_named` — the upstream pages the file never
+                        mentions, because a date is a proxy and BITS.md names the
+                        cards it drew on. Both facts go in a composite's
+                        rerun/keep/stop question, and they can disagree.
   pending               Idea pages with no pre-mortem, so `/premortem` is ready even
                         when some pre-mortems exist.
   moves                 Every row in loop order with its status:
@@ -319,10 +321,27 @@ def staleness_of(root, files, row):
     if own is None:
         return {"upstream_newer": "unknown", "newest_upstream": "unknown", "upstream": inputs_of(row)}
     newer = [(p, t) for p, t in upstream_times(root, files, inputs_of(row)) if t is not None and t > own]
+    # A date is a proxy. A derived file that names what it drew on — BITS.md
+    # names its cards under ## Groups, RANKING.md names its ideas — can be
+    # asked directly: which upstream pages does it never mention? Found on
+    # first contact (chunk 10): the damage BITS.md was "stale" by two cards
+    # it already covered.
+    try:
+        with open(os.path.join(root, target), encoding="utf-8") as fh:
+            text = fh.read()
+    except OSError:
+        text = ""
+    not_named = []
+    for rel in inputs_of(row):
+        if rel.endswith("/"):
+            for stem in files[rel].get("pages", []):
+                if stem not in text:
+                    not_named.append(rel + stem + ".md")
     return {
         "upstream_newer": len(newer),
         "newest_upstream": iso(max(t for _, t in newer)) if newer else None,
         "newer_files": sorted(p for p, _ in newer),
+        "not_named": sorted(not_named),
         "upstream": inputs_of(row),
     }
 
@@ -513,6 +532,19 @@ def selftest():
              st.get("upstream_newer") == 2 and st.get("newest_upstream") == out["files"]["papers/"]["newest"]
              and sorted(st.get("newer_files", [])) == ["papers/b-2020.md", "papers/c-2021.md"], str(st))
         case("15 stage reached is processing", out["stage_reached"] == "processing")
+        case("15b a stale file also says which upstream pages it never names",
+             st.get("not_named") == ["papers/a-2019.md", "papers/b-2020.md", "papers/c-2021.md"], str(st))
+        # The same folder, with a bits file that names two of its three cards:
+        # the date proxy still says two newer, the text says one not named.
+        write("dmg2", "QUESTION.md", filled("QUESTION.md"))
+        write("dmg2", "landscape/matrix.md", filled("matrix.md"))
+        write("dmg2", "BITS.md", filled("bits.md") + "\n- group one: a-2019, b-2020\n", age=3 * 86400)
+        write("dmg2", "papers/a-2019.md", filled("card.md"), age=5 * 86400)
+        write("dmg2", "papers/b-2020.md", filled("card.md"), age=86400)
+        write("dmg2", "papers/c-2021.md", filled("card.md"))
+        st2 = read(os.path.join(tmp, "dmg2"))["staleness"]["BITS.md"]
+        case("15c date and text are reported side by side, and can disagree",
+             st2["upstream_newer"] == 2 and st2["not_named"] == ["papers/c-2021.md"], str(st2))
         case("16 premortem is blocked with no idea pages, rank is blocked with no pre-mortems",
              status(out, "premortem") == "blocked" and status(out, "rank") == "blocked")
 
@@ -583,7 +615,7 @@ def selftest():
              str({k: (e["written_by"], e["template"]) for k, e in out["files"].items()
                   if not e["written_by"] or e["template"] == "not found"}))
 
-    print("{} cases, {} failed".format(27, len(failures)))
+    print("{} cases, {} failed".format(29, len(failures)))
     return 1 if failures else 0
 
 

@@ -45,10 +45,15 @@ same brief and quote this section by name.
   headings: …)` after a malformed one. Directory outputs as a count with the
   newest date: "papers/: 3 cards, newest 2026-09-16".
 - **What is stale**: each derived file whose `upstream_newer` is not zero, as
-  "BITS.md: 2 cards newer than it, newest 2026-09-16".
+  "BITS.md: 2 cards newer than it by date, newest 2026-09-16; 0 cards it
+  does not name" — both counts, because a date is a proxy and the file says
+  what it drew on.
 - **Repairs**, if any: the file, the kind (`malformed` or `missing upstream`),
   and the command that writes it.
 - **Next**: the moves, as the rules below decide.
+- **Also open**: every other `recommended` move, on one line with its status,
+  so a `ready` move at an earlier stage (an unrun `/scout`) or a later one is
+  visible even when the offer does not carry it.
 
 ## The three rules, in order
 
