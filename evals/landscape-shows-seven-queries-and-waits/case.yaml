@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: landscape-shows-seven-queries-and-waits
+context:
+  scaffold_script: scaffold.sh

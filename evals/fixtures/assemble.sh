@@ -7,6 +7,11 @@
 #   empty     nothing at all — no research/ folder
 #   wildfire  QUESTION.md and the landscape from the wildfire run (no cards)
 #   wildfire-surveyed  QUESTION.md and only the surveys file from that run
+#   question-only  QUESTION.md from the wildfire run and nothing else
+#   selection  the damage shape plus six SYNTHETIC idea pages and six
+#             pre-mortems from fixtures/selection/ (two not executable), so
+#             the rank gate can be graded. The one shape that is not a copy
+#             of a live run; every synthetic file says so in its first comment.
 #   damage    QUESTION.md, the landscape, three cards, datasets, groups, BITS.md
 #             and the critique from the damage runs
 #
@@ -24,7 +29,7 @@
 
 set -euo pipefail
 
-shape="${1:?usage: assemble.sh <empty|wildfire|wildfire-surveyed|damage> [target]}"
+shape="${1:?usage: assemble.sh <empty|wildfire|wildfire-surveyed|question-only|damage|selection> [target]}"
 target="${2:-$PWD/research}"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 evals="$(dirname "$here")"
@@ -39,6 +44,11 @@ stamp() {  # stamp <YYYYMMDDhhmm> <path>...
 case "$shape" in
   empty)
     rm -rf "$target"
+    ;;
+  question-only)
+    rm -rf "$target"; mkdir -p "$target"
+    cp -p "$landscape_runs/wildfire/research/QUESTION.md" "$target/"
+    stamp 202609150900 "$target/QUESTION.md"
     ;;
   wildfire-surveyed)
     # The wildfire run with only its surveys file: what /orient sees after
@@ -74,6 +84,12 @@ case "$shape" in
     stamp 202609161145 "$target/papers/shen-2021-bdanet.md"
     stamp 202609161200 "$target/landscape/datasets.md" "$target/landscape/groups.md"
     stamp 202609161231 "$target/critiques/BITS-2026-09-16.md"
+    ;;
+  selection)
+    "$here/assemble.sh" damage "$target" >/dev/null
+    cp -Rp "$here/selection/ideas" "$here/selection/premortems" "$target/"
+    stamp 202609171000 "$target"/ideas/*.md
+    stamp 202609171100 "$target"/premortems/*.md
     ;;
   *)
     echo "unknown shape: $shape" >&2; exit 2
