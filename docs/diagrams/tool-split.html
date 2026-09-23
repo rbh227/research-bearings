@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The tool split</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --paper: #f5f5f5; --ink: #2d3142; --muted: #4f5d75; }
+    body { font-family: 'Geist', system-ui, sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .frame { max-width: 1100px; width: 100%; }
+    .eyebrow { font-family: 'Geist Mono', monospace; font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    h1 { font-family: 'Instrument Serif', serif; font-size: 2rem; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+    svg { width: 100%; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">research-bearings</p>
+    <h1>The tool split</h1>
+<svg viewBox="0 0 1040 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="split-title split-desc">
+  <title id="split-title">The tool split</title>
+  <desc id="split-desc">Research agents read the world and cannot run code. Experiment agents read your runs and cannot reach the web. A hook, not a prompt, holds the line between them.</desc>
+  <defs>
+    <style>
+      .name { font: 600 14px 'Geist', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #2d3142; text-anchor: middle; }
+      .sub  { font: 11px 'Geist Mono', 'SF Mono', Menlo, Consolas, monospace; fill: #4f5d75; text-anchor: middle; }
+      .box  { fill: #ffffff; stroke: #2d3142; stroke-width: 1; }
+      .gate { fill: rgba(235,108,54,0.08); stroke: #eb6c36; stroke-width: 1; stroke-dasharray: 4,4; }
+      .gate-name { font: 600 14px 'Geist', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #2d3142; text-anchor: middle; }
+    </style>
+  </defs>
+  <rect width="1040" height="200" fill="#f5f5f5"/>
+
+  <rect class="box" x="40" y="56" width="400" height="88" rx="6"/>
+  <text class="name" x="240" y="90">research agents</text>
+  <text class="sub" x="240" y="110">read the world · write research/ · never run code</text>
+
+  <rect class="gate" x="472" y="64" width="96" height="72" rx="6"/>
+  <text class="gate-name" x="520" y="96">guard</text>
+  <text class="sub" x="520" y="116">a hook</text>
+
+  <rect class="box" x="600" y="56" width="400" height="88" rx="6"/>
+  <text class="name" x="800" y="90">experiment agents</text>
+  <text class="sub" x="800" y="110">read your runs · write research/ · never touch the web</text>
+</svg>
+
+  </div>
+</body>
+</html>

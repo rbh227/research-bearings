@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How gathering works</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --paper: #f5f5f5; --ink: #2d3142; --muted: #4f5d75; }
+    body { font-family: 'Geist', system-ui, sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .frame { max-width: 1100px; width: 100%; }
+    .eyebrow { font-family: 'Geist Mono', monospace; font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    h1 { font-family: 'Instrument Serif', serif; font-size: 2rem; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+    svg { width: 100%; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">research-bearings</p>
+    <h1>How gathering works</h1>
+<svg viewBox="0 0 1040 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="gather-title gather-desc">
+  <title id="gather-title">How gathering works</title>
+  <desc id="gather-desc">The question file goes to the landscape skill, which shows seven queries and waits. Seven searchers then run in parallel, each writing one section. A merger reads the sections and nothing else, and writes the matrix.</desc>
+  <defs>
+    <marker id="g-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+    <style>
+      .name { font: 600 14px 'Geist', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #2d3142; text-anchor: middle; }
+      .sub  { font: 11px 'Geist Mono', 'SF Mono', Menlo, Consolas, monospace; fill: #4f5d75; text-anchor: middle; }
+      .box  { fill: #ffffff; stroke: #2d3142; stroke-width: 1; }
+      .file { fill: rgba(45,49,66,0.05); stroke: #4f5d75; stroke-width: 1; }
+      .flow { fill: none; stroke: #4f5d75; stroke-width: 1.2; marker-end: url(#g-arrow); }
+    </style>
+  </defs>
+  <rect width="1040" height="200" fill="#f5f5f5"/>
+
+  <line class="flow" x1="216" y1="100" x2="256" y2="100"/>
+  <line class="flow" x1="432" y1="100" x2="472" y2="100"/>
+  <line class="flow" x1="648" y1="100" x2="688" y2="100"/>
+  <line class="flow" x1="864" y1="100" x2="904" y2="100"/>
+
+  <rect class="file" x="40" y="68" width="176" height="64" rx="6"/>
+  <text class="name" x="128" y="96">QUESTION.md</text>
+  <text class="sub" x="128" y="116">your framed question</text>
+
+  <rect class="box" x="256" y="68" width="176" height="64" rx="6"/>
+  <text class="name" x="344" y="96">/landscape</text>
+  <text class="sub" x="344" y="116">seven queries · one gate</text>
+
+  <rect class="box" x="488" y="56" width="160" height="64" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.35)"/>
+  <rect class="box" x="480" y="62" width="160" height="64" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.5)"/>
+  <rect class="box" x="472" y="68" width="160" height="64" rx="6"/>
+  <text class="name" x="552" y="96">searcher × 7</text>
+  <text class="sub" x="552" y="116">seven in parallel</text>
+
+  <rect class="box" x="688" y="68" width="176" height="64" rx="6"/>
+  <text class="name" x="776" y="96">merger</text>
+  <text class="sub" x="776" y="116">reads the seven files only</text>
+
+  <rect class="file" x="904" y="68" width="128" height="64" rx="6"/>
+  <text class="name" x="968" y="96">matrix.md</text>
+  <text class="sub" x="968" y="116">the concept matrix</text>
+</svg>
+
+  </div>
+</body>
+</html>

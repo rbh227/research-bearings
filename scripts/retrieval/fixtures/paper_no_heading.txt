@@ -1,0 +1,43 @@
+Quantifying Burn Severity With Sentinel-2 Time Series
+
+Abstract. We estimate burn severity from Sentinel-2 imagery using a
+temporal composite rather than a single post-event acquisition, and show
+that the composite reduces cloud-driven error by roughly a third on our
+validation fires.
+
+Wildfire burn severity is conventionally mapped with the differenced
+Normalized Burn Ratio, computed between a pre-fire and a post-fire
+acquisition. The method is simple, well understood, and used
+operationally by several national agencies, which is a large part of why
+it persists.
+
+Its weakness is that it depends on two cloud-free acquisitions at the
+right moments, and in many fire-prone regions those are not available.
+Smoke persists for days after containment, and in the tropics cloud
+cover can hide a burn scar for weeks.
+
+Our approach replaces the single post-fire acquisition with a composite
+over a sixty-day window, weighting each acquisition by its cloud
+probability as estimated by the s2cloudless model. We evaluate on
+fourteen fires across three continents, with field-surveyed composite
+burn index plots as ground truth.
+
+We fit a regression from the composite index to the field plots using
+leave-one-fire-out cross validation, which is the protocol we recommend
+for this task, because plots within one fire are spatially correlated at
+scales well below the size of the fire.
+
+Results show a mean absolute error of 0.31 composite burn index units
+against 0.46 for the single-acquisition baseline. The improvement is
+largest on the tropical fires, where cloud cover is heaviest, and
+smallest on the Californian fires, where the conventional method already
+has clean acquisitions to work with.
+
+We also examined whether the improvement holds when the pre-fire
+acquisition is likewise composited, and found a further small gain that
+was not statistically significant at our sample size.
+
+The limitation worth stating plainly is that a sixty-day composite
+cannot resolve reburn within a season, and in fire regimes where that is
+common the method would need a shorter window and would lose much of its
+cloud robustness.

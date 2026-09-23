@@ -1,0 +1,20 @@
+{
+  "name": "rbh227",
+  "owner": {
+    "name": "rbh227"
+  },
+  "description": "Research tooling for Claude Code.",
+  "plugins": [
+    {
+      "name": "research-bearings",
+      "source": "./",
+      "description": "Frame a research question worth answering, map the literature around it, and keep the agents honest while they do it.",
+      "category": "research",
+      "keywords": [
+        "research",
+        "literature-review",
+        "academic"
+      ]
+    }
+  ]
+}

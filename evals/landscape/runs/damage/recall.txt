@@ -1,0 +1,24 @@
+run: evals/landscape/runs/damage
+found titles: 564
+
+## Papers — damage assessment from aerial and satellite imagery: 10/14
+  MISS   Galanis — DamageMap, a post-wildfire damaged-buildings classifier — 2021?
+  MISS   Voigt — global trends in satellite-based emergency mapping — 2016
+  MISS   Rahnemoonfar — FloodNet, UAV imagery for post-flood scene understanding — 2021
+  MISS   Rahnemoonfar — RescueNet, UAV post-Hurricane-Michael pixel-level damage — 2023?
+
+## Papers — structure loss and the wildland-urban interface: 1/13
+  MISS   Cohen — preventing disaster: home ignitability in the wildland-urban interface — 2000
+  MISS   Radeloff — rapid growth of the US wildland-urban interface raised wildfire risk — 2018
+  MISS   Syphard — housing arrangement and location determine the likelihood of housing loss due to wildfire — 2012
+  MISS   Syphard & Keeley — factors associated with structure loss in the 2013–2018 California wildfires — 2019
+  MISS   Alexandre — factors related to building loss due to wildfires in the conterminous United States — 2016
+  MISS   Kramer — high wildfire damage in interface communities in California — 2019
+  MISS   Kramer — where wildfires destroy buildings in the US relative to the WUI — 2018?
+  MISS   Knapp — housing arrangement and vegetation factors in single-family home survival, 2018 Camp Fire — 2021
+  MISS   Moritz — learning to coexist with wildfire — 2014
+  MISS   Higuera — shifting social-ecological fire regimes explain increasing structure loss in the western US — 2023?
+  MISS   Wang / Guan — economic footprint of California wildfires — 2021
+  MISS   Mell — the wildland-urban interface fire problem, current approaches and research needs — 2010
+
+recall over the headings scored: 11/27 = 0.41

@@ -1,0 +1,7 @@
+.claude/worktrees/
+evals/results/
+**/research/.papers/
+__pycache__/
+*.pyc
+**/research/.crawl/
+.DS_Store

@@ -1,0 +1,9 @@
+{"notes": [
+ {"id": "vJkktqyU8B", "forum": "vJkktqyU8B",
+  "content": {"title": {"value": "Memory Efficient Transformer Adapter for Dense Predictions"},
+              "venue": {"value": "ICLR 2025 Poster"},
+              "venueid": {"value": "ICLR.cc/2025/Conference"}}},
+ {"id": "i0VqD2KaYt", "forum": "i0VqD2KaYt",
+  "content": {"title": {"value": "ViT-UWA: Vision Transformer Underwater-Adapter for Dense Predictions"},
+              "venue": {"value": "Submitted to ICLR 2025"}}}
+]}

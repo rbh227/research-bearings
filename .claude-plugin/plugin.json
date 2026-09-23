@@ -1,0 +1,19 @@
+{
+  "name": "research-bearings",
+  "displayName": "Research Bearings",
+  "version": "1.0.0",
+  "description": "A front door and 27 typed skills that run the research loop \u2014 from a question worth answering, through paper cards you can build on, to a ranked shortlist and a pre-registered experiment \u2014 with contract-bound agents and every paper checkable against the record.",
+  "author": {
+    "name": "rbh227"
+  },
+  "homepage": "https://github.com/rbh227/research-bearings",
+  "repository": "https://github.com/rbh227/research-bearings",
+  "license": "MIT",
+  "keywords": [
+    "research",
+    "literature-review",
+    "academic",
+    "science",
+    "ideation"
+  ]
+}

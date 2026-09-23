@@ -1,0 +1,10 @@
+{"data": [
+ {"paperId": "p1", "title": "Data-Centric AI Governance", "year": 2024, "venue": "arXiv.org",
+  "citationCount": 12, "externalIds": {"ArXiv": "2409.17216"},
+  "authors": [{"name": "Ritwik Gupta"}, {"name": "A. Reddie"}]},
+ {"paperId": "p2", "title": "Open-Source Assessments of AI Capabilities", "year": 2024, "venue": "arXiv.org",
+  "citationCount": 4, "externalIds": {"ArXiv": "2502.09271"},
+  "authors": [{"name": "Ritwik Gupta"}, {"name": "A. Reddie"}, {"name": "Leah Walker"}]},
+ {"paperId": "p3", "title": "An Old Paper Before The Floor", "year": 2019, "venue": "CVPR Workshops",
+  "citationCount": 400, "externalIds": {}, "authors": [{"name": "Ritwik Gupta"}]}
+]}

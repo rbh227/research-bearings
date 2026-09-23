@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The read trio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --paper: #f5f5f5; --ink: #2d3142; --muted: #4f5d75; }
+    body { font-family: 'Geist', system-ui, sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .frame { max-width: 1100px; width: 100%; }
+    .eyebrow { font-family: 'Geist Mono', monospace; font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    h1 { font-family: 'Instrument Serif', serif; font-size: 2rem; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+    svg { width: 100%; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">research-bearings</p>
+    <h1>The read trio</h1>
+<svg viewBox="0 0 1040 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="read-title read-desc">
+  <title id="read-title">The read trio</title>
+  <desc id="read-desc">A predictor sees only the abstract and introduction and commits predictions. A reader sees the whole paper and never the prediction. A scorer sees both and writes the card, including what a careful first reading would have missed.</desc>
+  <defs>
+    <marker id="r-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+    <style>
+      .name { font: 600 14px 'Geist', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #2d3142; text-anchor: middle; }
+      .sub  { font: 11px 'Geist Mono', 'SF Mono', Menlo, Consolas, monospace; fill: #4f5d75; text-anchor: middle; }
+      .box  { fill: #ffffff; stroke: #2d3142; stroke-width: 1; }
+      .file { fill: rgba(45,49,66,0.05); stroke: #4f5d75; stroke-width: 1; }
+      .flow { fill: none; stroke: #4f5d75; stroke-width: 1.2; marker-end: url(#r-arrow); }
+    </style>
+  </defs>
+  <rect width="1040" height="240" fill="#f5f5f5"/>
+
+  <path class="flow" d="M 456 64 H 520 a 8 8 0 0 1 8 8 V 112 a 8 8 0 0 0 8 8 H 576"/>
+  <path class="flow" d="M 456 176 H 520 a 8 8 0 0 0 8 -8 V 128 a 8 8 0 0 1 8 -8 H 576"/>
+  <line class="flow" x1="808" y1="120" x2="856" y2="120"/>
+
+  <rect class="box" x="200" y="32" width="256" height="64" rx="6"/>
+  <text class="name" x="328" y="60">predictor</text>
+  <text class="sub" x="328" y="80">sees the abstract and intro only</text>
+
+  <rect class="box" x="200" y="144" width="256" height="64" rx="6"/>
+  <text class="name" x="328" y="172">reader</text>
+  <text class="sub" x="328" y="192">sees the whole paper, never the guess</text>
+
+  <rect class="box" x="576" y="88" width="232" height="64" rx="6"/>
+  <text class="name" x="692" y="116">scorer</text>
+  <text class="sub" x="692" y="136">sees both; writes what was missed</text>
+
+  <rect class="file" x="856" y="88" width="144" height="64" rx="6"/>
+  <text class="name" x="928" y="116">card</text>
+  <text class="sub" x="928" y="136">papers/&lt;slug&gt;.md</text>
+</svg>
+
+  </div>
+</body>
+</html>

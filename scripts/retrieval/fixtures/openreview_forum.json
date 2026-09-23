@@ -1,0 +1,94 @@
+{
+ "notes": [
+  {
+   "id": "vJkktqyU8B",
+   "forum": "vJkktqyU8B",
+   "invitations": [
+    "ICLR.cc/2025/Conference/-/Submission"
+   ],
+   "content": {
+    "title": {
+     "value": "Memory Efficient Transformer Adapter for Dense Predictions"
+    }
+   }
+  },
+  {
+   "id": "rev1",
+   "forum": "vJkktqyU8B",
+   "invitations": [
+    "ICLR.cc/2025/Conference/Submission1/-/Official_Review"
+   ],
+   "signatures": [
+    "ICLR.cc/2025/Conference/Submission1/Reviewer_aB3c"
+   ],
+   "content": {
+    "rating": {
+     "value": 6
+    },
+    "confidence": {
+     "value": 4
+    },
+    "soundness": {
+     "value": 3
+    },
+    "summary": {
+     "value": "The paper proposes a memory-efficient adapter."
+    },
+    "weaknesses": {
+     "value": "The comparison omits the strongest prior adapter, and the ablation does not separate the memory saving from the accuracy change."
+    }
+   }
+  },
+  {
+   "id": "rev2",
+   "forum": "vJkktqyU8B",
+   "invitations": [
+    "ICLR.cc/2025/Conference/Submission1/-/Official_Review"
+   ],
+   "signatures": [
+    "ICLR.cc/2025/Conference/Submission1/Reviewer_zZ9y"
+   ],
+   "content": {
+    "rating": {
+     "value": 3
+    },
+    "confidence": {
+     "value": 5
+    },
+    "weaknesses": {
+     "value": "Single seed throughout; the gains are within plausible seed variance."
+    }
+   }
+  },
+  {
+   "id": "resp1",
+   "forum": "vJkktqyU8B",
+   "invitations": [
+    "ICLR.cc/2025/Conference/Submission1/-/Official_Comment"
+   ],
+   "signatures": [
+    "ICLR.cc/2025/Conference/Submission1/Authors"
+   ],
+   "content": {
+    "comment": {
+     "value": "We concede the seed point and have added three-seed results in the revision."
+    }
+   }
+  },
+  {
+   "id": "dec1",
+   "forum": "vJkktqyU8B",
+   "invitations": [
+    "ICLR.cc/2025/Conference/Submission1/-/Decision"
+   ],
+   "signatures": [
+    "ICLR.cc/2025/Conference/Program_Chairs"
+   ],
+   "content": {
+    "decision": {
+     "value": "Accept (Poster)"
+    }
+   }
+  }
+ ]
+}

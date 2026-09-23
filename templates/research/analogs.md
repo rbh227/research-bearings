@@ -1,0 +1,73 @@
+# <the problem, as a title>
+
+<!-- Written by /research-bearings:scout. One run, one file, five headings.
+     This is the breadth artifact: fields that share the problem's shape and
+     not its citation graph. The depth artifact - the citation neighbourhood of
+     a question - is research/landscape/, written by /landscape. -->
+
+## Question
+
+<!-- What the run was given, in the words it was given, then where it came
+     from on its own line: "Framed — research/QUESTION.md" or "Unframed — run
+     on the invocation text as typed." If the invocation widened or narrowed
+     the framed question, say how, in one line. -->
+
+## Shape
+
+<!-- The problem with the home field's nouns removed: what it is structurally,
+     in words any field would recognise. "Per-region change classification on
+     paired overhead imagery, sparse and noisy labels, domain shift between
+     captures" — not "post-disaster building damage assessment".
+
+     Then, on its own line, the removed vocabulary, so a reader can see what
+     was stripped and judge whether the shape survived it. -->
+
+## Fields
+
+<!-- One ### per field, five minimum. Never the home field, and never a field
+     that shares the home field's citation graph. One search each, in THAT
+     field's words.
+
+     ### <field, in its own words>
+     - Shares: <which element of the shape>
+     - Section: research/analogs/sections/<field-slug>.md
+     - Searched: `<query>` → <N> papers in the neighborhood; stop: <reason>
+     - Papers:
+       - <title> · <year> · S2 `<id>`            (or OpenAlex `W…`, arXiv `…`, DOI `…`)
+       - <title> · <year> · _candidate: prefix match only, <nearest title> (S2 `<id>`)_
+       - <title> · <year> · _unresolved: not found by title_
+     - Transfer: <one paragraph — why the method might move to this problem,
+       and what is different about it. Grounded in what the rows say.>
+     - Opportunity (speculative): <one paragraph — what you would actually try.
+       Labelled speculative because it is: it is the one part of this file that
+       is not sourced from anything.>
+     - Nearest existing: `<query, in the home vocabulary>` → <N> papers; top: <title> · <year> (S2 `<id>`)
+
+     The "Nearest existing" line is the absence rule. It reports what a small
+     neighborhood walk in your own field returned for the opportunity, and
+     lets the reader conclude. "Unexplored",
+     "gap", "novel" and "nobody" do not appear in this file. -->
+
+## Verification
+
+<!-- Every paper named anywhere above, checked by
+     `snowball.py verify`, with the counts:
+
+     - <title> — resolved, S2 `<id>`
+     - <title> — candidate, nearly: <title verify nearly matched> (<id>)
+     - <title> — unresolved, closest: <what the search returned>
+
+     Then: resolved N, unresolved M, checked N+M. A candidate counts as
+     unresolved: verify names what it nearly matched and certifies nothing.
+
+     An unresolved paper stays in ## Fields, marked. It is not deleted: where
+     the model's memory outran the record is information the reader wants. -->
+
+## Status
+
+<!-- Date. Run slug. Searchers dispatched, and each field's neighborhood size
+     and stop reason. Framed or unframed. Which sections reported a degraded
+     index — that is a degradation and is stamped here, not silently absorbed.
+     Which indexes answered and which were degraded (from search's `indexes`
+     block), per research/CONNECTIONS.md. Any field whose search returned zero
+     rows after a re-query. -->

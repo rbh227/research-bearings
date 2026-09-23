@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: rank-shows-bound-and-sets-aside
+context:
+  scaffold_script: scaffold.sh
