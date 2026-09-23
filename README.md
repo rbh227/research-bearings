@@ -43,7 +43,7 @@ Every skill is invoked as `/research-bearings:<name>`.
 ## Quick start
 
 ```bash
-claude plugin marketplace add ~/Desktop/Research-Skills
+claude plugin marketplace add rbh227/research-bearings
 claude plugin install research-bearings@rbh227
 ```
 
