@@ -2,6 +2,7 @@
 name: baseline
 description: Write the plan to reproduce the strongest published number you intend to beat, then record the gap between it and yours — the exact figure with the card and table it came from, what the paper leaves unstated, how your setup differs, and numbered steps you can run. Nothing here runs your code. Use before /design, once a card carries the number that matters. Writes research/baselines/<card-slug>.md.
 allowed-tools: Read, Glob, Grep, Bash, Write, AskUserQuestion, Agent
+user-invocable: false
 ---
 
 # baseline

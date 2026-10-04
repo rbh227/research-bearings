@@ -9,8 +9,8 @@ stays resident.
   snowball.py health                           keys and paths; no network
   snowball.py search "query" [--limit N] [--index all|s2|openalex|arxiv]
   snowball.py batch <id> [<id> ...]            S2 metadata for many ids
-  snowball.py verify [--title T]... [--id I]... [--limit N]
-  snowball.py neighborhood "query" [--seeds 30] [--budget 400] [--block w,w] [--surveys-only]
+  snowball.py verify [--title T]... [--id I]... [--limit N] [--append <section> --from memory|web]
+  snowball.py neighborhood "query" [--seeds 30] [--block w,w] [--surveys-only]
                           [--write research/landscape/sections/<slug>.md --question Q --field F --mode M]
   snowball.py openalex search "q" | work <W|doi> | refs <W> | cited-by <W>
   snowball.py crossref doi <doi> | search "title"
@@ -959,8 +959,8 @@ def oa_referenced(ident: str, limit: int = HOP_MAX) -> dict[str, Any]:
     """The works a work cites: one hop backward on OpenAlex, at most `limit`.
 
     Capped since 2026-09-15: a review with 543 references walked as seed 2 of
-    a survey run and spent the whole 400-paper budget by itself, leaving 28
-    seeds unwalked and every centrality at 1. OpenAlex's list is unordered, so
+    a survey run and filled the neighborhood by itself, leaving 28 seeds
+    unwalked and every centrality at 1. OpenAlex's list is unordered, so
     the cap is a sample, and `truncated` says so."""
     work = oa_work(ident)
     if "error" in work:
@@ -1348,9 +1348,7 @@ def is_survey(rec: dict[str, Any], seed_refs: dict[str, set[str]], members: set[
 def paper_line(rec: dict[str, Any]) -> str:
     """One paper, one line, in the form the searcher pastes: every field the
     ranking used, the id the index returned, and `verified` because it did."""
-    ids = _ids_of(rec)
-    label = (f"S2 `{ids['S2']}`" if ids.get("S2") else f"OpenAlex `{ids['OpenAlex']}`" if ids.get("OpenAlex")
-             else f"arXiv `{ids['ArXiv']}`" if ids.get("ArXiv") else f"DOI `{ids['DOI']}`" if ids.get("DOI") else "")
+    label = id_label(_ids_of(rec))
     return (f"- {rec.get('title') or '_no title_'} · {rec.get('year') or '_no year_'} · "
             f"{rec.get('venue') or '_no venue_'} · centrality {rec['centrality']} · "
             f"influential {rec.get('influentialCitationCount') if rec.get('influentialCitationCount') is not None else '_n/a_'} · "
@@ -1360,7 +1358,7 @@ def paper_line(rec: dict[str, Any]) -> str:
 HOP_ROWS = 25  # rows per direction per seed; 30 seeds both ways is 1,500 rows before dedupe
 
 
-def neighborhood(query: str, seeds: int = 30, budget: int = 400, block: list[str] | None = None,
+def neighborhood(query: str, seeds: int = 30, block: list[str] | None = None,
                  surveys_only: bool = False, top: int = 20, hop_limit: int = HOP_ROWS) -> dict[str, Any]:
     """Seed-and-snowball around one question, ranked inside the neighborhood.
 
@@ -1370,8 +1368,13 @@ def neighborhood(query: str, seeds: int = 30, budget: int = 400, block: list[str
     arXiv id, then folded title. Rank by field centrality (how many
     neighborhood papers cite it, over the edges this walk saw), then
     influentialCitationCount, then citations per year, then presence in both
-    indexes. Stop when a hop round adds under 5 percent new papers or the
-    budget is hit, and say which. Every line carries the id the index returned.
+    indexes. Stop only when a block of seeds adds under 5 percent new papers,
+    and say so. Every line carries the id the index returned.
+
+    There is no paper budget. Removed 2026-10-01: a 100-paper budget stopped
+    every walk of a seven-searcher landscape on seed 3 or 4 of 10, so the
+    neighborhood was whatever the first two seeds happened to cite. The walk
+    is already bounded by `seeds` times two hops times `hop_limit` rows.
     """
     query = (query or "").strip()
     if not query:
@@ -1381,7 +1384,6 @@ def neighborhood(query: str, seeds: int = 30, budget: int = 400, block: list[str
     if hits:
         return err(f"query uses blocked vocabulary: {', '.join(hits)}. Search the analog field in its own words.")
     seeds_n = max(1, min(int(seeds or 30), SEARCH_MAX))
-    budget = max(seeds_n, int(budget or 400))
     year_now = _dt.date.today().year
     log: list[str] = []
     nothing: list[str] = []
@@ -1459,8 +1461,8 @@ def neighborhood(query: str, seeds: int = 30, budget: int = 400, block: list[str
     failures = {"s2": 0, "openalex": 0}
     DEGRADE_AFTER = 3  # consecutive failed hop calls before an index is skipped for the rest of the walk
 
-    def hop_seed(sk: str, kind: str) -> tuple[int, bool]:
-        """One direction from one seed. Returns (new papers, budget_hit)."""
+    def hop_seed(sk: str, kind: str) -> int:
+        """One direction from one seed. Returns the new papers it added."""
         nonlocal unresolvable, truncated_hops
         seed = hood[sk]
         sid = seed.get("paperId")
@@ -1477,7 +1479,7 @@ def neighborhood(query: str, seeds: int = 30, budget: int = 400, block: list[str
             got, src = (oa_referenced(oaid, hop_limit) if kind == "references" else oa_cited_by(oaid, hop_limit)), "openalex"
             calls["openalex"] += 1
         else:
-            return 0, False
+            return 0
         hop_calls[kind] += 1
         if "error" in got:
             # One failed hop is a skipped hop. Three in a row is an index that
@@ -1488,7 +1490,7 @@ def neighborhood(query: str, seeds: int = 30, budget: int = 400, block: list[str
             if failures[src] >= DEGRADE_AFTER:
                 degraded.add(src)
             nothing.append(f"{kind} of {(seed.get('title') or sk)[:60]} on {src}: error {got.get('status')}")
-            return 0, False
+            return 0
         failures[src] = 0
         hop_rows[kind] += got.get("rows_returned", got.get("resolved_count", 0))
         unresolvable += got.get("unresolvable_count", 0)
@@ -1498,8 +1500,6 @@ def neighborhood(query: str, seeds: int = 30, budget: int = 400, block: list[str
             nothing.append(f"{kind} of {(seed.get('title') or sk)[:60]} on {src}: 0 rows")
         new = 0
         for rec in got["papers"]:
-            if dedupe_key(rec) not in hood and len(hood) >= budget:
-                return new, True
             if src == "openalex":
                 rec = {**rec, "edges": [{"origin": oaid, "hop": kind, "isInfluential": False, "intents": [],
                                          "contexts": [], "describes": "this_paper" if kind == "references" else "origin_paper"}]}
@@ -1512,32 +1512,23 @@ def neighborhood(query: str, seeds: int = 30, budget: int = 400, block: list[str
             else:
                 centrality[sk] += 1
                 seed_refs.setdefault(k, set()).add(sk)
-        return new, False
+        return new
 
-    # Each seed is walked both ways before the next seed: walking every seed
-    # backward first spent the whole budget on references and never reached
-    # a citing paper (measured 2026-09-15, budget 80: 74 references, 0 citers).
+    # Each seed is walked both ways before the next seed, so a walk that
+    # saturates early has still seen citing papers as well as cited ones.
     # Saturation is judged per block of seeds, since one seed's hop is noise.
     BLOCK = 5
     walked = 0
-    budget_hit = False
     for i in range(0, len(seed_keys), BLOCK):
         before = len(hood)
         block_new = 0
         for sk in seed_keys[i:i + BLOCK]:
             for kind in ("references", "citations"):
-                n, budget_hit = hop_seed(sk, kind)
+                n = hop_seed(sk, kind)
                 block_new += n
                 hop_new[kind] += n
-                if budget_hit:
-                    break
-            if budget_hit:
-                break
             walked += 1
         blocks.append(f"seeds {i + 1}-{min(i + BLOCK, len(seed_keys))}: +{block_new}")
-        if budget_hit:
-            stop_reason = f"budget: {budget} papers reached while walking seed {walked + 1} of {len(seed_keys)}"
-            break
         if before and block_new < SATURATION * before and i + BLOCK < len(seed_keys):
             stop_reason = (f"saturation: seeds {i + 1}-{i + BLOCK} added {block_new} papers, under 5 percent of "
                            f"{before}; {len(seed_keys) - walked} seeds not walked")
@@ -1654,17 +1645,125 @@ def render_section(nb: dict[str, Any], question: str, field: str, mode: str, blo
     return "\n".join(lines)
 
 
-def write_section(path: str, text: str) -> str | None:
+def outside_research(path: str, flag: str) -> str | None:
     """Confined to <project>/research/ like the records: the same rule the
     guard applies to an agent's Write, applied to the script's."""
     root = os.path.realpath(os.path.join(project_dir(), "research"))
+    if not os.path.realpath(path).startswith(root + os.sep):
+        return f"{flag} must point under {root}/"
+    return None
+
+
+def write_section(path: str, text: str) -> str | None:
+    problem = outside_research(path, "--write")
+    if problem:
+        return problem
     target = os.path.realpath(path)
-    if not target.startswith(root + os.sep):
-        return f"--write must point under {root}/"
     os.makedirs(os.path.dirname(target), exist_ok=True)
     with open(target, "w", encoding="utf-8") as fh:
         fh.write(text)
     return None
+
+
+# --------------------------------------------------------------------------
+# verify --append: a searcher's remembered papers, written by the script
+
+GROUP_HEADINGS = {"foundational": "Foundational", "current": "Current", "surveys": "Surveys"}
+SECTION_TITLE = re.compile(r"^\s*-\s+(.+?)\s+·\s")
+NO_ABSENCE = "every query and hop returned rows"
+
+
+def id_label(ids: dict[str, Any]) -> str:
+    return (f"S2 `{ids['S2']}`" if ids.get("S2") else f"OpenAlex `{ids['OpenAlex']}`" if ids.get("OpenAlex")
+            else f"arXiv `{ids['ArXiv']}`" if ids.get("ArXiv") else f"DOI `{ids['DOI']}`" if ids.get("DOI") else "")
+
+
+def group_of(title: str | None, year: Any, year_now: int) -> str:
+    """The neighborhood's grouping rule, less the citing-100 test a lone paper cannot take."""
+    if SURVEY_TITLE.search(title or ""):
+        return "surveys"
+    if isinstance(year, int) and year <= year_now - FOUNDATIONAL_AGE:
+        return "foundational"
+    return "current"
+
+
+def append_to_section(path: str, results: list[dict[str, Any]], origin: str) -> dict[str, Any]:
+    """Add verify's results to a section in place: an exact match as a
+    verified line, a near match as a candidate line, no match under
+    `## What returned nothing`. Every added line says where it came from.
+
+    Added 2026-10-01. Before this the searcher appended by re-typing the whole
+    section through Write: five of seven searchers in one landscape stalled
+    mid-stream on that 15-20 KB rewrite and lost fifteen minutes each. The
+    script owns the file, so the agent never re-emits it."""
+    problem = outside_research(path, "--append")
+    if problem:
+        return err(problem)
+    try:
+        with open(path, encoding="utf-8") as fh:
+            lines = fh.read().split("\n")
+    except OSError as exc:
+        return err(f"--append could not read {path}: {exc}")
+    for heading in list(GROUP_HEADINGS.values()) + ["What returned nothing"]:
+        if f"## {heading}" not in lines:
+            return err(f"--append: {path} has no ## {heading} heading; it is not a section")
+
+    year_now = _dt.date.today().year
+    tag = f"_added from {origin}, not in walk_"
+    listed = {normalised_title(m.group(1)) for m in map(SECTION_TITLE.match, lines) if m}
+    text = "\n".join(lines)
+    by_group: dict[str, list[str]] = {g: [] for g in GROUP_HEADINGS}
+    absent: list[str] = []
+    report: list[dict[str, Any]] = []
+    for r in results:
+        asked = r.get("query") or ""
+        if r.get("resolved"):
+            label = id_label(r.get("ids") or {})
+            if normalised_title(r.get("title") or asked) in listed or (label and label in text):
+                report.append({"query": asked, "added": False, "why": "already in the section"})
+                continue
+            g = group_of(r.get("title"), r.get("year"), year_now)
+            line = f"- {r.get('title') or asked} · {r.get('year') or '_no year_'} · {tag} · {label} · verified"
+        elif r.get("candidate"):
+            c = r["candidate"]
+            g = group_of(c.get("title"), c.get("year"), year_now)
+            line = (f"- {asked} · {c.get('year') or '_no year_'} · {tag} · "
+                    f"_candidate: {c['kind']} match only, {c.get('title')} ({id_label(c.get('ids') or {})})_")
+        else:
+            absent.append(f"- verify `{asked}` ({origin}): {r.get('note') or 'no match'}; not added")
+            report.append({"query": asked, "added": False, "why": "no match in any index"})
+            continue
+        by_group[g].append(line)
+        listed.add(normalised_title(r.get("title") or asked))
+        report.append({"query": asked, "added": True, "group": g, "line": line})
+
+    def insert(heading: str, new: list[str], replace: str | None = None) -> None:
+        h = lines.index(f"## {heading}")
+        end = next((i for i in range(h + 1, len(lines)) if lines[i].startswith("## ")), len(lines))
+        if replace is not None:
+            for i in range(h + 1, end):
+                if lines[i].strip() == replace:
+                    del lines[i]
+                    end -= 1
+                    break
+        while end - 1 > h and not lines[end - 1].strip():
+            end -= 1
+        lines[end:end] = ([""] if end == h + 1 else []) + new
+
+    for g, new in by_group.items():
+        if new:
+            insert(GROUP_HEADINGS[g], new)
+    if absent:
+        insert("What returned nothing", absent, replace=NO_ABSENCE)
+    added = sum(1 for ln in lines if ", not in walk_" in ln)
+    for i, ln in enumerate(lines):
+        if ln.startswith("- Verification:"):
+            lines[i] = ("- Verification: every line carries the id the index returned for it; "
+                        + (f"{added} added through `verify --append`, each marked on its line"
+                           if added else "the script added nothing from memory"))
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines))
+    return {"section": path, "added": sum(1 for x in report if x["added"]), "results": report}
 
 
 # --------------------------------------------------------------------------
@@ -1845,11 +1944,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--title", action="append", default=[], help="repeatable")
     p.add_argument("--id", action="append", default=[], dest="ids", help="repeatable")
     p.add_argument("--limit", type=int, default=10, help="rows to consider per title per index; the near match that makes a candidate is often below the top five")
+    p.add_argument("--append", default="", help="also add the results to this section under research/, each in its group")
+    p.add_argument("--from", dest="origin", default="memory", choices=("memory", "web"), help="where the titles came from, for --append")
 
     p = sub.add_parser("neighborhood", help="seed-and-snowball around one question; three ranked groups")
     p.add_argument("query")
     p.add_argument("--seeds", type=int, default=30, help="top N by relevance across S2 and OpenAlex")
-    p.add_argument("--budget", type=int, default=400, help="papers; the walk stops here")
     p.add_argument("--block", default="", help="comma-separated vocabulary the query may not use")
     p.add_argument("--surveys-only", action="store_true", help="seed on reviews only; output the surveys group")
     p.add_argument("--top", type=int, default=20, help="papers listed per group")
@@ -1857,7 +1957,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--write", default="", help="also write the six-heading section to this path under research/")
     p.add_argument("--question", default="", help="the question, for the section's title and ## Question")
     p.add_argument("--field", default="", help="the field, for ## Question")
-    p.add_argument("--mode", default="landscape", help="landscape | survey | analog, for ## Question")
+    p.add_argument("--mode", default="landscape", help="landscape | survey | analog | task, for ## Question")
 
     p = sub.add_parser("openalex", help="OpenAlex resolver")
     oa = p.add_subparsers(dest="sub")
@@ -1898,11 +1998,13 @@ def main(argv: list[str] | None = None) -> int:
         out = search(args.query, args.limit, args.index)
     elif args.cmd == "verify":
         out = verify(args.title, args.ids, args.limit)
+        if args.append and "error" not in out:
+            out["append"] = append_to_section(args.append, out["results"], args.origin)
     elif args.cmd == "batch":
         out = batch_papers(args.ids)
     elif args.cmd == "neighborhood":
         block = [b.strip() for b in args.block.split(",") if b.strip()]
-        out = neighborhood(args.query, args.seeds, args.budget, block, args.surveys_only, args.top, args.hop_limit)
+        out = neighborhood(args.query, args.seeds, block, args.surveys_only, args.top, args.hop_limit)
         if args.write and "error" not in out:
             problem = write_section(args.write, render_section(out, args.question or args.query, args.field or "_not given_", args.mode, block))
             out["section_written"] = None if problem else args.write
@@ -2303,7 +2405,7 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
 
     with _environ(RESEARCH_CACHE_DIR=tempfile.mkdtemp(prefix="snowball-cache-")):
         with _fetch(graph):
-            nb = neighborhood("seed method", seeds=5, budget=400, top=10)
+            nb = neighborhood("seed method", seeds=5, top=10)
     by_title = {p["title"]: p for g in nb["groups"].values() for p in g}
     check("35 neighborhood seeds from both indexes, hops on S2 where it can and OpenAlex where it must, dedupes across them",
           "error" not in nb and nb["counts"]["seeds"] == 2 and nb["counts"]["neighborhood"] == 5
@@ -2326,12 +2428,13 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
           "\n".join(nb["what_was_searched"]))
     with _environ(RESEARCH_CACHE_DIR=tempfile.mkdtemp(prefix="snowball-cache-")):
         with _fetch(graph):
-            small = neighborhood("seed method", seeds=2, budget=3, top=10)
+            small = neighborhood("seed method", seeds=2, top=10)
             blocked = neighborhood("seed method for damage", seeds=5, block=["damage", "satellite"])
             surveys = neighborhood("seed method", seeds=5, surveys_only=True, top=10)
-    check("39 the budget stops the walk and the stop reason says so",
-          small["counts"]["neighborhood"] <= 3 and small["stop_reason"].startswith("budget"),
-          f"got {small['counts']} {small['stop_reason']}")
+    check("39 there is no paper budget: every seed is walked both ways",
+          small["stop_reason"].startswith("complete")
+          and any(line.startswith("- Hops") and "2 of 2 seeds walked" in line for line in small["what_was_searched"]),
+          f"got {small['stop_reason']} {small['what_was_searched']}")
     check("40 a query in blocked vocabulary is refused before any request, naming the words",
           "error" in blocked and "damage" in blocked["error"] and "satellite" not in blocked["error"], f"got {blocked}")
     check("41 surveys-only outputs the surveys group alone and says how it seeded",
@@ -2351,6 +2454,40 @@ def selftest() -> int:  # noqa: C901 - a flat list of cases reads better than a 
             outside = write_section(os.path.join(tmp, "elsewhere.md"), text)
     check("43 --write lands under research/ and refuses anywhere else",
           inside is None and outside is not None, f"inside={inside} outside={outside}")
+
+    # 44-46. verify --append puts a remembered paper in its group without the agent re-typing the file.
+    remembered = [
+        {"query": "Old Root Paper", "resolved": True, "title": "Old Root Paper", "year": 2010, "ids": {"S2": "OLD1"}},
+        {"query": "Fresh Damage Net", "resolved": True, "title": "Fresh Damage Net", "year": 2025, "ids": {"S2": "NEW1"}},
+        {"query": "Attention for Damage", "resolved": False, "candidate": {"kind": "prefix", "title": "Attention",
+                                                                           "year": 2017, "ids": {"S2": "ATT"}}},
+        {"query": "Imaginary Paper", "resolved": False, "candidate": None, "note": "no title match in 30 rows across s2"},
+        {"query": "Root One", "resolved": True, "title": "Root One", "year": 2005, "ids": {"S2": "R1"}},
+    ]
+    with tempfile.TemporaryDirectory() as tmp:
+        with _environ(RESEARCH_PROJECT_DIR=tmp):
+            sec = os.path.join(tmp, "research", "landscape", "sections", "x.md")
+            write_section(sec, text)
+            got = append_to_section(sec, remembered, "memory")
+            refused = append_to_section(os.path.join(tmp, "elsewhere.md"), remembered, "memory")
+            with open(sec, encoding="utf-8") as fh:
+                after = fh.read()
+
+    def block(name: str) -> str:
+        return after.split(f"## {name}\n", 1)[1].split("\n## ", 1)[0]
+
+    check("44 --append places each paper by the walk's grouping rule, marked, and leaves the walk's lines alone",
+          "Old Root Paper · 2010 · _added from memory, not in walk_ · S2 `OLD1` · verified" in block("Foundational")
+          and "Fresh Damage Net · 2025 · _added from memory, not in walk_ · S2 `NEW1` · verified" in block("Current")
+          and "_candidate: prefix match only, Attention (S2 `ATT`)_" in block("Foundational")
+          and "verify `Imaginary Paper` (memory)" in block("What returned nothing")
+          and all(ln in after for ln in text.split("\n") if ln.startswith("- ") and "· verified" in ln)
+          and got["added"] == 3, f"got {got}\n{after}")
+    check("45 --append skips a paper already in the section and updates the Verification line",
+          after.count("Root One ·") == 1
+          and "- Verification: every line carries the id the index returned for it; 3 added through `verify --append`" in after,
+          after)
+    check("46 --append refuses a path outside research/", "error" in refused, f"got {refused}")
 
     PACE.update(saved_pace)
     print()

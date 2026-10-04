@@ -19,6 +19,7 @@ CONTRACTS = {
     "templates/research/CONTEXT.md": ["skills/setup/SKILL.md"],
     "templates/research/CONNECTIONS.md": ["skills/setup/SKILL.md"],
     "templates/research/QUESTION.md": ["skills/frame/SKILL.md"],
+    "templates/research/TASK.md": ["skills/find/SKILL.md"],
     "templates/research/framing-log.md": ["skills/frame/SKILL.md"],
     "templates/research/analogs.md": ["skills/scout/SKILL.md"],
     "templates/research/section.md": ["agents/searcher.md"],

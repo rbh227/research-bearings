@@ -43,7 +43,7 @@ def on_demand_met(out, command):
 # shape -> [(case that quotes it, sentence the grader states, predicate)]
 FACTS = {
     "empty": [
-        ("router-empty-names-start", "recommended is exactly setup", lambda o: o["recommended"] == ["setup"] and o["empty"]),
+        ("router-empty-names-start", "recommended is setup then find", lambda o: o["recommended"] == ["setup", "find"] and o["empty"]),
     ],
     "question-only": [
         ("router-framed-names-surveys", "stage reached is questions", lambda o: o["stage_reached"] == "questions"),
@@ -62,8 +62,8 @@ FACTS = {
     ],
     "wildfire": [
         ("router-wildfire-offers-scout-or-read", "stage reached is gathering", lambda o: o["stage_reached"] == "gathering"),
-        ("router-wildfire-offers-scout-or-read", "scout is the only non-done move at that stage, ready",
-         lambda o: [m["command"] for m in o["moves"] if m["stage"] == "gathering" and m["status"] != "done"] == ["scout"]
+        ("router-wildfire-offers-scout-or-read", "scout is the only recommended move at that stage, ready",
+         lambda o: [m["command"] for m in o["moves"] if m["stage"] == "gathering" and m["command"] in o["recommended"]] == ["scout"]
          and status(o, "scout") == "ready"),
         ("router-wildfire-offers-scout-or-read", "read is the first ready move of the next stage",
          lambda o: [m["command"] for m in o["moves"] if m["stage"] == "processing" and m["status"] == "ready"][0] == "read"),

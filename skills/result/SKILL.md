@@ -2,6 +2,7 @@
 name: result
 description: Read the outcome against what was pre-registered, in three rounds so that no agent sees what the others concluded — a tabulator that builds the table from the run directories only, a fresh critic that applies the stop rule literally and returns survived, killed or inconclusive, and an auditor that walks M1 to M7 against the run directory. Never edits the experiment page. Use after a run, once /log has ingested it. Writes research/results/<slug>-<date>.md.
 allowed-tools: Read, Glob, Bash, Write, AskUserQuestion, Agent
+user-invocable: false
 ---
 
 # result

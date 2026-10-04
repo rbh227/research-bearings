@@ -2,6 +2,7 @@
 name: orient
 description: The gathering stage as one command — /surveys then /landscape, with a pause between, ending in a one-screen brief of what the run found and the next move. Use after /frame, when the user says "orient me", "map the literature", "what exists on my question", "run the surveys and the landscape". Adds nothing to either skill and writes no file of its own.
 allowed-tools: Read, Glob, Bash(python3 *scripts/state.py*), AskUserQuestion, Skill
+user-invocable: false
 ---
 
 # orient
@@ -43,7 +44,7 @@ Two things about this sequence in particular:
 
 ## The brief
 
-At the end, and at any stop, the router's brief — `/research-bearings:router`
+At the end, and at any stop, the brief from `/research-bearings:next`
 § The brief — plus, when the landscape exists, five lines this composite owes
 the reader. Each is read from a file or from the state script's output, never
 from memory:
@@ -58,8 +59,8 @@ from memory:
 - **The three papers the matrix ranked highest**: paper lines from the densest
   cells first, then by the centrality on the line — the same order `/read`
   proposes in — that have no card yet under `research/papers/`.
-- **Next**: from the state read. With a matrix and no cards that is `/read`
-  and `/scout`, as the router would offer them.
+- **Next**: from the state read. With a matrix and no cards that is `/read`,
+  as `/next` would offer it.
 
 Printed, not saved. There is no `ORIENT.md`; the numbers are derivable from
 the files and a fifth landscape file would be one more heading to keep true.

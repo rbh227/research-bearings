@@ -2,6 +2,7 @@
 name: spec
 description: Write the Heilmeier page for one idea that survived ranking — the eight questions in eight paragraphs on a single page, every factual sentence sourced to the idea page, the pre-mortem, the cards or the question page rather than to memory, with dated and testable midterm and final checks. Applies the catechism's own one-page test and reports when the page fails it. Use after /rank. Writes research/specs/<slug>.md.
 allowed-tools: Read, Glob, Write
+user-invocable: false
 ---
 
 # spec

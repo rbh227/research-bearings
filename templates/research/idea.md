@@ -52,16 +52,14 @@
 
      - Query: "<the candidate, in the home vocabulary, as it was put to the index>"
      - Papers the query found: <n> of 5 requested (counts.seeds)
-     - Rows: <n> of a 30-paper budget (counts.neighborhood)
+     - Rows: <n> (counts.neighborhood)
      - Nearest: <title> · <year> · <S2|arXiv|OpenAlex|DOI> `<id>` · verified
      - Reading: <one line — what the nearest paper does that this does not, or
        the honest statement that it is close>
 
-     BOTH numbers, because the row count saturates. Measured 2026-09-16: a walk
-     with --budget 30 returned "neighborhood 30" for a query in a dense area,
-     and it will return 30 for almost any query that has seeds at all. "30 of
-     30" means the walk filled up, not that the literature holds thirty papers.
-     The other number is the one that moves: it is how many of the five
+     BOTH numbers. Rows is everything one hop from the five seeds: a
+     neighborhood, not a census of the literature.
+     The other number is the thin one: it is how many of the five
      requested papers the search could find for this query at all, and a query
      that finds one or two is the thin case worth noticing. It is not called a
      seed count here because `seed` already means a paper a walk starts from

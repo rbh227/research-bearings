@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Skill
-input_match: "setup|frame|start"
+input_match: "setup|frame|start|find"
 min: 0
 max: 0
 ---

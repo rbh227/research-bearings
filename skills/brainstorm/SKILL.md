@@ -2,6 +2,7 @@
 name: brainstorm
 description: The dump. Asks you what the important problems are before anything about feasibility, pushes your problem through Polya's seven transformations one at a time, and spawns four to six persona agents built from your field's own record to ask their own questions. Decides nothing — no ranking, no novelty claim, no page. Use when you want to get everything out of your head, or before /ideas so it has seeds that are yours. Appends to research/IDEAS.md.
 allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Agent
+user-invocable: false
 ---
 
 # brainstorm
@@ -25,7 +26,8 @@ your files'. Putting a candidate to the index is `/ideas`' step 3.
 Each layer overrides the one before it.
 
 1. **`research/QUESTION.md`** — the question and the person whose decision it
-   changes. **`research/CONTEXT.md`** if it exists: the constraints change what
+   changes; or `research/TASK.md` § Task in a project that started at `/find`,
+   which is framed by its task. **`research/CONTEXT.md`** if it exists: the constraints change what
    is worth asking about.
 2. **What the repo already holds**, read if present and skipped without comment
    if not: `research/BITS.md`, `research/papers/*.md`,

@@ -1,18 +1,36 @@
 ---
-name: router
-description: The front door. Reads what exists under research/, prints a one-screen brief, names the one command that comes next with the precondition it checked, asks once, and runs it. Use when the user asks "what next", "where am I", "what should I do with this project", "what's the state of my research", or names a goal ("I want ideas", "rank these") in a project that has a research/ folder — or when they type /router. Writes nothing.
+name: next
+description: The front door. Reads what exists under research/, prints a one-screen brief, names the one step that comes next with the precondition it checked, asks once, and runs it. Use when the user asks "what next", "where am I", "what should I do", "what's the state of my research", "how do I use this", or names a goal ("I want ideas", "rank these", "check the references") — or when they type /next. Writes nothing.
+argument-hint: "[what you want, in plain words — optional]"
 allowed-tools: Read, Glob, Bash(python3 *scripts/state.py*), AskUserQuestion, Skill
 ---
 
-# router
+# next
 
-One job: turn "what next?" into one command, with the evidence beside it, and
-run that command when the user says yes.
+One job: turn "what next?" into one step, with the evidence beside it, and
+run that step when the user says yes.
 
-Twenty-seven skills are unusable without a front door, and a front door that
+Twenty-nine skills are unusable without a front door, and a front door that
 only points is one more name to remember. This skill reads the state, names the
 move, asks once, and invokes. It never runs anything without the yes, and it
 never writes a file.
+
+## The six commands a person types
+
+Only six skills are on the `/` menu. Every other skill is hidden and reached
+through these, through this skill, or by asking in plain words. When the brief
+names a move, it also names the visible command that covers it, so the person
+always knows what to type next time:
+
+| Moves | Typed as |
+|---|---|
+| setup, frame | `/start` |
+| find, surveys, landscape | `/find` |
+| read | `/read` |
+| bits, scout, brainstorm, ideas, premortem, rank, spec | `/think` |
+| baseline, design, log, result | `/experiment` |
+| verify, audit, critique, reviews, replicate, datasets, groups | ask in plain words ("verify the references in …"), or `/next` with the goal |
+| anything | `/next` |
 
 ## The state read
 
@@ -51,7 +69,8 @@ same brief and quote this section by name.
   what it drew on.
 - **Repairs**, if any: the file, the kind (`malformed` or `missing upstream`),
   and the command that writes it.
-- **Next**: the moves, as the rules below decide.
+- **Next**: the moves, as the rules below decide, each with the visible
+  command that covers it from the table above.
 - **Also open**: every other `recommended` move, on one line with its status,
   so a `ready` move at an earlier stage (an unrun `/scout`) or a later one is
   visible even when the offer does not carry it.
@@ -86,8 +105,12 @@ one line: the status and the reason it is a move ("BITS.md: 2 cards newer than
 it"; "ideas/: nothing yet, BITS.md is present"). The user picks. A fork is a
 fact about the folder, not a failure to decide.
 
-An empty folder, or none, is not a fork. Name `/start`, which is `/setup` then
-`/frame`.
+An empty folder, or none, is a fork of exactly two, and the state script's
+`recommended` is `["setup", "find"]`: **`/start`** — you have an interest and
+want it sharpened into a question (setup, then frame) — or **`/find`** — you
+already know what you are looking for, a topic or a thing you are building, and
+want the papers on it. Ask which; with `/find`, ask for the sentence in the same
+question.
 
 The on-demand skills — verify, audit, critique, reviews, replicate, datasets,
 groups — are never in the next move or the fork. Rule 1 is the only way to
@@ -95,10 +118,12 @@ them. A ledger is asked for; it is never the next step.
 
 ## The question
 
-One `AskUserQuestion`, once. The option label is the command, the description
-its precondition. On yes, invoke the skill through the `Skill` tool as
-`research-bearings:<command>`, passing any argument the user gave verbatim.
-On no, print the remaining options once and stop.
+One `AskUserQuestion`, once. The option label is the move in plain words with
+its command ("Card five papers — read"), the description its precondition. On
+yes, invoke the skill through the `Skill` tool as
+`research-bearings:<command>`, passing any argument the user gave verbatim. A
+hidden skill is invoked the same way; hidden means off the menu, not
+unreachable. On no, print the remaining options once and stop.
 
 Never invoke without the yes. Never ask twice. Never run two.
 

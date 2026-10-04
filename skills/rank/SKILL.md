@@ -2,6 +2,7 @@
 name: rank
 description: Order the ideas by what to run next — a bounded pairwise tournament whose judges see two ideas and never their authors, Alon's feasibility-against-interest grid drawn from their scores, and a final order by cheapest kill first rather than by wins. Sets aside ideas whose pre-mortem said not executable, shows the pairing bound before anything runs, and asks you which survive. Use after /premortem, and again after any result lands. Writes research/RANKING.md.
 allowed-tools: Read, Glob, Write, Edit, AskUserQuestion, Agent
+user-invocable: false
 ---
 
 # rank

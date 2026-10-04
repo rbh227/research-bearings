@@ -2,6 +2,7 @@
 name: audit
 description: Walk the Kapoor and Narayanan leakage taxonomy against one paper card — eight types, each with the passage that supports it or a statement of what was checked — before you build on its number. One card per run, on demand: reading does not pay for an auditor on papers that never become a baseline. Edits the card's Leakage section.
 allowed-tools: Read, Glob, Grep, Bash, Agent
+user-invocable: false
 ---
 
 # audit

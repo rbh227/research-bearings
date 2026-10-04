@@ -2,6 +2,7 @@
 name: surveys
 description: Find the surveys and reviews of a framed research question, extract each one's own taxonomy and open-challenges list, diff them, and harvest the field's vocabulary into QUESTION.md. One searcher restricted to surveys, then a survey-differ agent. Use after /frame and before /landscape, or whenever the question's vocabulary is still guesses. Writes research/landscape/surveys.md.
 allowed-tools: Read, Glob, Bash, Agent
+user-invocable: false
 ---
 
 # surveys
@@ -13,8 +14,8 @@ from what this writes.
 ## Preconditions
 
 - **`research/QUESTION.md` must exist.** This skill appends to its
-  `## Vocabulary`. If it does not: name the file, say `/research-bearings:frame`
-  writes it, stop.
+  `## Vocabulary`. If it does not: name the file, say `/start` frames a
+  question — or that `/find` searches a topic or task with no question — and stop.
 - **`research/CONNECTIONS.md`** is read first; missing, run
   `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" status --md`
   once and carry on.
@@ -36,9 +37,9 @@ Nothing else: it reads the section and the paper records, and it knows where
 `QUESTION.md` is.
 
 **4. Report.** Surveys found, surveys with abstracts, vocabulary lines
-appended. Then say: run `/research-bearings:frame` again if the harvested
-vocabulary changes the question, and `/research-bearings:landscape` when it
-does not.
+appended. Then say: if the harvested vocabulary changes the question, reframe
+it (`/start`, keeping the context file); when it does not, the landscape is
+next (`/find`, or say "yes" when `/orient` asks).
 
 ## Outputs
 

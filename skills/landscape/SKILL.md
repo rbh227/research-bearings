@@ -2,6 +2,7 @@
 name: landscape
 description: Map the literature around a framed research question — derive the seven landscape questions from QUESTION.md and surveys.md, show the seven queries, fan out seven searcher agents in parallel over the citation indexes, then have a contract-bound merger lay their sections side by side as a formulation-by-data-regime matrix and a time slice. Use after /frame and ideally after /surveys, when you want to know what exists on your question in your own field. Writes research/landscape/matrix.md and timeslice.md.
 allowed-tools: Read, Glob, Bash, Write, AskUserQuestion, Agent
+user-invocable: false
 ---
 
 # landscape
@@ -21,8 +22,8 @@ python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" <command> ...
 ## Preconditions
 
 - **`research/QUESTION.md` must exist.** The seven questions are derived from
-  it. If it does not: name the file, say `/research-bearings:frame` writes it,
-  stop.
+  it. If it does not: name the file, say `/start` frames a question — or that
+  `/find` searches a topic or task with no question — and stop.
 - **`research/landscape/surveys.md`** is read if it exists. Its taxonomy is the
   best source of formulations. Without it, say so and derive the axes from the
   sections alone.
@@ -52,8 +53,8 @@ interest. Its section will show what an early-vocabulary query returns, and
 the merger's time slice does the rest. Say that in the query list.
 
 **2. Show the seven queries** and the slug the files will carry, and ask. This
-is the run's bound and its one human gate: seven walks at 30 seeds and 400
-papers each is up to 2,800 papers. Strike, rewrite, or approve.
+is the run's one human gate: seven walks, each walking all 30 of its seeds
+both ways. Strike, rewrite, or approve.
 
 **3. Dispatch seven searchers, in parallel** — seven `Agent` calls in one
 message, each `subagent_type: "research-bearings:searcher"`, each carrying:
@@ -82,9 +83,8 @@ paths. Nothing else.
 **7. Check and report.** Run
 `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/check_landscape.py" research/landscape`.
 Then say: cells filled / empty / total, contradictions, sections that reported
-a degraded index, and what to run next (`/research-bearings:scout` for the
-fields that never cite yours; `/read` when it exists, for the cells that
-matter).
+a degraded index, and one line: **Next: `/read`** for the cells that matter;
+the fields that never cite yours come later, inside `/think`.
 
 ## Outputs
 

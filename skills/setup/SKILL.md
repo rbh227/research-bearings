@@ -2,6 +2,7 @@
 name: setup
 description: Record a research project's resources and constraints before any research work begins — lab, compute allocation, data access, code, your calibration, deadline, and what counts as a win. Use when starting a research project, when picking up an inherited one, or when compute or data access changes. Writes research/CONTEXT.md.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(df:*), Bash(du:*), Bash(ls:*), Bash(uname:*), Bash(sw_vers:*), Bash(nvidia-smi:*), Bash(python3:*), Bash(pip:*), Bash(uv:*), Bash(git status:*), Bash(git log:*), Bash(git remote:*), Bash(free:*), Bash(sysctl:*), Bash(nproc:*), Bash(test:*), Bash(find:*), Bash(wc:*)
+user-invocable: false
 ---
 
 # setup
@@ -116,7 +117,9 @@ number carries a date and says whether it was checked or reported.
 `research/CONNECTIONS.md` exists with its two headings and a dated line per
 source.
 
-Then tell the user what to run next: `/research-bearings:frame`.
+Then name what comes next, by the command a person types: framing a question
+(`/start` runs it next), or `/find` for a person who already knows what they
+are looking for.
 
 ## Rules this skill applies
 

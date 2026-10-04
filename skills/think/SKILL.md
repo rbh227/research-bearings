@@ -59,8 +59,9 @@ Three things about this sequence in particular:
 
 The boundaries before `/premortem` and before `/rank` are the composite's
 exits into selection. A person who wants to read the idea pages before anything
-judges them says stop at the `/premortem` boundary; the brief names
-`/premortem` as the next move and the pages are on disk.
+judges them says stop at the `/premortem` boundary; the brief names the
+pre-mortem as the next move, typed as `/think` again, and the pages are on
+disk.
 
 ## Refusals
 

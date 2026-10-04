@@ -2,6 +2,7 @@
 name: verify
 description: Check every reference in one research file against the record and tag each line in place — verified, candidate, or not found with the indexes checked. Use on anything that names papers: a landscape section, a paper card, an analog page, the brief. A not-found reference is marked and kept, never deleted. Edits the file you name and writes nothing else.
 allowed-tools: Read, Glob, Grep, Bash, Edit
+user-invocable: false
 ---
 
 # verify

@@ -2,6 +2,7 @@
 name: bits
 description: Name the assumptions the field is standing on — one per group of papers that share a thesis, each traceable to the cards that share it and the matrix cells they sit in. Groups are recorded on the first run and reused, so the file /ideas reads does not reshuffle between runs. Use after several papers are carded. Writes research/BITS.md.
 allowed-tools: Read, Glob, Grep, Write, Edit
+user-invocable: false
 ---
 
 # bits

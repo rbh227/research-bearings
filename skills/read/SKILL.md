@@ -1,6 +1,6 @@
 ---
 name: read
-description: Turn papers into cards you can build on — propose the unread papers the landscape ranked highest, confirm the list, then run the three-agent protocol per paper: a predictor that sees only the introduction and commits predictions, a reader that sees the whole paper and never the prediction, and a scorer that sees both and writes what a careful first reading would have missed. Use after /landscape when the matrix has lines nobody has read. Writes research/papers/<slug>.md.
+description: Turn papers into cards you can build on — propose the unread papers the landscape ranked highest, confirm the list, then run the three-agent protocol per paper: a predictor that sees only the introduction and commits predictions, a reader that sees the whole paper and never the prediction, and a scorer that sees both and writes what a careful first reading would have missed. Use after /find or /landscape, when the searches have lines nobody has read. Writes research/papers/<slug>.md.
 allowed-tools: Read, Glob, Grep, Bash, Write, Edit, AskUserQuestion, Agent
 ---
 
@@ -39,6 +39,12 @@ that already have a card under `research/papers/`, and rank what is left the
 way the landscape ranked it — papers in the densest cells first, then by the
 centrality on the line. Take the top five.
 
+With no matrix and a `research/TASK.md` (a project that started at `/find`):
+collect the paper lines from the sections its `## Searches` names, drop the
+carded ones and duplicate titles, and rank by the centrality on the line,
+taking at most two from any one section so one slot cannot fill the list.
+Take the top five, and give each one's slot instead of a cell.
+
 With arguments (titles, ids, or slugs): resolve each with
 `snowball.py verify --title "<t>"` or `--id <id>`. **A candidate is refused**,
 with the id it nearly matched, and is not read: a prefix match carries the
@@ -72,9 +78,10 @@ no cell, the position is `_unplaced_` and the siblings are none.
 **6. Dispatch, two rounds.** For each paper, in one message, **one `Agent`
 call for the predictor and one for the reader**:
 
-- `research-bearings:predictor` — the intro path, `research/QUESTION.md`, and
+- `research-bearings:predictor` — the intro path, `research/QUESTION.md` (or
+  `research/TASK.md` when there is no question), and
   `research/papers/notes/<slug>.prediction.md`.
-- `research-bearings:reader` — the full path, `research/QUESTION.md`, mode
+- `research-bearings:reader` — the full path, the same question or task file, mode
   `full`, the cell, the sibling card paths, and
   `research/papers/notes/<slug>.reading.md`.
 
@@ -100,6 +107,8 @@ python3 "${CLAUDE_PLUGIN_ROOT}/scripts/check_cards.py" research/papers/
 
 and fix what it names. Then report, one line each: read fully, skimmed, not
 fetched and why, unplaced, and how many landscape lines are still unread.
+End on one line: **Next: `/read` again** while five or more lines are unread
+and the user wants more, **`/think`** once two or more cards exist.
 
 ## Slugs
 

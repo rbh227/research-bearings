@@ -2,6 +2,7 @@
 name: scout
 description: Find the fields that share your problem's shape but not its citation graph — strip the home field's vocabulary off the problem, search five to ten other fields in their own words, and write what might transfer and what you would try. Use when you want research directions rather than a reading list, or when you suspect someone else has already solved your problem under a different name. For the literature that already cites your question, use landscape. Writes research/analogs/<slug>.md.
 allowed-tools: Read, Glob, Bash, AskUserQuestion, WebFetch, Agent
+user-invocable: false
 ---
 
 # scout
@@ -48,7 +49,9 @@ Two things are stamped, not stops:
 Each layer overrides the one before it.
 
 1. **`research/QUESTION.md`** — `## Question` for the problem, `## Vocabulary`
-   for the words to strip in step 1. Read `research/CONTEXT.md` too if it
+   for the words to strip in step 1. In a project that started at `/find`
+   there is no question: `research/TASK.md` § Task is the problem, and the
+   queries under § Searches are the vocabulary to strip. Read `research/CONTEXT.md` too if it
    exists: constraints change which transfers are worth proposing.
 2. **`research/framing-log.md`, `## Rejected framings`** — every framing that
    died on the way to the question. These are alternative *shapes* of the same
@@ -83,8 +86,8 @@ words, with the blocked list (the home vocabulary) beside them — before
 anything runs. Let them strike fields, add fields, or rewrite the shape.
 
 This step is the run's bound. Each query becomes one searcher's neighborhood
-walk, up to 400 papers; ten fields is up to 4,000 papers touched, and the user
-should see that number.
+walk over all 30 of its seeds; ten fields is ten walks and ten agents, and the
+user should see that number.
 
 **4. Dispatch one searcher per field, in parallel** — one `Agent` call per
 field in a single message, each `subagent_type: "research-bearings:searcher"`,
@@ -113,7 +116,7 @@ the record it names.
 
 **Nearest existing, via the walk.** For each opportunity, put it to *your own*
 field: `neighborhood "<the opportunity, in the home vocabulary>" --seeds 5
---budget 30 --top 1`. The top-ranked paper is the nearest existing attempt and
+--top 1`. The top-ranked paper is the nearest existing attempt and
 the neighborhood count is the row count; write both on the `Nearest existing:`
 line. That is the absence rule, and it costs one small walk per field.
 
@@ -154,7 +157,7 @@ on work that already exists. Report the count; let the reader conclude.
 
 ## The bound
 
-**This skill has no budget, and does not pass `--run` or `--budget`.** A crawl
+**This skill has no budget, and nothing in the script takes one.** A crawl
 needs a ledger because it compounds: one seed reaches 44–119 papers and each of
 those reaches as many again, so the ceiling has to be enforced inside the script
 before a request is spent. Search does not compound. Every call returns at most
@@ -163,8 +166,8 @@ searches times the limit — and the number of searches is the field list, which
 the user reads and approves at step 3.
 
 That is the bound: a human, looking at the actual list, before anything runs.
-Since 2026-09-15 each field is a neighborhood walk rather than one search, so
-the number is up to 400 papers per field, and each walk's own stop reason and
+Since 2026-09-15 each field is a neighborhood walk rather than one search, and
+since 2026-10-01 a walk covers every seed unless it saturates; each walk's own stop reason and
 counts are in its section's `## What was searched`. Report in `## Status`:
 searchers dispatched, neighborhood sizes per field, and which sections reported
 a degraded index.

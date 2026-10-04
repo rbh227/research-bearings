@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """The state of a research/ folder: what exists, what is stale, what comes next.
 
-The one seam chunk 10 added. `/router` and the three composites (`/start`,
-`/orient`, `/think`) read this and nothing else, so the front door's
+The one seam chunk 10 added. `/next` and the composites (`/start`, `/find`,
+`/orient`, `/think`, `/experiment`) read this and nothing else, so the front door's
 recommendation is a lookup against a table rather than an opinion, and a grader
 can hold the router's words against the JSON for the same folder.
 
@@ -79,6 +79,7 @@ FILES = {
     "CONTEXT.md": ("CONTEXT.md", False),
     "CONNECTIONS.md": ("CONNECTIONS.md", False),
     "QUESTION.md": ("QUESTION.md", False),
+    "TASK.md": ("TASK.md", False),
     "framing-log.md": ("framing-log.md", False),
     "landscape/surveys.md": ("surveys.md", False),
     "landscape/matrix.md": ("matrix.md", False),
@@ -129,18 +130,23 @@ TABLE = [
          precondition="QUESTION.md must exist; frame writes it. surveys.md is read if present.",
          upstream=["QUESTION.md", "landscape/surveys.md"]),
     dict(command="scout", stage="gathering", writes=["analogs/"],
-         needs=[(ALL, ["QUESTION.md"])],
-         precondition="QUESTION.md must exist; frame writes it.", repeatable=True),
+         needs=[(ANY, ["QUESTION.md", "TASK.md"])],
+         precondition="QUESTION.md or TASK.md must exist; frame or find writes one.", repeatable=True),
+    # The task door: a topic or a task sentence, no framing. `entry` because a
+    # project that started here has not skipped setup or frame; they stay ready.
+    dict(command="find", stage="gathering", writes=["TASK.md"], needs=[],
+         precondition="Nothing; a topic or a task sentence is enough.", entry=True),
     dict(command="read", stage="processing", writes=["papers/"],
-         needs=[(ALL, ["landscape/matrix.md"])],
-         precondition="landscape/matrix.md must exist; landscape writes it. Reading proposes from the matrix.",
+         needs=[(ANY, ["landscape/matrix.md", "TASK.md"])],
+         precondition="landscape/matrix.md or TASK.md must exist; landscape or find writes one. "
+                      "Reading proposes from the matrix, or from the searches TASK.md names.",
          repeatable=True),
     dict(command="bits", stage="processing", writes=["BITS.md"],
          needs=[(COUNT, "papers/", 2)],
          precondition="At least two cards under papers/ that can share a thesis; read writes them."),
     dict(command="brainstorm", stage="processing", writes=["IDEAS.md"],
-         needs=[(ALL, ["QUESTION.md"])],
-         precondition="QUESTION.md must exist; frame writes it.", repeatable=True),
+         needs=[(ANY, ["QUESTION.md", "TASK.md"])],
+         precondition="QUESTION.md or TASK.md must exist; frame or find writes one.", repeatable=True),
     dict(command="ideas", stage="processing", writes=["ideas/"],
          needs=[(ANY, ["BITS.md", "analogs/", "IDEAS.md", "landscape/matrix.md"])],
          precondition="At least one seed source: BITS.md, an analog page, IDEAS.md, or the matrix's contradictions.",
@@ -177,11 +183,11 @@ TABLE = [
     dict(command="groups", stage="processing", writes=["landscape/groups.md"],
          needs=[(COUNT, "papers/", 1)],
          precondition="At least one card under papers/; read writes them.", on_demand=True),
-    dict(command="verify", stage="processing", writes=[], needs=[(ANY, ["QUESTION.md"])],
+    dict(command="verify", stage="processing", writes=[], needs=[(ANY, ["QUESTION.md", "TASK.md"])],
          precondition="Any file under research/ that names papers.", on_demand=True, repeatable=True),
     dict(command="audit", stage="processing", writes=[], needs=[(COUNT, "papers/", 1)],
          precondition="One card to audit; read writes cards.", on_demand=True, repeatable=True),
-    dict(command="critique", stage="processing", writes=["critiques/"], needs=[(ANY, ["QUESTION.md"])],
+    dict(command="critique", stage="processing", writes=["critiques/"], needs=[(ANY, ["QUESTION.md", "TASK.md"])],
          precondition="One file under research/ to attack.", on_demand=True, repeatable=True),
     dict(command="reviews", stage="processing", writes=["landscape/reviews.md"],
          needs=[(COUNT, "papers/", 1)],
@@ -383,7 +389,8 @@ def read(root):
         if row.get("on_demand"):
             continue
         if any(present(files, w) for w in row["writes"]):
-            last_with_output = i
+            if not row.get("entry"):
+                last_with_output = i
             if reached is None or STAGES.index(row["stage"]) > STAGES.index(reached):
                 reached = row["stage"]
     out["stage_reached"] = reached
@@ -451,12 +458,16 @@ def read(root):
 
     out["moves"] = moves
     out["staleness"] = staleness
-    out["recommended"] = [m["command"] for m in moves if m["status"] in ("ready", "stale", "repeat")]
+    # find is the unframed door. In a framed project its no-argument run is
+    # /orient, whose steps are already rows, so it is never offered there.
+    framed = present(files, "QUESTION.md")
+    out["recommended"] = [m["command"] for m in moves if m["status"] in ("ready", "stale", "repeat")
+                          and not (m["command"] == "find" and framed)]
     out["repairs"] = repairs
     out["on_demand"] = on_demand
     out["empty"] = not out["exists"] or not any(present(files, r) for r in files)
     if out["empty"]:
-        out["recommended"] = ["setup"]
+        out["recommended"] = ["setup", "find"]
     return out
 
 
@@ -500,8 +511,8 @@ def selftest():
              set(out) >= {"verb", "root", "exists", "stage_reached", "files", "counts", "staleness",
                           "pending", "moves", "recommended", "repairs", "on_demand", "empty"}
              and out["verb"] == "state", "got {}".format(sorted(out)))
-        case("2  no folder is the empty state and routes to setup",
-             out["exists"] is False and out["empty"] and out["recommended"] == ["setup"]
+        case("2  no folder is the empty state and offers setup or find",
+             out["exists"] is False and out["empty"] and out["recommended"] == ["setup", "find"]
              and out["stage_reached"] is None)
 
         # 2. Context only.
@@ -510,7 +521,7 @@ def selftest():
         case("3  context only: frame is ready, surveys is blocked on QUESTION.md",
              status(out, "frame") == "ready" and status(out, "surveys") == "blocked"
              and "QUESTION.md" in next(m["missing"] for m in out["moves"] if m["command"] == "surveys"))
-        case("4  recommended is exactly frame", out["recommended"] == ["frame"], str(out["recommended"]))
+        case("4  recommended is frame, then find: framing is not the only way on", out["recommended"] == ["frame", "find"], str(out["recommended"]))
         case("5  stage reached is questions", out["stage_reached"] == "questions")
 
         # 3. Framed.
@@ -656,9 +667,19 @@ def selftest():
         case("24d a file that exists is done, not blocked, when its own input is missing",
              status(out, "frame") == "done", status(out, "frame"))
 
+        # 13. A project that started at /find: no context, no question, a task.
+        write("task", "TASK.md", filled("TASK.md"))
+        out = read(os.path.join(tmp, "task"))
+        case("24e a task folder: read is ready on TASK.md, find is done, scout and brainstorm run on the task",
+             status(out, "read") == "ready" and status(out, "find") == "done"
+             and status(out, "scout") == "ready" and status(out, "brainstorm") == "ready"
+             and out["stage_reached"] == "gathering", str([(m["command"], m["status"]) for m in out["moves"]]))
+        case("24f starting at /find skips nothing: setup stays ready and nothing is a repair",
+             status(out, "setup") == "ready" and not out["repairs"], str((status(out, "setup"), out["repairs"])))
+
         # 10. Nothing written.
         before = sorted(os.path.relpath(os.path.join(d, n), tmp) for d, _, ns in os.walk(tmp) for n in ns)
-        for folder in ("ctx", "framed", "wild", "dmg", "bad", "sel", "qonly"):
+        for folder in ("ctx", "framed", "wild", "dmg", "bad", "sel", "qonly", "task"):
             read(os.path.join(tmp, folder))
         after = sorted(os.path.relpath(os.path.join(d, n), tmp) for d, _, ns in os.walk(tmp) for n in ns)
         case("25 nothing was written into any fixture tree", before == after,

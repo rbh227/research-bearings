@@ -2,6 +2,7 @@
 name: critique
 description: Attack one file under research/ with a fresh-context critic that never saw the reasoning behind it, then run the concession ladder — you rebut each finding, it scores the rebuttal on evidence rather than persuasion, concedes only at four or above, never twice in a row, and flags runaway agreement. Works on a card, an analog page, a landscape section, or BITS.md. Writes research/critiques/<file>-<date>.md and never edits the file it judges.
 allowed-tools: Read, Glob, Grep, Write, Agent
+user-invocable: false
 ---
 
 # critique

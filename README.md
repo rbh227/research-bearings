@@ -9,34 +9,32 @@ A Claude Code plugin that frames a question worth answering, maps what your fiel
 ```
   FRAME         GATHER        READ          THINK         EXPERIMENT    RESULT
  ┌────────┐    ┌────────┐    ┌────────┐    ┌────────┐    ┌────────┐    ┌────────┐
- │Question│ ─▶ │ Matrix │ ─▶ │ Cards  │ ─▶ │ Ranked │ ─▶ │ Design │ ─▶ │Verdict │
+ │Question│ ─▶ │ Papers │ ─▶ │ Cards  │ ─▶ │ Ranked │ ─▶ │ Design │ ─▶ │Verdict │
  │  gate  │    │Analogs │    │3 agents│    │  gate  │    │  gate  │    │3 rounds│
  └────────┘    └────────┘    └────────┘    └────────┘    └────────┘    └────────┘
-  /start        /orient       /read         /think        /design       /result
+  /start        /find         /read         /think        /experiment   /experiment
 ```
 
 Three human gates: you approve the question, you pick which ideas survive, you decide whether to spend compute. Nothing downstream runs until you say so, and no agent ever runs your code.
 
 ---
 
-## Commands
+## The six commands
 
-Type `/research-bearings:router`, or ask "what next?", and the front door reads what exists under `research/`, names the one command that comes next with the evidence beside it, and runs it when you say yes. These are the commands it hands you.
+You type six commands. Everything else runs inside them.
 
-| What you're doing | Command | Key principle |
+| You want to | Type | What happens |
 |---|---|---|
-| Starting from nothing | `/start` | Setup, then frame. A pause between. |
-| Framing a question worth answering | `/frame` | A question names who decides differently |
-| Mapping what exists | `/orient` | Surveys first, then a matrix; every line verified |
-| Finding fields that solved your problem under another name | `/scout` | Strip your vocabulary, search theirs |
-| Reading a paper into a card | `/read` | Predict before you read; a judge that never saw the guess |
-| Going from cards to a ranked shortlist | `/think` | Attack every idea before ranking it |
-| Writing the one page a professor reads | `/spec` | Heilmeier's eight, every sentence sourced |
-| Pre-registering an experiment | `/design` | The stop rule is named while the number is unknown |
-| Logging a run | `/log` | Every attempt, before its result is known |
-| Reading a result | `/result` | Three rounds, none sees the others' verdict |
+| Know where you are and what to do next | `/next` | Reads `research/`, prints a one-screen brief, offers the next step and runs it when you say yes |
+| Sharpen an interest into a question worth answering | `/start` | Records your setup, then frames the question, with a pause between |
+| Find the papers on a topic, or on a thing you are building | `/find <one sentence>` | Five searches (what exists, how it was built, how it is evaluated, what goes wrong, where the data comes from), then proposes five papers to read. No framing needed |
+| Turn papers into cards you can build on | `/read` | Proposes five unread papers and waits; three agents per paper |
+| Go from cards to a ranked shortlist of ideas | `/think` | Assumptions, analog fields, ideas, a pre-mortem on each, a ranking. Pauses at every file |
+| Design, log and judge an experiment | `/experiment` | Pre-registers it, opens the notebook entry, then reads your run directory into a verdict |
 
-Every skill is invoked as `/research-bearings:<name>`.
+The other 23 skills are off the `/` menu. The six run them, `/next` offers them, and plain words reach any of them: *"verify the references in research/papers/gupta-2019-creating.md"*, *"attack QUESTION.md"*, *"build the datasets ledger"*.
+
+If another plugin already owns one of the six names, the full form always works: `/research-bearings:find`.
 
 ---
 
@@ -47,28 +45,31 @@ claude plugin marketplace add rbh227/research-bearings
 claude plugin install research-bearings@rbh227
 ```
 
-Then, in any project:
+Then, in any project, either door:
 
 ```
-/research-bearings:router
+/find post-wildfire building damage classification and VQA from aerial imagery
+/start
 ```
 
-On an empty folder it names `/start`. No API key is required; `/setup` probes every source it can reach and writes which ones answered and which three keys would help most. See [Sources and keys](#sources-and-keys).
+Not sure? `/next` reads the folder and asks. No API key is required; setup probes every source it can reach and writes which ones answered and which three keys would help most. See [Sources and keys](#sources-and-keys).
 
 ---
 
-## All 27 skills
+## All 29 skills
 
-One skill, one job, one file. Each writes into `research/` under fixed headings that a script checks.
+One skill, one job, one file. Each writes into `research/` under fixed headings that a script checks. Only the six commands above are typed; this is what they run.
 
 ### Front door
 
 | Skill | What it does | Use when |
 |---|---|---|
-| `router` | Reads the state through one script, prints a brief, names the next command with the precondition it checked, asks once, runs it. Offers a fork of two or three when the folder has one. | "What next?" |
-| `start` | `/setup` then `/frame`, with the context file's summary and one question between them. | Day one |
-| `orient` | `/surveys` then `/landscape`, ending in a printed brief: surveys found, cells filled, cells that returned nothing, the three uncarded papers the matrix ranks highest. | After the question is approved |
-| `think` | `/bits`, `/scout`, `/ideas`, `/premortem`, `/rank`. Pauses at every file boundary; a file that exists gets a rerun-keep-stop question carrying its date and what is newer than it. | After the cards are read |
+| `next` | Reads the state through one script, prints a brief, names the next step with the precondition it checked and the command that covers it, asks once, runs it. Offers a fork of two or three when the folder has one. | "What next?" |
+| `start` | Setup then frame, with the context file's summary and one question between them. | You have an interest to sharpen |
+| `find` | Five task-shaped searches run by the retrieval script, no agents and no framing, then hands to `read`'s paper list. With no argument in a framed project, runs `orient`. | You know what you are looking for |
+| `orient` | Surveys then landscape, ending in a printed brief: surveys found, cells filled, cells that returned nothing, the three uncarded papers the matrix ranks highest. | A framed question, mapped |
+| `think` | Bits, scout, ideas, premortem, rank. Pauses at every file boundary; a file that exists gets a rerun-keep-stop question carrying its date and what is newer than it. | After the cards are read |
+| `experiment` | Baseline (offered), design, `log --start`, then after your run `log` and `result`. Stops while you run it. | An idea survived ranking |
 
 ### Questions
 
@@ -218,7 +219,7 @@ The cases need fixture folders, which each case's scaffold assembles from the ou
 
 | Path | What lives there |
 |---|---|
-| `skills/` | 27 skills, one `SKILL.md` each: purpose, inputs, agents dispatched, the file written with its headings, a refusals table |
+| `skills/` | 29 skills, one `SKILL.md` each: purpose, inputs, agents dispatched, the file written with its headings, a refusals table |
 | `agents/` | 23 agents: the one question each answers, its tools, its output headings, what it must not do |
 | `scripts/` | `state.py` (the loop as a table), `ingest_runs.py` (run directories nobody formatted for it), six checkers and their shared library |
 | `scripts/retrieval/` | `snowball.py` (status, search, verify, neighborhood) and `papers.py` (fetch, reviews, datasets, authors) |

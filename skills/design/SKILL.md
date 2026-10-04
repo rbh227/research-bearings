@@ -2,6 +2,7 @@
 name: design
 description: Write the experiment page before anything runs — the seven pre-registration fields, Platt's competing hypotheses with the run that discriminates between them, the leakage taxonomy applied to your own split, and a stop rule named while the number is still unknown. Refuses an idea whose pre-mortem said it is not executable. Use after /rank, before you spend any compute. Writes research/experiments/<slug>.md, which is never edited afterwards.
 allowed-tools: Read, Glob, Grep, Write, AskUserQuestion, Agent
+user-invocable: false
 ---
 
 # design
@@ -83,8 +84,9 @@ unusable to `/research-bearings:result`.
 whether a discriminating experiment exists, whether an ablation plan was
 written, any `constraint unknown`, and what the checker said.
 
-Then say plainly what happens next: **you run it, and `/research-bearings:log
---start <slug>` first.**
+Then say plainly what happens next: **you run it, with the notebook entry
+opened first** — `/experiment` opens it (`log --start <slug>`), and
+`/experiment <run directory>` reads what came back.
 
 ## Rules
 

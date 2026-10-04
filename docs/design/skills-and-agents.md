@@ -161,7 +161,7 @@ Thirty typed commands are unusable without a front door. These serve the "simple
 
 | Skill | Does |
 |---|---|
-| `/router` | picks the skill from what you say. The front door. **Shipped in chunk 10** (`docs/design/chunk-10-front-door.md`). Reads the state through `scripts/state.py` and nothing else; a stated goal is checked against its precondition first; one yes, then the skill runs in the same thread. Fires on "what next?" by description. |
+| `/next` (was `/router`) | picks the skill from what you say. The front door. **Shipped in chunk 10** (`docs/design/chunk-10-front-door.md`). Reads the state through `scripts/state.py` and nothing else; a stated goal is checked against its precondition first; one yes, then the skill runs in the same thread. Fires on "what next?" by description. |
 | `/start` | `/setup` + `/frame`. **Shipped in chunk 10.** One pause between them, and the rules every composite shares are written here: one yes per file boundary, rerun-keep-stop with the staleness fact for a file that exists, the skill's own gates untouched, nothing written. |
 | `/orient` | `/surveys` + `/landscape`. **Shipped in chunk 10.** Ends in a printed brief; no file. |
 | `/think` | `/bits` + `/scout` + `/ideas` + **`/premortem`** + `/rank`. **Shipped in chunk 10.** The pre-mortem was not in the plan's list; since chunk 9 `/rank` sets aside every idea without one, so the composite without it would rank an unattacked set. |

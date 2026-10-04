@@ -2,6 +2,7 @@
 name: groups
 description: Build the competitive landscape from the papers you have read — which labs publish on this question, in which venues, and where their last three years of titles say they are heading. Queries only the authors who appear on two or more cards or lead one, so the list stays the size of a thing you can read. Writes research/landscape/groups.md.
 allowed-tools: Read, Glob, Grep, Bash, Write, Agent
+user-invocable: false
 ---
 
 # groups

@@ -2,6 +2,7 @@
 name: frame
 description: Turn a research topic into a question worth answering. Diverges into candidate framings, converges with Booth's ladder and the Heilmeier eight, then has a fresh-context critic attack whatever survives. Use when starting a new research direction, when a question feels vague or unfalsifiable, or when re-entering after a survey has changed what you know. Writes research/QUESTION.md.
 allowed-tools: Read, Write, Edit, Glob, AskUserQuestion, Agent
+user-invocable: false
 ---
 
 # frame

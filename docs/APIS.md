@@ -173,7 +173,7 @@ keyed by the query, for 30 days. Override the root with `RESEARCH_CACHE_DIR`.
 
 `WebSearch` and `WebFetch` are not sources. Nine sources are. They are
 allowed in exactly two places: the `searcher` agent, as a last resort when every index above returns
-nothing, with the results labelled web-only and unverified until `verify`
-resolves them; and `/scout`, to read a page one of the indexes pointed at.
+nothing, with every result put through `verify --append --from web`, which
+files a match and logs the rest as not found; and `/scout`, to read a page one of the indexes pointed at.
 Nowhere else. The write-scope guard denies `WebSearch` and `WebFetch` to every
 other agent this plugin ships.

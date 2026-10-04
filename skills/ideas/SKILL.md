@@ -2,6 +2,7 @@
 name: ideas
 description: Generate research ideas from five seed kinds — the bits your field takes for granted, the analog pages' opportunities, the contradictions the merger marked, directions the record shows were dropped, and the personas' questions — put every candidate to the index and write the row count it came back with, then plan retrieval from the fields that would make the set less self-similar and generate again. Novelty is a retrieval result here, never a feeling. Writes research/ideas/<slug>.md and appends to research/IDEAS.md.
 allowed-tools: Read, Glob, Grep, Bash, Write, Edit, AskUserQuestion, Agent
+user-invocable: false
 ---
 
 # ideas
@@ -89,19 +90,17 @@ Per candidate, the same call `/research-bearings:scout` makes for its
 opportunities, so that both files' `Nearest existing` lines mean the same thing:
 
 ```
-... neighborhood "<the candidate, in the home vocabulary>" --seeds 5 --budget 30 --top 1
+... neighborhood "<the candidate, in the home vocabulary>" --seeds 5 --top 1
 ```
 
 Write the query, **both counts**, and the top-ranked paper onto the candidate.
 Those lines are the whole of what an absence claim may look like here.
 
-**Both counts, because one of them saturates.** `counts.neighborhood` is
-bounded by `--budget`: measured 2026-09-16, the walk above returned
-`neighborhood 30` against a 30-paper budget, and it will return 30 for almost
-any query the search finds papers for. Write it as `<n> of a 30-paper budget` so
-nobody reads "30" as a census. The number that moves is `counts.seeds` — how
-many of the five requested papers the search could find for this query — and it
-goes on the page as `Papers the query found: <n> of 5 requested`, not as a seed
+**Both counts.** `counts.neighborhood` is everything one hop from the five
+seeds, and goes on the page as `Rows: <n>`; it is a neighborhood, not a census.
+The other number is `counts.seeds` — how many of the five requested papers the
+search could find for this query, the thin case worth noticing — and it goes
+on the page as `Papers the query found: <n> of 5 requested`, not as a seed
 count: `seed` already means a paper a walk starts from, and on this page
 `## Seed` means where the idea came from.
 
@@ -124,7 +123,8 @@ Dispatch `diversity-planner` once, `subagent_type:
 "research-bearings:diversity-planner"`, carrying: every candidate with its seed
 and its `Nearest existing` line, the fields already searched (the analog pages'
 field names and the landscape sections' questions), the home vocabulary from
-`QUESTION.md` § Vocabulary, and the output path
+`QUESTION.md` § Vocabulary (or the queries under `TASK.md` § Searches), and
+the output path
 `research/ideas/plans/diversity-<date>.md`.
 
 **In `plans/`, not beside the pages.** `research/ideas/*.md` is the idea pages
@@ -140,8 +140,8 @@ answer.
 
 **Show the planner's fields and queries to the user and wait.** Same gate
 `/scout` puts before its fan-out, for the same reason: each field is a
-neighborhood walk of up to 400 papers, and the user should see the number
-before it is spent.
+neighborhood walk and an agent, and the user should see the number before it
+is spent.
 
 **At most three fields per round.** The planner ranks three to six; you take
 the top three the user approves, or fewer.
@@ -211,7 +211,7 @@ The nine headings, and what each must carry:
 | `## Idea` | One sentence: what you would do. Not the area it is in. |
 | `## Seed` | Kind, the file, and the line quoted. |
 | `## What it flips` | The assumption, contradiction or stopped direction, quoted from its file. |
-| `## Nearest existing` | The query, how many papers the query found of the five requested, the row count against the budget, the top paper's line with its id and tag, and one line on what it does that this does not. |
+| `## Nearest existing` | The query, how many papers the query found of the five requested, the row count, the top paper's line with its id and tag, and one line on what it does that this does not. |
 | `## What would have to be true` | The assumptions, one per line, each marked checkable (with how, and roughly what it costs) or not checkable before the experiment. |
 | `## Cheapest kill` | The smallest experiment that would end it, the result that would end it, and what it costs. |
 | `## Typicality` | One written sentence: the conventional core and the atypical injection. |
@@ -306,7 +306,7 @@ it.
 | "The nearest existing paper is close, I'll drop this candidate." | Mark it `increment` and log it. Deleting it means somebody generates it again next month and pays for the walk again. |
 | "I'll generate from the cards — they are what I have read." | The cards are the seed literature, and generating from them alone is the measured failure. Bits, contradictions, abandoned directions and analogs exist to get off them. |
 | "No bits file, so I can't run." | Run on what exists, name the missing kinds, and stamp the run. A one-seed-kind run is allowed and the stop rule is what it triggers. |
-| "The planner named eight fields; more retrieval is better." | Three per round, approved by the user first. Each is up to 400 papers, and the gate is a person looking at the number. |
+| "The planner named eight fields; more retrieval is better." | Three per round, approved by the user first. Each is a full walk and an agent, and the gate is a person looking at the number. |
 | "The planner's query is awkward; I'll write it in our terms." | Then it finds the home field, which is the one literature the set already has. The script refuses a blocked word besides. |
 | "The set is all bits, but the ideas are good." | The rule is about the set, not the ideas. One more planning round, and if it is still all bits, say so plainly to the user. |
 | "I'll compute a similarity score to prove diversity." | Nothing computes that here. Count the spread by seed kind and by field and write the counts. |

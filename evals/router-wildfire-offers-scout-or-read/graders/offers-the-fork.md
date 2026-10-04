@@ -5,7 +5,7 @@ weight: 2
 The fixture is the wildfire shape: `QUESTION.md` and a full `landscape/`
 (surveys, matrix, timeslice), no `CONTEXT.md`, no cards. For this folder
 `python3 scripts/state.py` reports `stage_reached: gathering`, `scout` as
-the only non-done move at that stage (status `ready`), `read` as the first
+the only recommended move at that stage (`find` is never offered in a framed project) (status `ready`), `read` as the first
 `ready` move of the next stage with the precondition "landscape/matrix.md
 must exist", and one repair: `CONTEXT.md`, `missing upstream`.
 

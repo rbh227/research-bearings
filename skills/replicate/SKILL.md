@@ -2,6 +2,7 @@
 name: replicate
 description: Reproduce a published result you are NOT building on, as a calibration test of your own pipeline — the same machinery as /baseline, pointed at a paper you have no stake in, so that the gap it reports is a fact about your setup rather than about the paper. Use when you want to know whether your reproduction gaps mean anything. Writes research/baselines/<card-slug>.md, marked as a calibration.
 allowed-tools: Read, Glob, Grep, Bash, Write, AskUserQuestion, Agent
+user-invocable: false
 ---
 
 # replicate

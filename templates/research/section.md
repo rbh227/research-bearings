@@ -18,10 +18,10 @@
 
 <!-- One paper per line, pasted from neighborhood's `line` field, unchanged:
      - <title> · <year> · <venue> · centrality N · influential N · X cites/yr · both indexes|s2|openalex · S2 `<id>` · verified
-     Older than five years and not a survey. Most central first. A paper you
-     added from memory goes through `verify` and ends in `· verified` only on
-     an exact match; otherwise it ends in
-     `· _candidate: <kind> match only, <nearest title> (<id>)_`. -->
+     Older than five years and not a survey. Most central first. A paper the
+     searcher remembered is added by `verify --append`, never by hand, and is
+     marked `_added from memory, not in walk_`: `· verified` on an exact
+     match, otherwise `· _candidate: <kind> match only, <nearest title> (<id>)_`. -->
 
 ## Current
 

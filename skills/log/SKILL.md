@@ -2,6 +2,7 @@
 name: log
 description: Append every attempt to one immutable notebook before its result is known, then ingest the run directory afterwards and attach what came back — the date, the experiment page, the config hash, the seeds, and the variance checker's refusals. Reads run directories you did not format for it. Use with --start before a run and with a run directory after it. Appends to research/NOTEBOOK.md and never edits a line of it.
 allowed-tools: Read, Glob, Bash, Write, Edit, AskUserQuestion, Agent
+user-invocable: false
 ---
 
 # log

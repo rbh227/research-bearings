@@ -2,6 +2,7 @@
 name: premortem
 description: Attack each idea in execution before anything is spent on it — one fresh-context agent per idea, none of which generated it, each naming the baselines the idea must beat and whether they run, the field's own metric, what the evaluation plan depends on, and a three-state verdict. Judges execution, never novelty. Use after /ideas, before /rank. Writes research/premortems/<slug>-<date>.md and never edits the idea page.
 allowed-tools: Read, Glob, Grep, Write, AskUserQuestion, Agent
+user-invocable: false
 ---
 
 # premortem

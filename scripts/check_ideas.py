@@ -19,13 +19,9 @@ What it enforces on a page, and why each one is here:
                                  claim about what does not exist may take, and
                                  without the query and the counts it is an
                                  opinion in the shape of a measurement.
-                                 BOTH counts, because the row count saturates:
-                                 measured 2026-09-16, a walk with --budget 30
-                                 returns "neighborhood 30" for any query the
-                                 search finds papers for. How many papers the
-                                 query found is the number that moves, so a
-                                 page carrying the rows alone reports the one
-                                 figure that cannot be thin.
+                                 BOTH counts: the rows are a neighborhood,
+                                 not a census, and how many papers the query
+                                 found is the number that can be thin.
   a seed naming a file           a candidate that cannot name where it came
                                  from was generated from what the model
                                  already knew — the exact failure this stage
@@ -152,7 +148,7 @@ def check(text):
     if not PAPERS_FOUND_LINE.search(nearest):
         problems.append(
             "## Nearest existing has no `- Papers the query found: <n>` line; the row count "
-            "saturates at the budget, so that one is the number that can be thin"
+            "is a neighborhood, so that one is the number that can be thin"
         )
 
     # 3. The seed names the file it came from.
@@ -273,7 +269,7 @@ which the datasets ledger says is most of them.
 
 - Query: "single image post-disaster building damage classification without pre-event imagery"
 - Papers the query found: 5 of 5 requested
-- Rows: 30 of a 30-paper budget
+- Rows: 143
 - Nearest: Single-Image Damage Grading with Auxiliary Pretraining · 2023 · S2 `aa11bb` · verified
 - Reading: it drops the pair at inference and at training both; the consistency
   objective here is what that paper has no equivalent of.
@@ -365,12 +361,12 @@ def selftest():
     case("4  ## Nearest existing with no query fails",
          any("no `- Query:" in p for p in got), f"got {got}")
 
-    got = check(GOOD.replace("- Rows: 30 of a 30-paper budget\n", ""))
+    got = check(GOOD.replace("- Rows: 143\n", ""))
     case("4b ## Nearest existing with no row count fails",
          any("no `- Rows:" in p for p in got), f"got {got}")
 
     got = check(GOOD.replace("- Papers the query found: 5 of 5 requested\n", ""))
-    case("4c a page with only the row count fails; the row count saturates",
+    case("4c a page with only the row count fails; the papers-found count is the thin one",
          any("no `- Papers the query found:" in p for p in got), f"got {got}")
 
     # 5. A seed that names no file cannot be traced back.

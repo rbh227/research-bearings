@@ -2,6 +2,7 @@
 name: reviews
 description: Put what a paper's referees said onto its card — ratings, the objections that recur, what the authors conceded, the decision — from OpenReview's public record, and write the field-level pattern across papers once three cards carry notes. Use after /read, when you want to know what this field's reviewers push on. Edits research/papers/<slug>.md and writes research/landscape/reviews.md.
 allowed-tools: Read, Glob, Grep, Bash, Write, Edit, Agent
+user-invocable: false
 ---
 
 # reviews

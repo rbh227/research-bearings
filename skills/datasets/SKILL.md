@@ -2,6 +2,7 @@
 name: datasets
 description: Build the datasets ledger from the papers you have read — size, modality, split protocol, license, known flaws and who uses it — taking every fact from a Hugging Face or GitHub host record or from a quoted passage of the paper, and writing "could not determine" when neither has it. Use after /read, before /audit or any baseline work. Writes research/landscape/datasets.md.
 allowed-tools: Read, Glob, Grep, Bash, Write, Agent
+user-invocable: false
 ---
 
 # datasets
