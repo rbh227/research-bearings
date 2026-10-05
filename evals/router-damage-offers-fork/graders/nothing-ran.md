@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Skill
-input_match: "setup|frame|start|bits|read|ideas|brainstorm|scout|premortem|rank"
+input_match: "frame|start|bits|read|ideas|brainstorm|scout|premortem|rank"
 min: 0
 max: 0
 ---

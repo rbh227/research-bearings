@@ -9,13 +9,11 @@
 
 I am studying wildfire from the air and from orbit — detection, burned-area and severity mapping, spread prediction, its climate and human drivers, its smoke, and the structure loss that follows a fire — because I want to find out which of these problems computer vision and machine learning have actually moved, in order to help a remote-sensing group decide where a new method would matter.
 
-## The ladder
-
-_fixture_
-
-## Who decides
+## Why it matters
 
 A remote-sensing group choosing its next project.
+
+_fixture_
 
 ## Today
 
@@ -25,21 +23,9 @@ Active-fire products from MODIS and VIIRS, burned-area from dNBR, spread from Ro
 
 Learned detectors on camera and satellite streams, learned spread emulators, foundation models for burn scars.
 
-## Risks
+## Sub-questions
 
-_fixture_
-
-## Cost and time
-
-_fixture_
-
-## Checkpoints
-
-_fixture_
-
-## Why you
-
-_fixture_
+_not in the original page_
 
 ## Vocabulary
 
@@ -82,3 +68,13 @@ _fixture_
 ## Status
 
 fixture
+
+Migrated 2026-10-05 from the eleven-heading format. Who decides and the ladder are under Why it matters; the four headings the new format dropped are kept below as they were.
+
+Risks: _fixture_
+
+Cost and time: _fixture_
+
+Checkpoints: _fixture_
+
+Why you: _fixture_

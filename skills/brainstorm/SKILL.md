@@ -92,7 +92,7 @@ taking the most specific first:
 
 | Source | The persona it warrants |
 |---|---|
-| `QUESTION.md`'s named decision-maker | The person whose decision the question changes |
+| `QUESTION.md` § Why it matters | The person who would use the answer, and what they would do with it |
 | `research/landscape/groups.md` | A researcher in one of the labs publishing on this, by their direction line |
 | The cards' venues | A reviewer for the venue the cards cluster at |
 | `research/landscape/datasets.md` | Whoever produces or labels the data |

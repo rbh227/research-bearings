@@ -1,6 +1,6 @@
 ---
 name: orient
-description: The gathering stage as one command — /surveys then /landscape, with a pause between, ending in a one-screen brief of what the run found and the next move. Use after /frame, when the user says "orient me", "map the literature", "what exists on my question", "run the surveys and the landscape". Adds nothing to either skill and writes no file of its own.
+description: The gathering stage as one command — /surveys then /landscape, with a pause between, ending in a one-screen brief of what the run found and the next move. Use after /frame, which invokes it for a question, or when the user says "orient me", "map the literature", "what exists on my question", "run the surveys and the landscape". Adds nothing to either skill and writes no file of its own.
 allowed-tools: Read, Glob, Bash(python3 *scripts/state.py*), AskUserQuestion, Skill
 user-invocable: false
 ---
@@ -22,15 +22,63 @@ rules and then prints the brief, so the person knows what exists before
    `research/landscape/timeslice.md` and the sections under
    `research/landscape/sections/`.
 
-## The rules
+## The rules every composite shares
 
-This composite follows **`/research-bearings:start` § The rules every
-composite shares**, unchanged: the state is read through the state script
-before each step; one yes per boundary; an output that exists is asked about
-as rerun, keep or stop, with its date and the count of upstream files newer
-than it; each step is the skill through the `Skill` tool with nothing added;
-stop means stop and keep is not skip; nothing cascades; the composite writes
-nothing.
+`/orient` is the first of the composites — `/think` and `/experiment` are the
+others — and the rules they all follow are written once, here, and quoted by
+the others by name.
+
+**Before each step, read the state.** Run
+
+```
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/state.py"
+```
+
+and take the step's move from `moves` by command name. Nothing else decides
+what exists; a composite that lists files itself will disagree with `/next`
+about the same folder.
+
+**One yes per boundary.** If the step's output does not exist, ask once
+whether to run it — one `AskUserQuestion`, the command as the label, its
+precondition as the description. The first step needs no yes: typing the
+composite, or approving the framing that invoked it, was it.
+
+**An output that exists is asked about, and the question carries the
+fact.** If the move's status is `stale`, `done` or `repeat`, ask **rerun,
+keep, or stop**, one question per existing file, and put in the question what
+the script reported: the file's date, and for a stale file the
+`upstream_newer` count with the newest upstream date, **and** `not_named` —
+the upstream pages the file never mentions ("`BITS.md`, dated 2026-09-16
+11:30; 2 cards newer than it by date, newest 11:45; 0 cards it does not
+name"). The two can disagree, and both are the user's to weigh: a date is a
+proxy, and a bits file that names every card is current whatever the clock
+says. Never skip an existing file silently; never rerun one unasked.
+
+**A step is the skill, through the `Skill` tool.** Invoke it as
+`research-bearings:<command>`. Pass through any argument the user gave the
+composite to the one step that takes it, verbatim, and to no other. Add no
+interview, no summary and no pause inside the step beyond the ones the skill
+already has — the skill's own gates are its own.
+
+**Stop means stop.** Three things end the composite: a skill that refuses or
+stops (the move's status is `blocked`, or the skill itself stopped); the user
+saying stop; the user keeping a file a later step cannot use. In each case,
+give the skill's own words where it had them, print the brief, name the next
+move, and end. **Keep is not skip**: a kept file is read by the next step as
+it stands.
+
+**Nothing cascades.** A rerun of an earlier step does not rerun later ones.
+Each boundary asks, every time.
+
+**The composite writes nothing.** Every file under `research/` was written by
+a skill it ran.
+
+**The brief at the end**, and at every stop: the brief — see
+`/research-bearings:next` § The brief — printed by the same routine, plus one
+list in two parts: files made this run, files kept. Then the next move, from
+the state read, **named by the visible command a person types** (`/start`,
+`/find`, `/read`, `/think`, `/experiment`, or `/next`), never by a hidden
+skill's name alone.
 
 Two things about this sequence in particular:
 

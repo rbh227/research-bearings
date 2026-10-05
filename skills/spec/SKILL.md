@@ -60,7 +60,7 @@ method name. If a sentence needs one, that sentence belongs to question 3.
 
 **5. Source every factual sentence.** The path, and the heading where it
 helps. A sentence about current practice cites the card. A sentence about who
-decides cites `QUESTION.md`. A sentence about cost cites `CONTEXT.md`.
+uses the answer cites `QUESTION.md`. A sentence about cost cites `CONTEXT.md`.
 
 Where nothing supports it, say so in the sentence — `not established in the
 cards I read` — and list it under `## Sources` as `unsourced:`. **An unsourced

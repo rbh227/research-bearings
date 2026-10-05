@@ -1,59 +1,39 @@
 # Research question
 
-<!-- Written by /research-bearings:frame. This file is the deliverable: the
-     question and nothing else. The working record — rejected framings, the
-     critique, revisions — lives in framing-log.md. Downstream skills read only
-     this file. -->
+<!-- Written by /research-bearings:frame from research/CONTEXT.md and the
+     conversation. The question and nothing else; how it got here is in
+     CONTEXT.md § Decisions. Downstream skills read this file. -->
 
 ## Question
 
-<!-- One sentence, no jargon. Booth's form: I am studying X, because I want to
-     find out Y, in order to help my reader understand Z. -->
+<!-- One sentence, plain words, something that could be answered. -->
 
-## The ladder
+## Why it matters
 
-<!-- Topic -> question -> problem. Then the condition (what is true now) and its
-     consequence (what it costs that nobody knows this). Then the so-what rungs,
-     each one asked of the answer above it, until they terminate on a named
-     audience. If a rung lands on "advances the field", the ladder has failed. -->
-
-## Who decides
-
-<!-- The person, and the specific decision your answer changes. Not a field, not
-     a community. A role that makes a call. -->
+<!-- Who would use the answer — a person or a role, not "the field" — and
+     what they would do differently with it. -->
 
 ## Today
 
-<!-- How it is done now, and where it breaks. -->
+<!-- What exists now and where it falls short, drawn from CONTEXT.md with its
+     links. -->
 
 ## What's new
 
-<!-- What is different here, and why it might work when the current thing does
-     not. -->
+<!-- What answering this would add, and why it might work where the existing
+     attempts did not. -->
 
-## Risks
+## Sub-questions
 
-<!-- What makes this fail. -->
-
-## Cost and time
-
-<!-- Grounded in CONTEXT.md's Compute and Constraints sections. Never invented.
-     If the allocation there is _unknown_, so is this. -->
-
-## Checkpoints
-
-<!-- Midterm and final. The observations that tell you to stop. -->
-
-## Why you
-
-<!-- Why this is yours to do, and why the obvious people are not doing it. -->
+<!-- Two to five smaller questions the main one breaks into, in the order you
+     would answer them. -->
 
 ## Vocabulary
 
-<!-- The field's own terms for this. Starts as guesses and is marked as such;
-     /surveys overwrites it with harvested terms once the literature is read. -->
+<!-- The field's own terms, from CONTEXT.md § Vocabulary. /surveys appends
+     harvested terms once the literature is read. -->
 
 ## Status
 
-<!-- Which headings above are still unfilled, so a re-entry knows where to
-     resume. Empty means the question is complete. -->
+<!-- What is still unsettled, so a re-entry knows where to resume. Empty means
+     the question is complete. -->

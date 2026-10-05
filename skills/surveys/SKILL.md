@@ -38,7 +38,7 @@ Nothing else: it reads the section and the paper records, and it knows where
 
 **4. Report.** Surveys found, surveys with abstracts, vocabulary lines
 appended. Then say: if the harvested vocabulary changes the question, reframe
-it (`/start`, keeping the context file); when it does not, the landscape is
+it (ask to reframe — `frame` runs again on the context page and the surveys); when it does not, the landscape is
 next (`/find`, or say "yes" when `/orient` asks).
 
 ## Outputs

@@ -10,10 +10,13 @@ allowed-tools: Read, Glob, Bash, Write, AskUserQuestion, Skill
 One job: a person who knows what they are looking for gets the papers on it in
 one command, without being asked to turn it into a research question first.
 
-`/start` is the other door. It sharpens a vague interest into a question, and a
-person building something does not have a vague interest. Measured 2026-09-29:
-a user with a task ("a post-wildfire damage VQA dataset") went through setup
-and three framing rounds to reach a paper search, and said so.
+`/start` is the other door: talk an idea through first, with the agent
+searching what exists and working it out with you, then frame it. A person who
+already knows what to search does not need that conversation. Measured
+2026-09-29: a user with a task ("a post-wildfire damage VQA dataset") went
+through setup and three framing rounds to reach a paper search, and said so.
+`/frame` also ends here: a framing that came out as a task is passed to this
+skill as its argument.
 
 ## Which door
 
@@ -34,9 +37,12 @@ python3 "${CLAUDE_PLUGIN_ROOT}/scripts/state.py"
 - **No argument and neither file.** Ask one question: what are you looking
   for — a topic, or the thing you are building, in a sentence.
 
-No `research/CONTEXT.md` is fine. Read `research/CONNECTIONS.md` if it exists
-and pass on what it says about a source that is not connected; never stop for
-a missing key.
+No `research/CONTEXT.md` is fine; when it exists, read its `## Vocabulary`
+and `## What's been done` — the queries should use the first and need not
+re-find the second. Read `research/CONNECTIONS.md` if it exists and pass on
+what it says about a source that is not connected; if it is missing, run
+`python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" status --md`
+once and carry on. Never stop for a missing key.
 
 ## Steps
 
@@ -46,11 +52,11 @@ in one line.
 
 | # | Slot | The query asks for |
 |---|---|---|
-| 1 | existing | what already exists that does this or part of it: datasets, benchmarks, tools, systems |
-| 2 | construction | how things like it were built: collection, annotation, pipelines, methods |
-| 3 | evaluation | how they are evaluated: metrics, protocols, the models they are tested on |
-| 4 | flaws | what goes wrong with them: known failures, biases, leakage, critiques |
-| 5 | sources | the raw material it would be built from: data sources, imagery, records, instruments |
+| 1 | existing | what already exists that does this or part of it: studies, datasets, tools, systems, programmes, products |
+| 2 | construction | how things like it were made or done: designs, methods, procedures, pipelines |
+| 3 | evaluation | how they are judged: measures, protocols, comparisons, what they are tested against |
+| 4 | flaws | what goes wrong with them: known failures, biases, critiques, replication problems |
+| 5 | sources | the raw material it would be built from: data, archives, records, instruments, populations |
 
 For a topic rather than a build, read `existing` as the main lines of work
 and `construction` as their methods. The slots stay five.
@@ -110,8 +116,9 @@ as its query and its numbers, never as "nobody has done this".
 | The shortcut | Why you don't |
 |---|---|
 | "This is a task, not a question; I'll frame it first." | That is `/start`. The user chose this door. |
+| "The slots read like a machine-learning benchmark." | They are any field's: what exists, how it was made, how it is judged, what goes wrong, what it is made from. Query in the field's words. |
 | "I'll dispatch searcher agents for the five." | The walks are a script. Five Bash calls take the time of one and spend no agents. |
-| "No CONTEXT.md, so `/setup` first." | Not for this door. Setup stays one command away and nothing here reads it. |
+| "No CONTEXT.md, so `/start` first." | Not for this door. The conversation stays one command away; this door needs a sentence and nothing else. |
 | "Section 2 is mostly off-topic; I'll drop the bad lines." | The script ranked and the reader filters. Re-run the slot once with a better query and say so. |
 | "I'll show the queries and wait for approval." | No agents are spent here. Print them and run; the paper list is the gate. |
 | "I'll pick the five papers to read myself." | `/read` proposes by centrality and the user picks. |

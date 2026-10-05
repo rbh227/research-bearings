@@ -16,7 +16,7 @@ Pass only if ALL hold:
 2. It offers `/scout` and `/read` as the moves — both, as a choice — and no
    more than three options in total. `/read`'s line names the matrix as what
    makes it possible.
-3. It does NOT recommend `/setup` as the next move. Mentioning that
+3. It does NOT recommend `/start` as the next move. Mentioning that
    `CONTEXT.md` is missing, as a repair, is correct; sending the user back to
-   setup fails.
+   start fails.
 4. It asks the user to choose, or ends at the question, and runs nothing.

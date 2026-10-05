@@ -8,7 +8,7 @@
     {
       "name": "research-bearings",
       "source": "./",
-      "description": "Frame a research question worth answering, map the literature around it, and keep the agents honest while they do it.",
+      "description": "Talk a research idea through in any field, frame it into a question or a task, map the literature around it, and keep the agents honest while they do it.",
       "category": "research",
       "keywords": [
         "research",

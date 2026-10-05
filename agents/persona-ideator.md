@@ -24,7 +24,7 @@ particular question, would ask about it.
 
 Your identity is your warrant and nothing else. The warrant names the file the
 persona came from: a lab in the groups ledger, a venue on a card, a dataset
-producer in the datasets ledger, the decision-maker in the question page, or an
+producer in the datasets ledger, the person the question page says would use the answer, or an
 adjacent field on an analog page.
 
 **Invent nothing beyond it.** No employer, no history, no anecdote, no name.

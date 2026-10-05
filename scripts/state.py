@@ -80,7 +80,6 @@ FILES = {
     "CONNECTIONS.md": ("CONNECTIONS.md", False),
     "QUESTION.md": ("QUESTION.md", False),
     "TASK.md": ("TASK.md", False),
-    "framing-log.md": ("framing-log.md", False),
     "landscape/surveys.md": ("surveys.md", False),
     "landscape/matrix.md": ("matrix.md", False),
     "landscape/timeslice.md": ("timeslice.md", False),
@@ -116,11 +115,13 @@ ALL, ANY, COUNT = "all", "any", "count"
 # The loop, written down as data. Fields: command, stage, writes, needs,
 # precondition sentence, repeatable, extra upstream for staleness, on_demand.
 TABLE = [
-    dict(command="setup", stage="questions", writes=["CONTEXT.md", "CONNECTIONS.md"],
+    # The conversation: a dump, the agent searches what exists, the two of you
+    # work it through. It writes the context page as it goes, then hands to frame.
+    dict(command="start", stage="questions", writes=["CONTEXT.md", "CONNECTIONS.md"],
          needs=[], precondition="Nothing; this is the first step."),
-    dict(command="frame", stage="questions", writes=["QUESTION.md", "framing-log.md"],
+    dict(command="frame", stage="questions", writes=["QUESTION.md"],
          needs=[(ALL, ["CONTEXT.md"])],
-         precondition="CONTEXT.md must exist; setup writes it."),
+         precondition="CONTEXT.md must exist; start writes it."),
     dict(command="surveys", stage="gathering", writes=["landscape/surveys.md"],
          needs=[(ALL, ["QUESTION.md"])],
          precondition="QUESTION.md must exist; frame writes it."),
@@ -133,7 +134,7 @@ TABLE = [
          needs=[(ANY, ["QUESTION.md", "TASK.md"])],
          precondition="QUESTION.md or TASK.md must exist; frame or find writes one.", repeatable=True),
     # The task door: a topic or a task sentence, no framing. `entry` because a
-    # project that started here has not skipped setup or frame; they stay ready.
+    # project that started here has not skipped start or frame; they stay ready.
     dict(command="find", stage="gathering", writes=["TASK.md"], needs=[],
          precondition="Nothing; a topic or a task sentence is enough.", entry=True),
     dict(command="read", stage="processing", writes=["papers/"],
@@ -383,7 +384,7 @@ def read(root):
     # Stage reached: the latest stage any row's output is present in. And the
     # last loop row with output, in table order, because "skipped" is about
     # rows, not stages: a question page beside a missing context file means
-    # setup was skipped even though both sit in the questions stage.
+    # start was skipped even though both sit in the questions stage.
     reached, last_with_output = None, -1
     for i, row in enumerate(TABLE):
         if row.get("on_demand"):
@@ -467,7 +468,7 @@ def read(root):
     out["on_demand"] = on_demand
     out["empty"] = not out["exists"] or not any(present(files, r) for r in files)
     if out["empty"]:
-        out["recommended"] = ["setup", "find"]
+        out["recommended"] = ["start", "find"]
     return out
 
 
@@ -511,8 +512,8 @@ def selftest():
              set(out) >= {"verb", "root", "exists", "stage_reached", "files", "counts", "staleness",
                           "pending", "moves", "recommended", "repairs", "on_demand", "empty"}
              and out["verb"] == "state", "got {}".format(sorted(out)))
-        case("2  no folder is the empty state and offers setup or find",
-             out["exists"] is False and out["empty"] and out["recommended"] == ["setup", "find"]
+        case("2  no folder is the empty state and offers start or find",
+             out["exists"] is False and out["empty"] and out["recommended"] == ["start", "find"]
              and out["stage_reached"] is None)
 
         # 2. Context only.
@@ -547,7 +548,7 @@ def selftest():
              and "matrix.md" in next(m["precondition"] for m in out["moves"] if m["command"] == "read"))
         case("10 stage reached is gathering", out["stage_reached"] == "gathering")
         case("11 a missing CONTEXT.md with downstream output is a repair, not a move",
-             status(out, "setup") == "skipped" and "setup" not in out["recommended"]
+             status(out, "start") == "skipped" and "start" not in out["recommended"]
              and any(r["file"] == "CONTEXT.md" and r["kind"] == "missing upstream" for r in out["repairs"]))
 
         # 5. The damage shape: cards newer than BITS.md.
@@ -594,7 +595,7 @@ def selftest():
         out = read(os.path.join(tmp, "bad"))
         case("17 a file missing headings is present-but-malformed, never absent",
              out["files"]["QUESTION.md"]["state"] == "present-but-malformed"
-             and "The ladder" in out["files"]["QUESTION.md"]["missing_headings"])
+             and "Why it matters" in out["files"]["QUESTION.md"]["missing_headings"])
         case("18 a malformed file still satisfies presence: surveys is ready",
              status(out, "surveys") == "ready")
         case("19 the repair names the file and the skill that writes it",
@@ -656,14 +657,14 @@ def selftest():
         case("24b a ledger is never the next move: datasets and groups are not in recommended with one card",
              not ({"datasets", "groups"} & set(out["recommended"])))
 
-        # 12. Question only (no CONTEXT.md): setup was skipped within its own
-        # stage, and the next move is surveys, not setup.
+        # 12. Question only (no CONTEXT.md): start was skipped within its own
+        # stage, and the next move is surveys, not start.
         write("qonly", "QUESTION.md", filled("QUESTION.md"))
         out = read(os.path.join(tmp, "qonly"))
-        case("24c a question beside a missing context file makes setup a repair, not the next move",
-             status(out, "setup") == "skipped" and out["recommended"][0] == "surveys"
+        case("24c a question beside a missing context file makes start a repair, not the next move",
+             status(out, "start") == "skipped" and out["recommended"][0] == "surveys"
              and any(r["file"] == "CONTEXT.md" and r["kind"] == "missing upstream" for r in out["repairs"]),
-             str((status(out, "setup"), out["recommended"], out["repairs"])))
+             str((status(out, "start"), out["recommended"], out["repairs"])))
         case("24d a file that exists is done, not blocked, when its own input is missing",
              status(out, "frame") == "done", status(out, "frame"))
 
@@ -674,8 +675,8 @@ def selftest():
              status(out, "read") == "ready" and status(out, "find") == "done"
              and status(out, "scout") == "ready" and status(out, "brainstorm") == "ready"
              and out["stage_reached"] == "gathering", str([(m["command"], m["status"]) for m in out["moves"]]))
-        case("24f starting at /find skips nothing: setup stays ready and nothing is a repair",
-             status(out, "setup") == "ready" and not out["repairs"], str((status(out, "setup"), out["repairs"])))
+        case("24f starting at /find skips nothing: start stays ready and nothing is a repair",
+             status(out, "start") == "ready" and not out["repairs"], str((status(out, "start"), out["repairs"])))
 
         # 10. Nothing written.
         before = sorted(os.path.relpath(os.path.join(d, n), tmp) for d, _, ns in os.walk(tmp) for n in ns)

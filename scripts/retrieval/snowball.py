@@ -1774,7 +1774,7 @@ def health() -> dict[str, Any]:
     """Keys and paths, without spending a request or inferring it from a failure."""
     return {
         "script": "snowball.py", "version": VERSION,
-        "key_present": bool(s2_key()),  # kept: /setup and /scout read this name
+        "key_present": bool(s2_key()),  # kept: /scout reads this name
         "keys": keys_present(), "cache_dir": cache_dir(),
         "project_dir": project_dir(), "records_dir": records_dir(),
     }

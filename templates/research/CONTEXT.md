@@ -1,58 +1,57 @@
-# Research context
+# <the project, as a title>
 
-<!-- Written by /research-bearings:setup. Every section carries content or an
-     explicit _unknown_. Numbers you reported carry the date you reported them;
-     numbers the agent checked carry (checked YYYY-MM-DD). -->
+<!-- Written by /research-bearings:start during the conversation, not after
+     it: what you want to do, what this kind of project is, what has been
+     done, and what you decided along the way. /frame reads it to propose
+     questions or tasks. Every claim about the world carries the link it came
+     from; every claim about you came from you. A heading with nothing yet
+     says _nothing yet_. -->
 
-## Project
+## In your words
 
-<!-- What this project is, in one line. New, inherited, or continuing. The
-     deliverable and its deadline. Who it is for. -->
+<!-- The dump, close to verbatim. Then the two or three sentences the agent
+     wrote back and you agreed with. When the idea moves, the new version goes
+     on top with its date. -->
 
-## People
+## What this kind of project is
 
-<!-- Lab. PI. Collaborators and who owns what. Who nearby works on adjacent
-     things. Who you ask when stuck. -->
+<!-- What the searching found: what people call this, what such projects
+     usually produce, the main ways they get done. Plain language, each claim
+     with its link. -->
 
-## Compute
+## What's been done
 
-<!-- Where it lives. The allocation in the units that actually bind: service
-     units, GPU-hours, node flavours, wall-clock caps. What is contended. What
-     has already been burned. -->
+<!-- The closest existing work — projects, studies, papers, tools, datasets,
+     products, reports. One line each: what it is, the link, what it covers
+     relative to the idea and what it does not. "Searched `<query>`, nothing
+     close" is a line too. -->
 
-## Storage and data
+## Where it gets hard
 
-<!-- Volumes and their sizes. Datasets held now. What you have licence or IRB
-     access to. What is behind a request form, and how long that form takes. -->
+<!-- What trips people up, what is contested, what is still open. Linked. -->
 
-## Code
+## Vocabulary
 
-<!-- Repos owned or inherited. What runs today. What is known-broken. The
-     environment. Whether a working baseline exists at all. -->
+<!-- The field's words for this, which are rarely the words the dump used.
+     /frame and the finders search in them. -->
 
-## Calibration
+## Decisions
 
-<!-- What you know cold. What you are shaky on. What you could reimplement in
-     an afternoon. This is what lets every later skill stop explaining what you
-     already know and start flagging what you do not. -->
+<!-- Forks settled in conversation, dated:
+     - YYYY-MM-DD — <the fork>: chose <x>; set aside <y> — <why>
+     Set-aside directions stay here; /scout searches them. -->
+
+## Open threads
+
+<!-- What is still unresolved or worth looking into. -->
 
 ## Constraints
 
-<!-- Hours per week actually available. Teaching or course load. Publication
-     obligations or embargoes. Hardware you cannot get. -->
+<!-- Only what came up in conversation — time, money, compute, data access,
+     skills, a deadline. Never asked as a form. _none raised_ is the normal
+     answer. -->
 
-## What counts as a win
+## Sources
 
-<!-- Honestly. Workshop paper, thesis chapter, working demo, something an
-     agency uses. Which venue, by when, and who has to accept it. -->
-
-## History
-
-<!-- What this project already tried, and why it stopped. -->
-
-## Retrieval
-
-<!-- Whether the retrieval script ran (`health` printed JSON), and the date.
-     The per-source states live in research/CONNECTIONS.md, written by the
-     same setup run from `snowball.py status`; point at it here rather than
-     copying it, so there is one place for a state to go stale. -->
+<!-- Every link opened or quoted, one line each:
+     - <title> — <URL> — <what it was used for> -->

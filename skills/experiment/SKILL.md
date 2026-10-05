@@ -42,7 +42,7 @@ writes it: `RANKING.md` comes from `/think`. Stop there.
 
 ## The rules
 
-This composite follows **`/research-bearings:start` § The rules every
+This composite follows **`/research-bearings:orient` § The rules every
 composite shares**, unchanged: the state is read before each step; one yes per
 boundary; an output that exists is asked about as rerun, keep or stop; each
 step is the skill through the `Skill` tool with nothing added; stop means stop;

@@ -8,13 +8,11 @@
 
 I am studying post-disaster building damage assessment from aerial and satellite imagery — a per-building damage verdict from pre- and post-event captures — because I want to find out where current methods break between one event and the next, in order to help an emergency-mapping team decide whether to trust an automated first pass.
 
-## The ladder
-
-_fixture_
-
-## Who decides
+## Why it matters
 
 An emergency-mapping team deciding whether an automated damage map goes to responders.
+
+_fixture_
 
 ## Today
 
@@ -24,21 +22,9 @@ xBD-style paired imagery, a localisation-then-classification pipeline, manual ve
 
 Change-detection backbones, weak supervision, cross-event generalisation.
 
-## Risks
+## Sub-questions
 
-_fixture_
-
-## Cost and time
-
-_fixture_
-
-## Checkpoints
-
-_fixture_
-
-## Why you
-
-_fixture_
+_not in the original page_
 
 ## Vocabulary
 
@@ -58,3 +44,13 @@ _fixture_
 ## Status
 
 fixture
+
+Migrated 2026-10-05 from the eleven-heading format. Who decides and the ladder are under Why it matters; the four headings the new format dropped are kept below as they were.
+
+Risks: _fixture_
+
+Cost and time: _fixture_
+
+Checkpoints: _fixture_
+
+Why you: _fixture_

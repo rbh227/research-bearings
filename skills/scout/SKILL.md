@@ -29,7 +29,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/scripts/retrieval/snowball.py" <command> ...
 **Read `research/CONNECTIONS.md` first**, if it exists, and adapt: a source
 marked `not connected` is not asked; `connected-no-key` is used at its unkeyed
 rate and stamped in `## Status`. If the file does not exist, run `... status
---md` once and use that; do not write the file — that is `/setup`'s.
+--md` once and use that; do not write the file — that is `/start`'s.
 
 Two things are stamped, not stops:
 
@@ -53,10 +53,11 @@ Each layer overrides the one before it.
    there is no question: `research/TASK.md` § Task is the problem, and the
    queries under § Searches are the vocabulary to strip. Read `research/CONTEXT.md` too if it
    exists: constraints change which transfers are worth proposing.
-2. **`research/framing-log.md`, `## Rejected framings`** — every framing that
-   died on the way to the question. These are alternative *shapes* of the same
-   interest, and they are worth searching in their own right. Each becomes one
-   extra field block, marked as coming from a rejected framing.
+2. **`research/CONTEXT.md`, `## Decisions`** — every direction set aside on
+   the way to the question, in the conversation or at framing. These are
+   alternative *shapes* of the same interest, and they are worth searching in
+   their own right. Each becomes one extra field block, marked as coming from a
+   set-aside direction.
 3. **The invocation text** — whatever the user typed. It may widen the
    question, narrow it, or replace it. It wins. Say in `## Question` how it
    changed what came from the files.
@@ -81,7 +82,7 @@ whether a paper in that field would plausibly cite your seeds — if yes, it
 belongs to `/research-bearings:landscape`.
 
 **3. Confirm.** Show the user the shape (the fingerprint) and **the query
-plan**: one query per field, one per rejected framing, each in that field's
+plan**: one query per field, one per set-aside direction, each in that field's
 words, with the blocked list (the home vocabulary) beside them — before
 anything runs. Let them strike fields, add fields, or rewrite the shape.
 

@@ -31,7 +31,7 @@ command, which is the step the measured ideation–execution gap is about.
 
 ## The rules
 
-This composite follows **`/research-bearings:start` § The rules every
+This composite follows **`/research-bearings:orient` § The rules every
 composite shares**, unchanged: the state is read through the state script
 before each step; one yes per boundary; an output that exists is asked about
 as rerun, keep or stop, with its date and the count of upstream files newer

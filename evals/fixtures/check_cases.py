@@ -43,11 +43,11 @@ def on_demand_met(out, command):
 # shape -> [(case that quotes it, sentence the grader states, predicate)]
 FACTS = {
     "empty": [
-        ("router-empty-names-start", "recommended is setup then find", lambda o: o["recommended"] == ["setup", "find"] and o["empty"]),
+        ("router-empty-names-start", "recommended is start then find", lambda o: o["recommended"] == ["start", "find"] and o["empty"]),
     ],
     "question-only": [
         ("router-framed-names-surveys", "stage reached is questions", lambda o: o["stage_reached"] == "questions"),
-        ("router-framed-names-surveys", "setup is skipped and a repair", lambda o: status(o, "setup") == "skipped"
+        ("router-framed-names-surveys", "start is skipped and a repair", lambda o: status(o, "start") == "skipped"
          and any(r["file"] == "CONTEXT.md" and r["kind"] == "missing upstream" for r in o["repairs"])),
         ("router-framed-names-surveys", "frame is done", lambda o: status(o, "frame") == "done"),
         ("router-framed-names-surveys", "recommended begins with surveys", lambda o: o["recommended"][:1] == ["surveys"]),

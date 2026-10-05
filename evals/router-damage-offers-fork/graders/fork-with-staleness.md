@@ -21,7 +21,7 @@ Pass only if ALL hold:
 2. The reply offers a fork of at most three options that includes `/bits`
    and `/read`. `/bits` is described as stale or as having newer cards, not
    as missing.
-3. It does not offer `/setup` as a move. Naming the missing `CONTEXT.md` as a
+3. It does not offer `/start` as a move. Naming the missing `CONTEXT.md` as a
    repair is correct.
 4. It does not offer `/verify`, `/audit`, `/critique`, `/reviews`,
    `/replicate`, `/datasets` or `/groups` — the on-demand skills are not the

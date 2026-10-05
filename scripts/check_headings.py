@@ -16,11 +16,10 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 # template -> the files that must name every one of its headings
 CONTRACTS = {
-    "templates/research/CONTEXT.md": ["skills/setup/SKILL.md"],
-    "templates/research/CONNECTIONS.md": ["skills/setup/SKILL.md"],
+    "templates/research/CONTEXT.md": ["skills/start/SKILL.md"],
+    "templates/research/CONNECTIONS.md": ["skills/start/SKILL.md"],
     "templates/research/QUESTION.md": ["skills/frame/SKILL.md"],
     "templates/research/TASK.md": ["skills/find/SKILL.md"],
-    "templates/research/framing-log.md": ["skills/frame/SKILL.md"],
     "templates/research/analogs.md": ["skills/scout/SKILL.md"],
     "templates/research/section.md": ["agents/searcher.md"],
     "templates/research/matrix.md": ["agents/merger.md", "skills/landscape/SKILL.md"],
@@ -49,7 +48,6 @@ CONTRACTS = {
 
 # agent -> the output headings its contract must define
 AGENT_OUTPUTS = {
-    "agents/question-critic.md": ["Findings", "Concessions", "Could not determine"],
     "agents/critic.md": ["Findings", "Concessions", "Could not determine"],
     # tournament-judge writes a comparison file rather than a template's page:
     # one pairing, four headings, and no template of its own because the file

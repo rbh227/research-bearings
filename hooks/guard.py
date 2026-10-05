@@ -283,21 +283,21 @@ def selftest():
 
         # 3-4. Our agent, inside the write root.
         check("our agent writing inside research/ is allowed",
-              payload("research-bearings:question-critic", inside), env, False)
+              payload("research-bearings:critic", inside), env, False)
         check("our agent writing deep inside research/ is allowed",
               payload(scout, nested), env, False)
 
         # 5-7. Our agent, outside the write root.
         check("our agent writing at project root is DENIED",
-              payload("research-bearings:question-critic", at_root), env, True)
+              payload("research-bearings:critic", at_root), env, True)
         check("our agent writing to /tmp is DENIED",
-              payload("research-bearings:question-critic", "/tmp/loose.md"), env, True)
+              payload("research-bearings:critic", "/tmp/loose.md"), env, True)
         check("our agent escaping via research/.. is DENIED",
-              payload("research-bearings:question-critic", escape), env, True)
+              payload("research-bearings:critic", escape), env, True)
 
         # 8. A prefix that merely looks like ours.
         check("a path like research-notes/ does not count as research/",
-              payload("research-bearings:question-critic",
+              payload("research-bearings:critic",
                       os.path.join(project, "research-notes", "x.md")), env, True)
 
         # 9-11. Malformed input must never block the user's own work.
@@ -307,12 +307,12 @@ def selftest():
 
         # 12. Our agent, but no file_path in the payload.
         check("missing file_path is allowed",
-              json.dumps({"agent_type": "research-bearings:question-critic",
+              json.dumps({"agent_type": "research-bearings:critic",
                           "cwd": project, "tool_input": {}}), env, False)
 
         # 13. No CLAUDE_PROJECT_DIR: fall back to cwd.
         check("falls back to cwd when CLAUDE_PROJECT_DIR is unset",
-              payload("research-bearings:question-critic", inside), {}, False)
+              payload("research-bearings:critic", inside), {}, False)
 
         def bash(agent, command):
             return json.dumps({"tool_name": "Bash", "agent_type": agent, "cwd": project,

@@ -4,8 +4,9 @@ Every skill and agent from `research_plugin_build_plan.md`, joined to what justi
 
 **Two tests, not one.** A row earns its place if it implements an entry in `academic.md` **or** if it serves one of the four goals: parallel gathering, simple presentation, planning directions, simple to use. The sheet documents research methodology and says nothing about usability, so a row backed only by a goal is fully justified.
 
-Counts, 2026-09-18 (chunk 10): **27 skills built**, 23 agents, 11 scripts, 28
-templates, 33 eval cases. Planned and unbuilt: `/render` and `/figure` from
+Counts, 2026-10-05: **28 skills built**, 22 agents, 11 scripts, 28
+templates, 23 eval cases. (2026-10-05: `/setup` and `question-critic` deleted;
+`/start` became the conversation.) Planned and unbuilt: `/render` and `/figure` from
 Stage 2b. No agent remains unbuilt.
 
 The loop that actually matters is four skills: `/scout` and `/landscape` find
@@ -19,10 +20,10 @@ what remains planned is presentation.
 
 | Skill | Agents | Output | Justification |
 |---|---|---|---|
-| `/setup` | — | `CONTEXT.md` | goal: simple to use. Stage one for a new project. |
-| `/frame` | `question-critic` | `QUESTION.md` | Booth (topic→question→problem, so-what), Heilmeier (8 questions), Hamming (important problems), Wagstaff (metric ties to a decision) |
+| `/start` | — | `CONTEXT.md` | goal: simple to use. A brain dump, then the agent searches what this kind of project is and what exists, and works it through with the user. Absence claims and abstention (`academic.md` § Keeping agents honest); Hamming (keep the door open to what others are doing). Replaced `/setup`'s resource interview, 2026-10-05. |
+| `/frame` | — | `QUESTION.md`, or a task handed to `/find` | Heilmeier ("how is it done today", "who cares", midterm and final checks), Booth (so-what), Wagstaff (the measure ties to a decision), Platt (a question something could fail). Three checks, asked about only when one fails. `question-critic` deleted 2026-10-05; `/critique` attacks the page on demand. |
 
-Human gate: the question. Nothing downstream runs without `QUESTION.md`.
+Human gate: the question or task. Nothing downstream runs until the user approves a framing.
 
 ---
 
